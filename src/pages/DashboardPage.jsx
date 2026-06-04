@@ -11,7 +11,7 @@ export default function DashboardPage() {
 
   if (!isRealtor) {
     return (
-      <div className="min-h-screen pt-24 pb-16 flex items-center justify-center">
+      <div className="min-h-screen py-16 flex items-center justify-center">
         <div className="text-center max-w-md mx-auto px-4">
           <div className="text-5xl mb-4">🏠</div>
           <h2 className="text-xl font-bold text-text-primary mb-2">Realtor Access Only</h2>

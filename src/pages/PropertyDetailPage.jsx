@@ -69,7 +69,7 @@ export default function PropertyDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen pt-24 pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen py-8 max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
             <div className="aspect-[16/10] skeleton rounded-2xl" />
@@ -101,8 +101,8 @@ export default function PropertyDetailPage() {
   }
 
   return (
-    <main className="min-h-screen pt-24 pb-16 animate-fade-in">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <main className="min-h-screen py-8 animate-fade-in">
+      <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
         {/* Back */}
         <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-text-muted hover:text-primary transition-colors mb-6">
           <ArrowLeft className="w-4 h-4" /> Back to listings
@@ -174,7 +174,7 @@ export default function PropertyDetailPage() {
 
           {/* Right Column — Sticky Realtor Card */}
           <div className="lg:col-span-1">
-            <div className="lg:sticky lg:top-24 space-y-6">
+            <div className="lg:sticky lg:top-[80px] space-y-6">
               <RealtorCard realtor={property.realtor} propertyTitle={property.title} />
 
               {/* Location Map Placeholder */}

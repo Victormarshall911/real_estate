@@ -206,6 +206,7 @@ function CreateListingModal({ onClose, onCreated }) {
   const [form, setForm] = useState({
     title: '', description: '', price: '', land_size: '',
     location: '', state: '', latitude: '', longitude: '', status: 'available',
+    listing_type: 'regular'
   })
   const [images, setImages] = useState([])
   const [previews, setPreviews] = useState([])
@@ -266,7 +267,7 @@ function CreateListingModal({ onClose, onCreated }) {
               placeholder="Detailed description of the property..." className="w-full px-4 py-3 rounded-xl border border-border bg-surface-dim text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all resize-none" />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-text-secondary mb-1.5">Price (₦)</label>
               <input type="number" required value={form.price} onChange={(e) => update('price', e.target.value)}
@@ -276,6 +277,13 @@ function CreateListingModal({ onClose, onCreated }) {
               <label className="block text-sm font-medium text-text-secondary mb-1.5">Land Size (sqm)</label>
               <input type="number" required value={form.land_size} onChange={(e) => update('land_size', e.target.value)}
                 placeholder="648" className="w-full px-4 py-3 rounded-xl border border-border bg-surface-dim text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-text-secondary mb-1.5">Listing Type</label>
+              <select value={form.listing_type} onChange={(e) => update('listing_type', e.target.value)} className="w-full px-4 py-3 rounded-xl border border-border bg-surface-dim text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all">
+                <option value="regular">Regular</option>
+                <option value="upcoming">Upcoming Estate</option>
+              </select>
             </div>
           </div>
 

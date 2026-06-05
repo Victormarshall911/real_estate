@@ -1,30 +1,77 @@
+import { useState, useEffect } from 'react'
 import HeroSearch from '../components/search/HeroSearch'
 import PropertyGrid from '../components/property/PropertyGrid'
+import FeaturedCarousel from '../components/property/FeaturedCarousel'
 import { useProperties } from '../hooks/useProperties'
+import { propertiesAPI } from '../api/client'
 
 export default function HomePage() {
-  const { properties, loading, updateFilters } = useProperties()
+  const { properties: regularProperties, loading: regularLoading, updateFilters } = useProperties()
+  const [upcomingProperties, setUpcomingProperties] = useState([])
+  const [upcomingLoading, setUpcomingLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState('regular') // 'regular' or 'upcoming'
+
+  useEffect(() => {
+    async function fetchUpcoming() {
+      try {
+        const { data } = await propertiesAPI.upcoming()
+        setUpcomingProperties(data)
+      } catch (err) {
+        console.error('Failed to fetch upcoming', err)
+      } finally {
+        setUpcomingLoading(false)
+      }
+    }
+    fetchUpcoming()
+  }, [])
+
+  const properties = activeTab === 'regular' ? regularProperties : upcomingProperties
+  const loading = activeTab === 'regular' ? regularLoading : upcomingLoading
 
   return (
     <main>
       <HeroSearch onFilterChange={updateFilters} />
 
+      {/* Featured Carousel Section */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-4">
+        <FeaturedCarousel />
+      </section>
+
       {/* Properties Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16" id="properties-section">
-        <div className="flex items-end justify-between mb-8">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12" id="properties-section">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
           <div>
             <h2 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-tight">
-              Featured Properties
+              Property Listings
             </h2>
             <p className="text-sm text-text-muted mt-2">
-              Handpicked land listings across Nigeria
+              Browse available land and upcoming estates.
             </p>
           </div>
-          {!loading && properties.length > 0 && (
-            <p className="text-sm text-text-muted hidden sm:block">
-              Showing <span className="font-semibold text-text-secondary">{properties.length}</span> listing{properties.length !== 1 ? 's' : ''}
-            </p>
-          )}
+          
+          {/* Tabs */}
+          <div className="flex items-center p-1 bg-surface-dim rounded-xl border border-border-light">
+            <button
+              onClick={() => setActiveTab('regular')}
+              className={`px-6 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+                activeTab === 'regular' 
+                  ? 'bg-white text-primary shadow-sm' 
+                  : 'text-text-secondary hover:text-text-primary'
+              }`}
+            >
+              Available Plots
+            </button>
+            <button
+              onClick={() => setActiveTab('upcoming')}
+              className={`px-6 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+                activeTab === 'upcoming' 
+                  ? 'bg-white text-gold shadow-sm' 
+                  : 'text-text-secondary hover:text-text-primary'
+              }`}
+            >
+              Upcoming Estates
+            </button>
+          </div>
         </div>
 
         <PropertyGrid properties={properties} loading={loading} />

@@ -9,9 +9,12 @@ export default function CompleteProfileModal() {
   
   const [form, setForm] = useState({
     company_name: '',
+    company_location: '',
     phone_number: '',
     whatsapp_link: '',
     bio: '',
+    full_address: '',
+    date_of_birth: '',
   })
   const [profilePicture, setProfilePicture] = useState(null)
   const [preview, setPreview] = useState(null)
@@ -43,13 +46,27 @@ export default function CompleteProfileModal() {
     setError('')
     
     try {
-      const data = { ...form }
+      // 1. Complete User Profile
+      const userProfileData = {
+        full_address: form.full_address,
+        date_of_birth: form.date_of_birth,
+      }
       if (profilePicture) {
-        data.profile_picture = profilePicture
+        userProfileData.profile_photo = profilePicture
       }
       
-      await realtorsAPI.createProfile(data)
-      await refreshUser() // Fetch user again to get the has_realtor_profile = true flag
+      // 2. Create Realtor Profile
+      const realtorData = {
+        company_name: form.company_name,
+        company_location: form.company_location,
+        phone_number: form.phone_number,
+        whatsapp_link: form.whatsapp_link,
+        bio: form.bio,
+      }
+      
+      await authAPI.completeProfile(userProfileData)
+      await realtorsAPI.createProfile(realtorData)
+      await refreshUser() // Fetch user again to get the updated flags
     } catch (err) {
       const msgs = err.response?.data
       if (typeof msgs === 'object') {
@@ -140,13 +157,48 @@ export default function CompleteProfileModal() {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-text-secondary mb-1.5">Phone Number *</label>
+                <label className="block text-sm font-semibold text-text-secondary mb-1.5">Company Location (Optional)</label>
+                <input 
+                  type="text" 
+                  value={form.company_location} 
+                  onChange={(e) => update('company_location', e.target.value)}
+                  placeholder="e.g. 15 Admiralty Way, Lekki Phase 1" 
+                  className="w-full px-4 py-3 rounded-xl border border-border bg-surface-dim text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all" 
+                />
+              </div>
+
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <label className="block text-sm font-semibold text-text-secondary mb-1.5">Date of Birth *</label>
+                  <input 
+                    type="date" 
+                    required
+                    value={form.date_of_birth} 
+                    onChange={(e) => update('date_of_birth', e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border border-border bg-surface-dim text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all text-text-primary" 
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-sm font-semibold text-text-secondary mb-1.5">Phone Number *</label>
+                  <input 
+                    type="text" 
+                    required
+                    value={form.phone_number} 
+                    onChange={(e) => update('phone_number', e.target.value)}
+                    placeholder="+234 801 234 5678" 
+                    className="w-full px-4 py-3 rounded-xl border border-border bg-surface-dim text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all" 
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-text-secondary mb-1.5">Full Residential Address *</label>
                 <input 
                   type="text" 
                   required
-                  value={form.phone_number} 
-                  onChange={(e) => update('phone_number', e.target.value)}
-                  placeholder="+234 801 234 5678" 
+                  value={form.full_address} 
+                  onChange={(e) => update('full_address', e.target.value)}
+                  placeholder="Enter your full home address" 
                   className="w-full px-4 py-3 rounded-xl border border-border bg-surface-dim text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all" 
                 />
               </div>

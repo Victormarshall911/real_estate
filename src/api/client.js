@@ -65,6 +65,17 @@ export const authAPI = {
   login: (data) => client.post('/auth/login/', data),
   getProfile: () => client.get('/auth/profile/'),
   verifyEmail: (token) => client.post('/auth/verify-email/', { token }),
+  completeProfile: (data) => {
+    const formData = new FormData()
+    Object.entries(data).forEach(([key, value]) => {
+      if (value !== null && value !== undefined) {
+        formData.append(key, value)
+      }
+    })
+    return client.patch('/auth/complete-profile/', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+  },
 }
 
 export const propertiesAPI = {
@@ -118,4 +129,10 @@ export const realtorsAPI = {
   },
 }
 
+export const kycAPI = {
+  initiate: (data) => client.post('/kyc/initiate/', data),
+  getStatus: () => client.get('/kyc/status/'),
+}
+
 export default client
+

@@ -4,10 +4,24 @@ import RealtorDashboard from '../components/realtor/RealtorDashboard'
 import CompleteProfileModal from '../components/realtor/CompleteProfileModal'
 
 export default function DashboardPage() {
-  const { user, isAuthenticated, isRealtor } = useAuth()
+  const { user, isAuthenticated, isRealtor, isKycVerified } = useAuth()
 
   if (!isAuthenticated) {
     return <Navigate to="/" replace />
+  }
+
+  // 1. Enforce KYC Verification first
+  if (!isKycVerified) {
+    return <Navigate to="/verify-identity" replace />
+  }
+
+  // 2. Enforce Realtor Profile Completion
+  if (isRealtor && !user?.has_realtor_profile) {
+    return (
+      <div className="min-h-screen pt-24 pb-16 bg-surface-dim">
+        <CompleteProfileModal />
+      </div>
+    )
   }
 
   if (!isRealtor) {
@@ -20,14 +34,6 @@ export default function DashboardPage() {
             The dashboard is available for realtor accounts. If you&apos;re a property seller, register as a realtor to access your dashboard.
           </p>
         </div>
-      </div>
-    )
-  }
-
-  if (!user?.has_realtor_profile) {
-    return (
-      <div className="min-h-screen pt-24 pb-16 bg-surface-dim">
-        <CompleteProfileModal />
       </div>
     )
   }

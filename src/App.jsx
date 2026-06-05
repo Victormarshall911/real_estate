@@ -4,6 +4,7 @@ import Footer from './components/layout/Footer'
 import HomePage from './pages/HomePage'
 import PropertyDetailPage from './pages/PropertyDetailPage'
 import DashboardPage from './pages/DashboardPage'
+import KYCPage from './pages/KYCPage'
 import NotFoundPage from './pages/NotFoundPage'
 
 export default function App() {
@@ -15,6 +16,7 @@ export default function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/properties/:id" element={<PropertyDetailPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/verify-identity" element={<KYCPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </div>

@@ -65,6 +65,16 @@ export default function Navbar() {
               >
                 Browse Land
               </Link>
+              <Link
+                to="/agents"
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
+                  location.pathname === '/agents'
+                    ? 'text-primary bg-primary/5'
+                    : 'text-text-secondary hover:text-text-primary hover:bg-surface-muted'
+                }`}
+              >
+                Hire an Agent
+              </Link>
               {isRealtor && (
                 <Link
                   to="/dashboard"
@@ -164,6 +174,12 @@ export default function Navbar() {
                 className="px-4 py-3 rounded-lg text-sm font-medium text-text-secondary hover:bg-surface-muted transition-colors"
               >
                 Browse Land
+              </Link>
+              <Link
+                to="/agents"
+                className="px-4 py-3 rounded-lg text-sm font-medium text-text-secondary hover:bg-surface-muted transition-colors"
+              >
+                Hire an Agent
               </Link>
               {isRealtor && (
                 <Link

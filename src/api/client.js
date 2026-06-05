@@ -134,5 +134,21 @@ export const kycAPI = {
   getStatus: () => client.get('/kyc/status/'),
 }
 
-export default client
+export const agentsAPI = {
+  list: (params) => client.get('/agents/profiles/', { params }),
+  myProfile: () => client.get('/agents/profiles/me/'),
+  createProfile: (data) => {
+    const formData = new FormData()
+    Object.entries(data).forEach(([key, value]) => {
+      formData.append(key, value)
+    })
+    return client.post('/agents/profiles/', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+  },
+  addLocation: (agentId, data) => client.post(`/agents/profiles/${agentId}/add_location/`, data),
+  myConnections: () => client.get('/agents/connections/'),
+  initiateConnection: (data) => client.post('/agents/connections/initiate/', data),
+}
 
+export default client

@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { propertiesAPI } from '../api/client'
 import ImageGallery from '../components/property/ImageGallery'
 import RealtorCard from '../components/realtor/RealtorCard'
+import { useAuth } from '../hooks/useAuth'
 import { ArrowLeft, MapPin, Maximize2, Eye, Calendar, BadgeCheck, Share2 } from 'lucide-react'
 
 function formatPrice(price) {
@@ -49,6 +50,7 @@ const MOCK_DETAIL = {
 
 export default function PropertyDetailPage() {
   const { id } = useParams()
+  const { user, isAuthenticated, isRealtor } = useAuth()
   const [property, setProperty] = useState(null)
   const [loading, setLoading] = useState(true)
 
@@ -176,6 +178,34 @@ export default function PropertyDetailPage() {
           <div className="lg:col-span-1">
             <div className="lg:sticky lg:top-[80px] space-y-6">
               <RealtorCard realtor={property.realtor} propertyTitle={property.title} />
+
+              {/* Owner actions */}
+              {isAuthenticated && isRealtor && user?.id === property.realtor?.user?.id && (
+                <div className="bg-primary/5 rounded-2xl border border-primary/20 p-5 mt-4">
+                  <h4 className="font-semibold text-text-primary text-sm mb-2">Need help selling?</h4>
+                  <p className="text-xs text-text-muted mb-4">Hire a verified external agent to help you close this deal faster.</p>
+                  <Link 
+                    to="/agents"
+                    className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-primary text-white font-semibold text-sm hover:bg-primary-dark transition-all duration-200"
+                  >
+                    Contact External Agent
+                  </Link>
+                </div>
+              )}
+
+              {/* Buyer actions */}
+              {(!isAuthenticated || !isRealtor || user?.id !== property.realtor?.user?.id) && (
+                <div className="bg-surface-dim rounded-2xl border border-border-light p-5 mt-4">
+                  <h4 className="font-semibold text-text-primary text-sm mb-2">Need a professional?</h4>
+                  <p className="text-xs text-text-muted mb-4">Hire a verified agent to inspect this property, negotiate, and handle paperwork securely.</p>
+                  <Link 
+                    to="/agents"
+                    className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-navy text-white font-semibold text-sm hover:bg-navy-light transition-all duration-200"
+                  >
+                    Hire an Agent
+                  </Link>
+                </div>
+              )}
 
               {/* Location Map Placeholder */}
               {property.latitude && property.longitude && (

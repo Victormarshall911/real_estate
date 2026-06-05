@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Search, MapPin, DollarSign, Maximize2 } from 'lucide-react'
+import { Search, MapPin, Maximize2 } from 'lucide-react'
 
 export default function HeroSearch({ onFilterChange }) {
   const [location, setLocation] = useState('')
@@ -76,7 +76,7 @@ export default function HeroSearch({ onFilterChange }) {
 
               {/* Min Price */}
               <div className="relative">
-                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium text-slate-500">₦</span>
                 <input
                   type="number"
                   value={minPrice}
@@ -89,7 +89,7 @@ export default function HeroSearch({ onFilterChange }) {
 
               {/* Max Price */}
               <div className="relative">
-                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium text-slate-500">₦</span>
                 <input
                   type="number"
                   value={maxPrice}

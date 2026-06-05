@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useAuth } from '../../hooks/useAuth'
-import { propertiesAPI } from '../../api/client'
-import { Plus, Eye, Home, TrendingUp, Trash2, Upload, X, ImageIcon } from 'lucide-react'
+import { propertiesAPI, subscriptionsAPI } from '../../api/client'
+import { Plus, Eye, Home, TrendingUp, Trash2, Upload, X, ImageIcon, Star, ArrowRight } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
 function StatCard({ icon: Icon, label, value, color }) {
   return (
@@ -41,22 +42,25 @@ const MOCK_LISTINGS = [
 export default function RealtorDashboard() {
   const { user } = useAuth()
   const [listings, setListings] = useState([])
+  const [subscription, setSubscription] = useState(null)
   const [loading, setLoading] = useState(true)
   const [showCreateForm, setShowCreateForm] = useState(false)
 
-  const fetchListings = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true)
     try {
-      const { data } = await propertiesAPI.myListings()
-      setListings(data.results || data)
-    } catch {
-      setListings(MOCK_LISTINGS)
+      const [listingsRes, subRes] = await Promise.all([
+        propertiesAPI.myListings().catch(() => ({ data: MOCK_LISTINGS })),
+        subscriptionsAPI.mySubscription().catch(() => ({ data: null }))
+      ])
+      setListings(listingsRes.data.results || listingsRes.data)
+      setSubscription(subRes.data)
     } finally {
       setLoading(false)
     }
   }, [])
 
-  useEffect(() => { fetchListings() }, [fetchListings])
+  useEffect(() => { fetchData() }, [fetchData])
 
   const totalViews = listings.reduce((s, l) => s + (l.view_count || 0), 0)
   const activeCount = listings.filter((l) => l.status === 'available').length
@@ -79,6 +83,40 @@ export default function RealtorDashboard() {
           >
             <Plus className="w-4 h-4" /> New Listing
           </button>
+        </div>
+
+        {/* Subscription Plan Card */}
+        <div className="mb-8">
+          <div className="bg-gradient-to-r from-navy to-navy-light rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-elevated relative overflow-hidden border border-navy-medium">
+            <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-white via-transparent to-transparent" />
+            <div className="relative z-10 flex items-center gap-5">
+              <div className="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center border border-white/20">
+                <Star className={`w-7 h-7 ${subscription?.is_valid && subscription.plan.name !== 'Free' ? 'text-gold fill-gold' : 'text-white'}`} />
+              </div>
+              <div>
+                <p className="text-navy-100 text-sm font-medium mb-1">Current Plan</p>
+                <div className="flex items-center gap-3">
+                  <h3 className="text-2xl font-bold text-white tracking-tight">
+                    {subscription?.is_valid ? subscription.plan.name : 'Free (No Plan)'}
+                  </h3>
+                  {subscription?.is_valid && (
+                    <span className="px-2.5 py-1 rounded-full bg-success/20 text-success text-xs font-semibold border border-success/30">
+                      Active
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+            
+            <div className="relative z-10 w-full sm:w-auto">
+              <Link 
+                to="/pricing"
+                className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-white text-navy font-bold text-sm hover:bg-surface-dim transition-all active:scale-[0.98]"
+              >
+                Upgrade Plan <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          </div>
         </div>
 
         {/* Stats */}
@@ -156,7 +194,7 @@ export default function RealtorDashboard() {
 
         {/* Create Form Modal */}
         {showCreateForm && (
-          <CreateListingModal onClose={() => setShowCreateForm(false)} onCreated={() => { setShowCreateForm(false); fetchListings() }} />
+          <CreateListingModal onClose={() => setShowCreateForm(false)} onCreated={() => { setShowCreateForm(false); fetchData() }} />
         )}
       </div>
     </div>

@@ -77,6 +77,18 @@ export default function Navbar() {
               </Link>
               {isRealtor && (
                 <Link
+                  to="/pricing"
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
+                    location.pathname === '/pricing'
+                      ? 'text-primary bg-primary/5'
+                      : 'text-text-secondary hover:text-text-primary hover:bg-surface-muted'
+                  }`}
+                >
+                  Pricing
+                </Link>
+              )}
+              {isRealtor && (
+                <Link
                   to="/dashboard"
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
                     location.pathname === '/dashboard'
@@ -181,6 +193,14 @@ export default function Navbar() {
               >
                 Hire an Agent
               </Link>
+              {isRealtor && (
+                <Link
+                  to="/pricing"
+                  className="px-4 py-3 rounded-lg text-sm font-medium text-text-secondary hover:bg-surface-muted transition-colors"
+                >
+                  Pricing
+                </Link>
+              )}
               {isRealtor && (
                 <Link
                   to="/dashboard"

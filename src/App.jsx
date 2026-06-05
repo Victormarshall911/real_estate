@@ -6,6 +6,7 @@ import PropertyDetailPage from './pages/PropertyDetailPage'
 import DashboardPage from './pages/DashboardPage'
 import KYCPage from './pages/KYCPage'
 import AgentsPage from './pages/AgentsPage'
+import SubscriptionPage from './pages/SubscriptionPage'
 import NotFoundPage from './pages/NotFoundPage'
 
 export default function App() {
@@ -19,6 +20,7 @@ export default function App() {
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/verify-identity" element={<KYCPage />} />
           <Route path="/agents" element={<AgentsPage />} />
+          <Route path="/pricing" element={<SubscriptionPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </div>

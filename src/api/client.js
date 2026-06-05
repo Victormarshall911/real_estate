@@ -4,7 +4,7 @@
  */
 import axios from 'axios'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1'
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8001/api/v1'
 
 const client = axios.create({
   baseURL: API_URL,
@@ -149,6 +149,12 @@ export const agentsAPI = {
   addLocation: (agentId, data) => client.post(`/agents/profiles/${agentId}/add_location/`, data),
   myConnections: () => client.get('/agents/connections/'),
   initiateConnection: (data) => client.post('/agents/connections/initiate/', data),
+}
+
+export const subscriptionsAPI = {
+  listPlans: () => client.get('/subscriptions/plans/'),
+  mySubscription: () => client.get('/subscriptions/my/current/'),
+  subscribe: (data) => client.post('/subscriptions/my/subscribe/', data),
 }
 
 export default client

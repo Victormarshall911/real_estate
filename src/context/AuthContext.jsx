@@ -71,6 +71,16 @@ export function AuthProvider({ children }) {
     setUser(null)
   }, [])
 
+  const refreshUser = useCallback(async () => {
+    try {
+      const { data } = await authAPI.getProfile()
+      setUser(data)
+      localStorage.setItem('user', JSON.stringify(data))
+    } catch (error) {
+      console.error('Failed to refresh user profile', error)
+    }
+  }, [])
+
   const value = {
     user,
     loading,
@@ -79,6 +89,7 @@ export function AuthProvider({ children }) {
     login,
     register,
     logout,
+    refreshUser,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

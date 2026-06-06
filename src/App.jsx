@@ -7,6 +7,7 @@ import DashboardPage from './pages/DashboardPage'
 import KYCPage from './pages/KYCPage'
 import AgentsPage from './pages/AgentsPage'
 import SubscriptionPage from './pages/SubscriptionPage'
+import ChatPage from './pages/ChatPage'
 import NotFoundPage from './pages/NotFoundPage'
 
 export default function App() {
@@ -21,6 +22,7 @@ export default function App() {
           <Route path="/verify-identity" element={<KYCPage />} />
           <Route path="/agents" element={<AgentsPage />} />
           <Route path="/pricing" element={<SubscriptionPage />} />
+          <Route path="/messages" element={<ChatPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </div>

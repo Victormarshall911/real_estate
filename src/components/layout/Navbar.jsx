@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { Menu, X, MapPin, User, LogOut, LayoutDashboard, ChevronDown } from 'lucide-react'
+import { Menu, X, MapPin, User, LogOut, LayoutDashboard, ChevronDown, MessageSquare } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import LoginModal from '../auth/LoginModal'
 import RegisterModal from '../auth/RegisterModal'
@@ -135,6 +135,13 @@ export default function Navbar() {
                           <LayoutDashboard className="w-4 h-4" /> Dashboard
                         </Link>
                       )}
+                      <Link
+                        to="/messages"
+                        onClick={() => setProfileOpen(false)}
+                        className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-text-secondary hover:bg-surface-muted transition-colors"
+                      >
+                        <MessageSquare className="w-4 h-4" /> Messages
+                      </Link>
                       <button
                         onClick={handleLogout}
                         className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-danger hover:bg-red-50 transition-colors"
@@ -218,6 +225,12 @@ export default function Navbar() {
                     <p className="text-sm font-medium text-text-primary">{user?.first_name} {user?.last_name}</p>
                     <p className="text-xs text-text-muted">{user?.email}</p>
                   </div>
+                  <Link
+                    to="/messages"
+                    className="px-4 py-3 rounded-lg text-sm font-medium text-text-secondary hover:bg-surface-muted transition-colors"
+                  >
+                    Messages
+                  </Link>
                   <button
                     onClick={handleLogout}
                     className="px-4 py-3 rounded-lg text-sm font-medium text-danger text-left hover:bg-red-50 transition-colors"

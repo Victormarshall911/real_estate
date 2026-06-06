@@ -159,4 +159,11 @@ export const subscriptionsAPI = {
   subscribe: (data) => client.post('/subscriptions/my/subscribe/', data),
 }
 
+export const chatAPI = {
+  sessions: () => client.get('/chat/sessions/'),
+  sessionDetail: (id) => client.get(`/chat/sessions/${id}/`),
+  messages: (id) => client.get(`/chat/sessions/${id}/messages/`),
+  sendMessage: (id, data) => client.post(`/chat/sessions/${id}/send_message/`, data),
+}
+
 export default client

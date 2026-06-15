@@ -63,7 +63,7 @@ export default function AgentCard({ agent, onConnect }) {
                   onClick={() => onConnect(agent, loc)}
                   className="shrink-0 px-4 py-2 rounded-lg bg-primary/10 text-primary font-semibold text-sm hover:bg-primary hover:text-white transition-colors"
                 >
-                  ₦{parseFloat(loc.connection_fee).toLocaleString()}
+                  {parseFloat(loc.connection_fee) === 0 ? 'Free' : `₦${parseFloat(loc.connection_fee).toLocaleString()}`}
                 </button>
               </div>
             ))}

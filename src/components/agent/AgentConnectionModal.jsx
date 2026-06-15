@@ -48,28 +48,23 @@ export default function AgentConnectionModal({ agent, locationPrice, onClose, on
             </div>
           </div>
 
-          <div className="bg-surface-dim rounded-xl p-4 border border-border-light mb-6">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-sm text-text-secondary">Connection Fee</span>
-              <span className="font-bold text-text-primary">₦{formattedFee}</span>
-            </div>
-            <div className="flex items-center justify-between pb-3 mb-3 border-b border-border-light">
-              <span className="text-sm text-text-secondary">Processing Fee (1.5%)</span>
-              <span className="font-bold text-text-primary">₦{(fee * 0.015).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-            </div>
+          <div className="bg-success/10 rounded-xl p-4 border border-success/20 mb-6">
             <div className="flex items-center justify-between">
               <span className="text-sm font-bold text-text-primary">Total to Pay</span>
-              <span className="text-lg font-bold text-primary">
-                ₦{(fee * 1.015).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              <span className="text-lg font-bold text-success">
+                Free (Limited Time)
               </span>
             </div>
+            <p className="text-xs text-text-muted mt-2">
+              Agent connection fees are currently waived. Connect instantly for free!
+            </p>
           </div>
 
           <div className="space-y-3">
             <div className="flex items-start gap-3">
               <ShieldCheck className="w-5 h-5 text-success shrink-0 mt-0.5" />
               <p className="text-xs text-text-muted leading-relaxed">
-                <strong className="text-text-primary">Secure Payment:</strong> Your payment is held securely and grants you instant access to the agent's verified contact details and direct chat.
+                <strong className="text-text-primary">Instant Access:</strong> Hiring an agent grants you instant access to the agent's verified contact details and direct chat.
               </p>
             </div>
           </div>
@@ -80,14 +75,13 @@ export default function AgentConnectionModal({ agent, locationPrice, onClose, on
           <button
             onClick={() => onConfirm(agent.id, locationPrice.id)}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-[#092C4C] text-white font-bold text-sm hover:bg-[#092C4C]/90 transition-all disabled:opacity-70 active:scale-[0.98] shadow-lg shadow-[#092C4C]/20"
+            className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-primary text-white font-bold text-sm hover:bg-primary-dark transition-all disabled:opacity-70 active:scale-[0.98] shadow-lg shadow-primary/20"
           >
             {loading ? (
               <Loader2 className="w-5 h-5 animate-spin" />
             ) : (
               <>
-                <CreditCard className="w-5 h-5" />
-                Pay with Paystack
+                Confirm Connection
               </>
             )}
           </button>

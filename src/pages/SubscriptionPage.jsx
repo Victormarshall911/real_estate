@@ -111,9 +111,9 @@ export default function SubscriptionPage() {
                     
                     <div className="mb-6">
                       <span className="text-4xl font-extrabold text-text-primary">
-                        ₦{parseFloat(plan.price_monthly).toLocaleString()}
+                        {parseFloat(plan.price_monthly) === 0 ? 'Free' : `₦${parseFloat(plan.price_monthly).toLocaleString()}`}
                       </span>
-                      <span className="text-text-muted font-medium">/mo</span>
+                      {parseFloat(plan.price_monthly) !== 0 && <span className="text-text-muted font-medium">/mo</span>}
                     </div>
 
                     <div className="space-y-4 mb-8">
@@ -153,10 +153,10 @@ export default function SubscriptionPage() {
       </div>
 
       <div className="max-w-3xl mx-auto px-4 mt-20 text-center">
-        <Shield className="w-10 h-10 text-primary/50 mx-auto mb-4" />
-        <h3 className="text-lg font-bold text-text-primary mb-2">Secure Payments</h3>
+        <Shield className="w-10 h-10 text-success mx-auto mb-4" />
+        <h3 className="text-lg font-bold text-text-primary mb-2">100% Free Access</h3>
         <p className="text-sm text-text-muted">
-          All payments are securely processed via Paystack. You can cancel or change your plan at any time from your dashboard.
+          For a limited time, all our premium features are completely free. Upgrade your account today and start growing your real estate business with no hidden charges.
         </p>
       </div>
     </div>

@@ -21,7 +21,7 @@ export default function SubscriptionPage() {
     setLoading(true)
     try {
       const { data: plansData } = await subscriptionsAPI.listPlans()
-      setPlans(plansData)
+      setPlans(plansData.results || plansData)
       
       if (isAuthenticated && isRealtor) {
         try {

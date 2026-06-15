@@ -203,6 +203,7 @@ export default function RealtorDashboard() {
 
 function CreateListingModal({ onClose, onCreated }) {
   const fileRef = useRef(null)
+  const videoRef = useRef(null)
   const [form, setForm] = useState({
     title: '', description: '', price: '', land_size: '',
     location: '', state: '', latitude: '', longitude: '', status: 'available',
@@ -210,6 +211,8 @@ function CreateListingModal({ onClose, onCreated }) {
   })
   const [images, setImages] = useState([])
   const [previews, setPreviews] = useState([])
+  const [video, setVideo] = useState(null)
+  const [videoPreview, setVideoPreview] = useState(null)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
 
@@ -222,6 +225,18 @@ function CreateListingModal({ onClose, onCreated }) {
     setPreviews((prev) => [...prev, ...newPreviews])
   }
 
+  const handleVideo = (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      if (file.size > 50 * 1024 * 1024) { // 50MB limit
+        setError('Video file is too large (max 50MB).')
+        return
+      }
+      setVideo(file)
+      setVideoPreview(URL.createObjectURL(file))
+    }
+  }
+
   const removeImage = (idx) => {
     setImages((prev) => prev.filter((_, i) => i !== idx))
     setPreviews((prev) => {
@@ -230,12 +245,21 @@ function CreateListingModal({ onClose, onCreated }) {
     })
   }
 
+  const removeVideo = () => {
+    setVideo(null)
+    if (videoPreview) URL.revokeObjectURL(videoPreview)
+    setVideoPreview(null)
+    if (videoRef.current) videoRef.current.value = ''
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setSubmitting(true)
     setError('')
     try {
-      await propertiesAPI.create({ ...form, uploaded_images: images })
+      const payload = { ...form, uploaded_images: images }
+      if (video) payload.video = video
+      await propertiesAPI.create(payload)
       onCreated()
     } catch (err) {
       setError(err.response?.data?.detail || 'Failed to create listing. Make sure your realtor profile is set up.')
@@ -318,8 +342,31 @@ function CreateListingModal({ onClose, onCreated }) {
                 <Upload className="w-5 h-5" />
                 <span className="text-[10px]">Add</span>
               </button>
-              <input ref={fileRef} type="file" multiple accept="image/*" className="hidden" onChange={handleImages} />
             </div>
+            <input type="file" hidden ref={fileRef} multiple accept="image/*" onChange={handleImages} />
+          </div>
+
+          {/* Video Upload */}
+          <div>
+            <label className="block text-sm font-medium text-text-secondary mb-1.5">Property Video (Optional)</label>
+            <div className="flex flex-wrap gap-3">
+              {videoPreview ? (
+                <div className="relative w-40 h-24 rounded-lg overflow-hidden group border border-border">
+                  <video src={videoPreview} className="w-full h-full object-cover" muted />
+                  <button type="button" onClick={removeVideo}
+                    className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Trash2 className="w-5 h-5 text-white" />
+                  </button>
+                </div>
+              ) : (
+                <button type="button" onClick={() => videoRef.current?.click()}
+                  className="w-40 h-24 rounded-lg border-2 border-dashed border-border hover:border-primary flex flex-col items-center justify-center gap-1 text-text-muted hover:text-primary transition-colors">
+                  <Upload className="w-6 h-6" />
+                  <span className="text-xs">Add Video (Max 50MB)</span>
+                </button>
+              )}
+            </div>
+            <input type="file" hidden ref={videoRef} accept="video/mp4,video/webm,video/quicktime" onChange={handleVideo} />
           </div>
 
           <button type="submit" disabled={submitting}

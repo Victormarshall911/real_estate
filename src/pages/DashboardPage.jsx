@@ -1,10 +1,14 @@
+import { useState } from 'react'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import RealtorDashboard from '../components/realtor/RealtorDashboard'
 import CompleteProfileModal from '../components/realtor/CompleteProfileModal'
+import { authAPI } from '../api/client'
+import { Loader2 } from 'lucide-react'
 
 export default function DashboardPage() {
-  const { user, isAuthenticated, isRealtor, isKycVerified } = useAuth()
+  const { user, isAuthenticated, isRealtor, isKycVerified, refreshUser } = useAuth()
+  const [upgrading, setUpgrading] = useState(false)
 
   if (!isAuthenticated) {
     return <Navigate to="/" replace />
@@ -24,6 +28,18 @@ export default function DashboardPage() {
     )
   }
 
+  const handleUpgrade = async () => {
+    setUpgrading(true)
+    try {
+      await authAPI.upgradeToRealtor()
+      await refreshUser()
+    } catch (err) {
+      alert(err.response?.data?.error || 'Upgrade failed. Please try again.')
+    } finally {
+      setUpgrading(false)
+    }
+  }
+
   if (!isRealtor) {
     return (
       <div className="min-h-screen py-16 flex flex-col items-center justify-center bg-surface-dim">
@@ -41,8 +57,13 @@ export default function DashboardPage() {
           </a>
           <div className="mt-6 pt-6 border-t border-border-light">
             <p className="text-xs text-text-muted mb-3">Want to list your own properties?</p>
-            <button className="text-sm font-semibold text-primary hover:text-primary-dark transition-colors">
-              Upgrade to Realtor Account
+            <button
+              onClick={handleUpgrade}
+              disabled={upgrading}
+              className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border-2 border-primary text-primary font-bold text-sm hover:bg-primary hover:text-white transition-all disabled:opacity-60"
+            >
+              {upgrading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+              {upgrading ? 'Upgrading...' : 'Upgrade to Realtor Account — Free'}
             </button>
           </div>
         </div>

@@ -76,6 +76,7 @@ export const authAPI = {
       headers: { 'Content-Type': 'multipart/form-data' },
     })
   },
+  upgradeToRealtor: () => client.post('/auth/upgrade-to-realtor/'),
 }
 
 export const propertiesAPI = {

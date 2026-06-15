@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react'
 import { Upload, X, CheckCircle2, User } from 'lucide-react'
-import { realtorsAPI } from '../../api/client'
+import { realtorsAPI, authAPI } from '../../api/client'
 import { useAuth } from '../../hooks/useAuth'
 
 export default function CompleteProfileModal() {
@@ -46,7 +46,7 @@ export default function CompleteProfileModal() {
     setError('')
     
     try {
-      // 1. Complete User Profile
+      // 1. Complete User Profile (DOB, address, photo)
       const userProfileData = {
         full_address: form.full_address,
         date_of_birth: form.date_of_birth,
@@ -54,8 +54,9 @@ export default function CompleteProfileModal() {
       if (profilePicture) {
         userProfileData.profile_photo = profilePicture
       }
-      
-      // 2. Create Realtor Profile
+      await authAPI.completeProfile(userProfileData)
+
+      // 2. Create Realtor Profile (company, phone, whatsapp, bio)
       const realtorData = {
         company_name: form.company_name,
         company_location: form.company_location,
@@ -63,15 +64,22 @@ export default function CompleteProfileModal() {
         whatsapp_link: form.whatsapp_link,
         bio: form.bio,
       }
-      
-      await authAPI.completeProfile(userProfileData)
+      if (profilePicture) {
+        realtorData.profile_picture = profilePicture
+      }
       await realtorsAPI.createProfile(realtorData)
-      await refreshUser() // Fetch user again to get the updated flags
+      await refreshUser()
     } catch (err) {
-      const msgs = err.response?.data
-      if (typeof msgs === 'object') {
-        const firstErr = Object.values(msgs)[0]
-        setError(Array.isArray(firstErr) ? firstErr[0] : firstErr)
+      const data = err.response?.data
+      if (data && typeof data === 'object') {
+        // Collect all field errors into one readable string
+        const messages = Object.entries(data)
+          .map(([field, msgs]) => {
+            const msg = Array.isArray(msgs) ? msgs[0] : msgs
+            return `${field}: ${msg}`
+          })
+          .join(' | ')
+        setError(messages || 'Failed to create profile.')
       } else {
         setError('Failed to create profile. Please check your inputs.')
       }

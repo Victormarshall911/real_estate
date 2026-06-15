@@ -55,12 +55,9 @@ export default function AgentsPage() {
         agent_id: agentId,
         location_id: locationId
       })
-      // Success - In a real app, this would redirect to Paystack checkout
-      // For now, it mocks immediate success and we can redirect to chat/dashboard
-      alert(data.message)
       setSelectedAgent(null)
       setSelectedLocation(null)
-      navigate('/dashboard') // Or /chat when implemented
+      navigate('/chat') // Go directly to chat
     } catch (err) {
       alert(err.response?.data?.error || 'Failed to initiate connection.')
     } finally {

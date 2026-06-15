@@ -149,6 +149,15 @@ export const agentsAPI = {
       headers: { 'Content-Type': 'multipart/form-data' },
     })
   },
+  updateProfile: (agentId, data) => {
+    const formData = new FormData()
+    Object.entries(data).forEach(([key, value]) => {
+      formData.append(key, value)
+    })
+    return client.patch(`/agents/profiles/${agentId}/`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+  },
   addLocation: (agentId, data) => client.post(`/agents/profiles/${agentId}/add_location/`, data),
   removeLocation: (agentId, data) => client.post(`/agents/profiles/${agentId}/remove_location/`, data),
   myConnections: () => client.get('/agents/connections/'),

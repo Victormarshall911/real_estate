@@ -23,6 +23,19 @@ export default function CompleteProfileModal() {
 
   const update = (key, val) => setForm((p) => ({ ...p, [key]: val }))
 
+  // Convert any phone number format to a wa.me URL
+  const toWhatsAppUrl = (value) => {
+    const trimmed = value.trim()
+    if (!trimmed) return trimmed
+    if (trimmed.startsWith('http')) return trimmed
+    let digits = trimmed.replace(/[^0-9]/g, '')
+    // Format local Nigerian numbers (e.g., 080... -> 23480...)
+    if (digits.startsWith('0')) {
+      digits = '234' + digits.slice(1)
+    }
+    return `https://wa.me/${digits}`
+  }
+
   const handleImage = (e) => {
     const file = e.target.files[0]
     if (file) {
@@ -61,7 +74,7 @@ export default function CompleteProfileModal() {
         company_name: form.company_name,
         company_location: form.company_location,
         phone_number: form.phone_number,
-        whatsapp_link: form.whatsapp_link,
+        whatsapp_link: toWhatsAppUrl(form.whatsapp_link),
         bio: form.bio,
       }
       if (profilePicture) {
@@ -212,16 +225,16 @@ export default function CompleteProfileModal() {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-text-secondary mb-1.5">WhatsApp Number / Link *</label>
+                <label className="block text-sm font-semibold text-text-secondary mb-1.5">WhatsApp Number *</label>
                 <input 
                   type="text" 
                   required
                   value={form.whatsapp_link} 
                   onChange={(e) => update('whatsapp_link', e.target.value)}
-                  placeholder="https://wa.me/2348012345678 or +2348012345678" 
+                  placeholder="e.g. +2348012345678" 
                   className="w-full px-4 py-3 rounded-xl border border-border bg-surface-dim text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all" 
                 />
-                <p className="text-xs text-text-muted mt-1.5">This will be used when buyers click "Chat on WhatsApp".</p>
+                <p className="text-xs text-text-muted mt-1.5">Enter your number — we'll turn it into a WhatsApp link automatically.</p>
               </div>
             </div>
           </div>

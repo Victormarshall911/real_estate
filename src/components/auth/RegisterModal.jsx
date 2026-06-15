@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { X, Mail, Lock, Eye, EyeOff, User, Building, Briefcase } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
+import { useNavigate } from 'react-router-dom'
 
 export default function RegisterModal({ onClose, onSwitchToLogin }) {
   const { register, loading } = useAuth()
+  const navigate = useNavigate()
   const [form, setForm] = useState({
     first_name: '',
     last_name: '',
@@ -29,6 +31,7 @@ export default function RegisterModal({ onClose, onSwitchToLogin }) {
     const result = await register(form)
     if (result.success) {
       onClose()
+      navigate('/dashboard')
     } else {
       setError(result.error)
     }

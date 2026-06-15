@@ -3,27 +3,67 @@ import { Navigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import RealtorDashboard from '../components/realtor/RealtorDashboard'
 import CompleteProfileModal from '../components/realtor/CompleteProfileModal'
+import CompleteAgentProfileModal from '../components/agent/CompleteAgentProfileModal'
 import { authAPI } from '../api/client'
-import { Loader2 } from 'lucide-react'
+import { Loader2, MessageSquare, MapPin, CheckCircle2 } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
 export default function DashboardPage() {
-  const { user, isAuthenticated, isRealtor, isKycVerified, refreshUser } = useAuth()
+  const { user, isAuthenticated, isRealtor, isAgent, isKycVerified, refreshUser } = useAuth()
   const [upgrading, setUpgrading] = useState(false)
 
   if (!isAuthenticated) {
     return <Navigate to="/" replace />
   }
 
-  // 1. Enforce KYC Verification first
-  if (!isKycVerified) {
+  // 1. Enforce KYC Verification — only for realtors and buyers, not agents
+  if (!isKycVerified && !isAgent) {
     return <Navigate to="/verify-identity" replace />
   }
 
-  // 2. Enforce Realtor Profile Completion
+  // 2. Realtor needs to complete profile
   if (isRealtor && !user?.has_realtor_profile) {
     return (
       <div className="min-h-screen pt-24 pb-16 bg-surface-dim">
         <CompleteProfileModal />
+      </div>
+    )
+  }
+
+  // 3. Agent needs to complete their agent profile
+  if (isAgent && !user?.has_agent_profile) {
+    return (
+      <div className="min-h-screen pt-24 pb-16 bg-surface-dim">
+        <CompleteAgentProfileModal />
+      </div>
+    )
+  }
+
+  // 4. Agent dashboard
+  if (isAgent) {
+    return (
+      <div className="min-h-screen py-12 bg-surface-dim">
+        <div className="max-w-3xl mx-auto px-4">
+          <h1 className="text-2xl font-bold text-text-primary mb-2">Agent Dashboard</h1>
+          <p className="text-text-muted mb-8">Manage your connections and chat with clients.</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <Link to="/chat" className="bg-surface border border-border rounded-2xl p-6 hover:shadow-card-hover transition-all group">
+              <MessageSquare className="w-8 h-8 text-primary mb-3 group-hover:scale-110 transition-transform" />
+              <h3 className="font-bold text-text-primary mb-1">Messages</h3>
+              <p className="text-sm text-text-muted">Chat with clients who have connected with you.</p>
+            </Link>
+            <Link to="/agents" className="bg-surface border border-border rounded-2xl p-6 hover:shadow-card-hover transition-all group">
+              <MapPin className="w-8 h-8 text-primary mb-3 group-hover:scale-110 transition-transform" />
+              <h3 className="font-bold text-text-primary mb-1">My Public Profile</h3>
+              <p className="text-sm text-text-muted">See how you appear to buyers searching for agents.</p>
+            </Link>
+            <div className="bg-success/10 border border-success/20 rounded-2xl p-6 col-span-full">
+              <CheckCircle2 className="w-6 h-6 text-success mb-2" />
+              <h3 className="font-bold text-text-primary mb-1">Your profile is live!</h3>
+              <p className="text-sm text-text-muted">Buyers can now find and hire you on the Agents page. You will be notified when someone connects with you.</p>
+            </div>
+          </div>
+        </div>
       </div>
     )
   }
@@ -40,6 +80,7 @@ export default function DashboardPage() {
     }
   }
 
+  // 5. Buyer dashboard
   if (!isRealtor) {
     return (
       <div className="min-h-screen py-16 flex flex-col items-center justify-center bg-surface-dim">

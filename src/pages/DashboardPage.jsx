@@ -4,6 +4,7 @@ import { useAuth } from '../hooks/useAuth'
 import RealtorDashboard from '../components/realtor/RealtorDashboard'
 import CompleteProfileModal from '../components/realtor/CompleteProfileModal'
 import CompleteAgentProfileModal from '../components/agent/CompleteAgentProfileModal'
+import ManageAgentLocations from '../components/agent/ManageAgentLocations'
 import { authAPI } from '../api/client'
 import { Loader2, MessageSquare, MapPin, CheckCircle2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
@@ -57,12 +58,9 @@ export default function DashboardPage() {
               <h3 className="font-bold text-text-primary mb-1">My Public Profile</h3>
               <p className="text-sm text-text-muted">See how you appear to buyers searching for agents.</p>
             </Link>
-            <div className="bg-success/10 border border-success/20 rounded-2xl p-6 col-span-full">
-              <CheckCircle2 className="w-6 h-6 text-success mb-2" />
-              <h3 className="font-bold text-text-primary mb-1">Your profile is live!</h3>
-              <p className="text-sm text-text-muted">Buyers can now find and hire you on the Agents page. You will be notified when someone connects with you.</p>
-            </div>
           </div>
+          
+          <ManageAgentLocations />
         </div>
       </div>
     )

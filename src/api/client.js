@@ -150,6 +150,7 @@ export const agentsAPI = {
     })
   },
   addLocation: (agentId, data) => client.post(`/agents/profiles/${agentId}/add_location/`, data),
+  removeLocation: (agentId, data) => client.post(`/agents/profiles/${agentId}/remove_location/`, data),
   myConnections: () => client.get('/agents/connections/'),
   initiateConnection: (data) => client.post('/agents/connections/initiate/', data),
 }

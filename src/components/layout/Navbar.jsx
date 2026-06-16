@@ -87,7 +87,7 @@ export default function Navbar() {
                   Pricing
                 </Link>
               )}
-              {isRealtor && (
+              {isAuthenticated && (
                 <Link
                   to="/dashboard"
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
@@ -126,7 +126,7 @@ export default function Navbar() {
                         <p className="text-sm font-semibold text-text-primary truncate">{user?.first_name} {user?.last_name}</p>
                         <p className="text-xs text-text-muted truncate mt-0.5">{user?.email}</p>
                       </div>
-                      {isRealtor && (
+                      {isAuthenticated && (
                         <Link
                           to="/dashboard"
                           onClick={() => setProfileOpen(false)}
@@ -208,7 +208,7 @@ export default function Navbar() {
                   Pricing
                 </Link>
               )}
-              {isRealtor && (
+              {isAuthenticated && (
                 <Link
                   to="/dashboard"
                   className="px-4 py-3 rounded-lg text-sm font-medium text-text-secondary hover:bg-surface-muted transition-colors"

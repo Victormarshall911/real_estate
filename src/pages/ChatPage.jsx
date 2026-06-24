@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../hooks/useAuth'
-import { chatAPI } from '../api/client'
-import { Send, Loader2, MessageSquare, ArrowLeft, Check, CheckCheck } from 'lucide-react'
+import { chatAPI, agentsAPI } from '../api/client'
+import { Search, Loader2, ArrowLeft, Send, CheckCheck, Check, MessageSquare, ShieldCheck } from 'lucide-react'
+import ReviewSection from '../components/shared/ReviewSection'
 import { Link } from 'react-router-dom'
 import { formatDistanceToNow } from 'date-fns'
 
@@ -128,6 +129,31 @@ export default function ChatPage() {
     return session.client
   }
 
+  const handleCompleteDeal = async () => {
+    if (!window.confirm("Are you sure you want to mark this deal as completed? Funds will be released if both parties accept.")) return
+    
+    try {
+      const { data } = await agentsAPI.completeDeal(activeSession.connection)
+      // Refresh session
+      const updatedSessions = await chatAPI.sessions()
+      setSessions(updatedSessions.data)
+      const current = updatedSessions.data.find(s => s.id === activeSession.id)
+      setActiveSession(current)
+      alert(data.message)
+    } catch (err) {
+      alert(err.response?.data?.error || 'Failed to complete deal.')
+    }
+  }
+
+  const handleReviewSubmit = async (targetId, reviewData) => {
+    await agentsAPI.rate(targetId, reviewData)
+    // Refresh to get updated ratings
+    const updatedSessions = await chatAPI.sessions()
+    setSessions(updatedSessions.data)
+    const current = updatedSessions.data.find(s => s.id === activeSession.id)
+    setActiveSession(current)
+  }
+
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center bg-surface-dim"><Loader2 className="w-8 h-8 text-primary animate-spin" /></div>
   }
@@ -204,12 +230,46 @@ export default function ChatPage() {
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
                 {getOtherUser(activeSession).first_name?.[0]}{getOtherUser(activeSession).last_name?.[0]}
               </div>
-              <div>
-                <h3 className="font-bold text-text-primary">
+              <div className="flex-1">
+                <h3 className="font-bold text-text-primary flex items-center gap-2">
                   {getOtherUser(activeSession).first_name} {getOtherUser(activeSession).last_name}
+                  {activeSession.connection_status === 'closed' && (
+                    <span className="px-2 py-0.5 rounded-full bg-success/10 text-success text-[10px] uppercase font-bold border border-success/20">
+                      Completed
+                    </span>
+                  )}
                 </h3>
               </div>
+
+              {/* Escrow Actions */}
+              {activeSession.connection_status !== 'closed' && (
+                <button
+                  onClick={handleCompleteDeal}
+                  disabled={(user.id === activeSession.client.id && activeSession.connection_buyer_completed) || 
+                            (user.id !== activeSession.client.id && activeSession.connection_agent_completed)}
+                  className="px-4 py-2 rounded-xl bg-primary text-white text-xs font-bold flex items-center gap-1.5 hover:bg-primary-dark transition-colors disabled:bg-success disabled:text-white"
+                >
+                  <ShieldCheck className="w-4 h-4" />
+                  {(user.id === activeSession.client.id && activeSession.connection_buyer_completed) || 
+                   (user.id !== activeSession.client.id && activeSession.connection_agent_completed)
+                    ? 'Waiting for other party...'
+                    : 'Complete Deal'}
+                </button>
+              )}
             </div>
+
+            {/* If Deal is closed, show Review Section for Buyer */}
+            {activeSession.connection_status === 'closed' && user.id === activeSession.client.id && (
+              <div className="px-4 pt-4">
+                <ReviewSection
+                  targetId={activeSession.agent.id}
+                  targetType="agent"
+                  onSubmit={handleReviewSubmit}
+                  averageRating={activeSession.agent.average_rating}
+                  totalReviews={activeSession.agent.total_reviews}
+                />
+              </div>
+            )}
 
             {/* Chat Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4">

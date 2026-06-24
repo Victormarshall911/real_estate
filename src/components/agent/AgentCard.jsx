@@ -1,4 +1,4 @@
-import { MapPin, CheckCircle2, User } from 'lucide-react'
+import { MapPin, CheckCircle2, User, Star } from 'lucide-react'
 
 export default function AgentCard({ agent, onConnect }) {
   const name = agent?.user?.full_name || 'Agent'
@@ -21,6 +21,12 @@ export default function AgentCard({ agent, onConnect }) {
               {name}
             </h3>
             {agent.is_verified && <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />}
+            {agent.average_rating > 0 && (
+              <div className="flex items-center gap-1 ml-2 bg-gold/10 px-1.5 py-0.5 rounded text-xs font-bold text-gold">
+                <Star className="w-3 h-3 fill-gold" />
+                {agent.average_rating}
+              </div>
+            )}
           </div>
           {agent.company_name && (
             <p className="text-sm font-medium text-text-secondary truncate" title={agent.company_name}>

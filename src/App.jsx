@@ -1,7 +1,8 @@
 import { Routes, Route } from 'react-router-dom'
 import Navbar from './components/layout/Navbar'
 import Footer from './components/layout/Footer'
-import HomePage from './pages/HomePage'
+import LandingPage from './pages/LandingPage'
+import PropertiesPage from './pages/PropertiesPage'
 import PropertyDetailPage from './pages/PropertyDetailPage'
 import DashboardPage from './pages/DashboardPage'
 import KYCPage from './pages/KYCPage'
@@ -16,7 +17,8 @@ export default function App() {
       <Navbar />
       <div className="flex-1">
         <Routes>
-          <Route path="/" element={<HomePage />} />
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/properties" element={<PropertiesPage />} />
           <Route path="/properties/:id" element={<PropertyDetailPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/verify-identity" element={<KYCPage />} />

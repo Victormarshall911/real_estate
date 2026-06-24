@@ -110,7 +110,7 @@ export const propertiesAPI = {
 }
 
 export const realtorsAPI = {
-  list: () => client.get('/realtors/'),
+  list: (params) => client.get('/realtors/', { params }),
   detail: (id) => client.get(`/realtors/${id}/`),
   createProfile: (data) => {
     const formData = new FormData()
@@ -130,6 +130,7 @@ export const realtorsAPI = {
       headers: { 'Content-Type': 'multipart/form-data' },
     })
   },
+  rate: (id, data) => client.post(`/realtors/${id}/rate/`, data),
 }
 
 export const kycAPI = {
@@ -162,6 +163,8 @@ export const agentsAPI = {
   removeLocation: (agentId, data) => client.post(`/agents/profiles/${agentId}/remove_location/`, data),
   myConnections: () => client.get('/agents/connections/'),
   initiateConnection: (data) => client.post('/agents/connections/initiate/', data),
+  completeDeal: (id) => client.post(`/agents/connections/${id}/complete_deal/`),
+  rate: (agentId, data) => client.post(`/agents/profiles/${agentId}/rate/`, data),
 }
 
 export const subscriptionsAPI = {

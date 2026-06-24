@@ -55,9 +55,9 @@ export default function Navbar() {
             {/* Desktop Nav Links */}
             <nav className="hidden md:flex items-center gap-1">
               <Link
-                to="/"
+                to="/properties"
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
-                  location.pathname === '/'
+                  location.pathname === '/properties'
                     ? 'text-primary bg-primary/5'
                     : 'text-text-secondary hover:text-text-primary hover:bg-surface-muted'
                 }`}
@@ -189,7 +189,7 @@ export default function Navbar() {
           <div className="md:hidden border-t border-border-light bg-surface/95 backdrop-blur-md animate-fade-in">
             <div className="max-w-7xl mx-auto px-5 py-3 flex flex-col gap-1">
               <Link
-                to="/"
+                to="/properties"
                 className="px-4 py-3 rounded-lg text-sm font-medium text-text-secondary hover:bg-surface-muted transition-colors"
               >
                 Browse Land

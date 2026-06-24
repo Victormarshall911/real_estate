@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { propertiesAPI } from '../api/client'
+import { propertiesAPI, realtorsAPI } from '../api/client'
 import ImageGallery from '../components/property/ImageGallery'
 import RealtorCard from '../components/realtor/RealtorCard'
+import ReviewSection from '../components/shared/ReviewSection'
 import { useAuth } from '../hooks/useAuth'
 import { ArrowLeft, MapPin, Maximize2, Eye, Calendar, BadgeCheck, Share2 } from 'lucide-react'
 
@@ -54,20 +55,27 @@ export default function PropertyDetailPage() {
   const [property, setProperty] = useState(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    async function load() {
-      setLoading(true)
-      try {
-        const { data } = await propertiesAPI.detail(id)
-        setProperty(data)
-      } catch {
-        setProperty(MOCK_DETAIL)
-      } finally {
-        setLoading(false)
-      }
+  const fetchProperty = useCallback(async () => {
+    setLoading(true)
+    try {
+      const { data } = await propertiesAPI.detail(id)
+      setProperty(data)
+    } catch {
+      setProperty(MOCK_DETAIL)
+    } finally {
+      setLoading(false)
     }
-    load()
   }, [id])
+
+  useEffect(() => {
+    fetchProperty()
+  }, [fetchProperty])
+
+  const handleReviewSubmit = async (targetId, reviewData) => {
+    await realtorsAPI.rate(targetId, reviewData)
+    // Refresh the property to get the updated realtor rating
+    await fetchProperty()
+  }
 
   if (loading) {
     return (
@@ -178,6 +186,16 @@ export default function PropertyDetailPage() {
           <div className="lg:col-span-1">
             <div className="lg:sticky lg:top-[80px] space-y-6">
               <RealtorCard realtor={property.realtor} propertyTitle={property.title} />
+
+              {property.realtor && (
+                <ReviewSection 
+                  targetId={property.realtor.id}
+                  targetType="seller"
+                  onSubmit={handleReviewSubmit}
+                  averageRating={property.realtor.average_rating}
+                  totalReviews={property.realtor.total_reviews}
+                />
+              )}
 
               {/* Owner actions */}
               {isAuthenticated && isRealtor && user?.id === property.realtor?.user?.id && (

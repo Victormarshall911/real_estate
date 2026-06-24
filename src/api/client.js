@@ -177,4 +177,10 @@ export const chatAPI = {
   sendMessage: (id, data) => client.post(`/chat/sessions/${id}/send_message/`, data),
 }
 
+export const walletsAPI = {
+  me: () => client.get('/wallets/me/'),
+  deposit: (data) => client.post('/wallets/deposit/', data),
+}
+
 export default client
+

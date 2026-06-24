@@ -3,6 +3,7 @@ import { useAuth } from '../../hooks/useAuth'
 import { propertiesAPI, subscriptionsAPI } from '../../api/client'
 import { Plus, Eye, Home, TrendingUp, Trash2, Upload, X, ImageIcon, Star, ArrowRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import WalletManager from '../wallet/WalletManager'
 
 function StatCard({ icon: Icon, label, value, color }) {
   return (
@@ -124,6 +125,11 @@ export default function RealtorDashboard() {
           <StatCard icon={Home} label="Active Listings" value={activeCount} color="bg-primary" />
           <StatCard icon={Eye} label="Total Views" value={totalViews.toLocaleString()} color="bg-blue-500" />
           <StatCard icon={TrendingUp} label="Total Leads" value={Math.floor(totalViews * 0.12)} color="bg-gold" />
+        </div>
+
+        {/* Wallet Manager */}
+        <div className="mb-8">
+          <WalletManager />
         </div>
 
         {/* Listings Table */}

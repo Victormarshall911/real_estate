@@ -111,9 +111,8 @@ export default function SubscriptionPage() {
                     
                     <div className="mb-6">
                       <span className="text-4xl font-extrabold text-text-primary">
-                        {parseFloat(plan.price_monthly) === 0 ? 'Free' : `₦${parseFloat(plan.price_monthly).toLocaleString()}`}
+                        Free
                       </span>
-                      {parseFloat(plan.price_monthly) !== 0 && <span className="text-text-muted font-medium">/mo</span>}
                     </div>
 
                     <div className="space-y-4 mb-8">
@@ -126,23 +125,10 @@ export default function SubscriptionPage() {
                     </div>
 
                     <button
-                      onClick={() => handleSubscribe(plan)}
-                      disabled={subscribing === plan.id || isCurrent}
-                      className={`w-full py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.98] ${
-                        isCurrent
-                          ? 'bg-success/10 text-success cursor-default'
-                          : isPopular
-                            ? 'bg-primary text-white hover:bg-primary-dark shadow-lg shadow-primary/25'
-                            : 'bg-surface-dim border-2 border-border-light text-text-primary hover:border-primary hover:bg-primary/5'
-                      }`}
+                      disabled={true}
+                      className="w-full py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 bg-surface-dim border-2 border-border-light text-text-muted cursor-not-allowed"
                     >
-                      {subscribing === plan.id ? (
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                      ) : isCurrent ? (
-                        <>Current Plan <Check className="w-4 h-4" /></>
-                      ) : (
-                        <>Get {plan.name} <ArrowRight className="w-4 h-4" /></>
-                      )}
+                      Coming Soon
                     </button>
                   </div>
                 </div>

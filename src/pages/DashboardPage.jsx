@@ -5,6 +5,7 @@ import RealtorDashboard from '../components/realtor/RealtorDashboard'
 import CompleteProfileModal from '../components/realtor/CompleteProfileModal'
 import CompleteAgentProfileModal from '../components/agent/CompleteAgentProfileModal'
 import ManageAgentLocations from '../components/agent/ManageAgentLocations'
+import WalletManager from '../components/wallet/WalletManager'
 import { authAPI } from '../api/client'
 import { Loader2, MessageSquare, MapPin, CheckCircle2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
@@ -61,6 +62,10 @@ export default function DashboardPage() {
           </div>
           
           <ManageAgentLocations />
+
+          <div className="mt-8">
+            <WalletManager />
+          </div>
         </div>
       </div>
     )
@@ -105,6 +110,10 @@ export default function DashboardPage() {
               {upgrading ? 'Upgrading...' : 'Upgrade to Realtor Account — Free'}
             </button>
           </div>
+        </div>
+        
+        <div className="w-full max-w-md mx-auto px-4 mt-8">
+          <WalletManager />
         </div>
       </div>
     )

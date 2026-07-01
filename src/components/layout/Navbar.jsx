@@ -43,13 +43,12 @@ export default function Navbar() {
         <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-[64px]">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-2.5 shrink-0 group" id="nav-logo">
-              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
-                <MapPin className="w-[18px] h-[18px] text-white" strokeWidth={2.5} />
-              </div>
-              <span className="text-lg font-bold text-navy tracking-tight">
-                Land<span className="text-primary">Market</span>
-              </span>
+            <Link to="/" className="flex items-center shrink-0 group" id="nav-logo">
+              <img
+                src="/landmarket-logo.png"
+                alt="LandMarket Logo"
+                className="h-9 w-auto transition-transform duration-200 group-hover:scale-105 object-contain"
+              />
             </Link>
 
             {/* Desktop Nav Links */}

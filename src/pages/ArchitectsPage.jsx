@@ -78,7 +78,10 @@ export default function ArchitectsPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header Banner */}
-        <div className="bg-gradient-to-r from-primary-900 via-primary-800 to-primary-700 rounded-3xl p-8 sm:p-12 mb-10 text-white shadow-xl relative overflow-hidden">
+        <div
+          className="rounded-3xl p-8 sm:p-12 mb-10 text-white shadow-xl relative overflow-hidden"
+          style={{ background: 'linear-gradient(135deg, #0f172a 0%, #064e3b 100%)' }}
+        >
           <div className="absolute right-0 bottom-0 opacity-10 translate-x-10 translate-y-10 pointer-events-none">
             <Ruler className="w-96 h-96" />
           </div>

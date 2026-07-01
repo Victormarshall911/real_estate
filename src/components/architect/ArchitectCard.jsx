@@ -2,8 +2,8 @@ import { Star, MessageCircle, Phone, Globe, ShieldCheck, Award } from 'lucide-re
 
 export default function ArchitectCard({ architect, onRate }) {
   const whatsappUrl = architect?.formatted_whatsapp_url
-    ? `${architect.formatted_whatsapp_url}?text=${encodeURIComponent('Hello! I saw your profile on Suba and I would like to inquire about architectural design services.')}`
-    : `https://wa.me/${architect?.phone_number?.replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Hello! I saw your profile on Suba.')}`
+    ? `${architect.formatted_whatsapp_url}?text=${encodeURIComponent('Hello! I saw your profile on LandMarket and I would like to inquire about architectural design services.')}`
+    : `https://wa.me/${architect?.phone_number?.replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Hello! I saw your profile on LandMarket.')}`
 
   const name = architect?.user
     ? `${architect.user.first_name} ${architect.user.last_name}`

@@ -83,14 +83,14 @@ export default function ArchitectsPage() {
             <Ruler className="w-96 h-96" />
           </div>
           <div className="relative z-10 max-w-2xl">
-            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-primary-200 text-xs font-semibold uppercase tracking-wider mb-4 border border-white/15">
+            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-white text-xs font-semibold uppercase tracking-wider mb-4 border border-white/30">
               <ShieldCheck className="w-4 h-4 text-emerald-400" />
               <span>Verified Professionals</span>
             </div>
-            <h1 className="text-3xl sm:text-5xl font-black mb-4 tracking-tight leading-tight">
+            <h1 className="text-3xl sm:text-5xl font-black mb-4 tracking-tight leading-tight text-white">
               Hire Nigerian Architects & Planners
             </h1>
-            <p className="text-primary-100 text-base sm:text-lg font-normal leading-relaxed">
+            <p className="text-white/90 text-base sm:text-lg font-normal leading-relaxed">
               Connect directly with verified architectural studios. Browse design specializations, consult via WhatsApp, and plan your dream property with zero middlemen fees.
             </p>
           </div>

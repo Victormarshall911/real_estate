@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { X, Mail, Lock, Eye, EyeOff, User, Building, Briefcase } from 'lucide-react'
+import { X, Mail, Lock, Eye, EyeOff, User, Building, Briefcase, Ruler } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { useNavigate } from 'react-router-dom'
 
@@ -61,11 +61,12 @@ export default function RegisterModal({ onClose, onSwitchToLogin }) {
           {/* Role Selector */}
           <div>
             <label className="block text-sm font-medium text-text-secondary mb-2">I want to</label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               {[
                 { value: 'buyer', label: 'Buy Land', icon: User, desc: 'Browse & invest' },
                 { value: 'realtor', label: 'Sell Land', icon: Building, desc: 'List properties' },
                 { value: 'agent', label: 'Agent', icon: Briefcase, desc: 'Earn commission' },
+                { value: 'architect', label: 'Architect', icon: Ruler, desc: 'Design & plan' },
               ].map(({ value, label, icon: Icon, desc }) => (
                 <button
                   key={value}

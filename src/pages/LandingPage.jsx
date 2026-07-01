@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Search, ShieldCheck, Home, ArrowRight, Wallet, Star } from 'lucide-react'
+import { Search, ShieldCheck, Home, ArrowRight, Wallet, Star, Ruler } from 'lucide-react'
 
 export default function LandingPage() {
   return (
@@ -34,7 +34,13 @@ export default function LandingPage() {
               to="/agents" 
               className="w-full sm:w-auto px-8 py-4 rounded-full bg-white/10 text-white border border-white/20 font-bold text-lg hover:bg-white/20 transition-all hover:-translate-y-1 flex items-center justify-center gap-2 backdrop-blur-sm"
             >
-              Hire an Agent <ArrowRight className="w-5 h-5" />
+              Hire an Agent
+            </Link>
+            <Link 
+              to="/architects" 
+              className="w-full sm:w-auto px-8 py-4 rounded-full bg-white/10 text-white border border-white/20 font-bold text-lg hover:bg-white/20 transition-all hover:-translate-y-1 flex items-center justify-center gap-2 backdrop-blur-sm"
+            >
+              Find Architects <Ruler className="w-5 h-5" />
             </Link>
           </div>
         </div>

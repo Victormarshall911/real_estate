@@ -167,6 +167,21 @@ export const agentsAPI = {
   rate: (agentId, data) => client.post(`/agents/profiles/${agentId}/rate/`, data),
 }
 
+export const architectsAPI = {
+  list: (params) => client.get('/architects/profiles/', { params }),
+  myProfile: () => client.get('/architects/profiles/me/'),
+  createProfile: (data) => {
+    const formData = new FormData()
+    Object.entries(data).forEach(([key, value]) => {
+      if (value !== null && value !== undefined) formData.append(key, value)
+    })
+    return client.post('/architects/profiles/me/', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+  },
+  rate: (id, data) => client.post(`/architects/profiles/${id}/rate/`, data),
+}
+
 export const subscriptionsAPI = {
   listPlans: () => client.get('/subscriptions/plans/'),
   mySubscription: () => client.get('/subscriptions/my/current/'),

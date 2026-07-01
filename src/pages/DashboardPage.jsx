@@ -4,6 +4,7 @@ import { useAuth } from '../hooks/useAuth'
 import RealtorDashboard from '../components/realtor/RealtorDashboard'
 import CompleteProfileModal from '../components/realtor/CompleteProfileModal'
 import CompleteAgentProfileModal from '../components/agent/CompleteAgentProfileModal'
+import CompleteArchitectProfileModal from '../components/architect/CompleteArchitectProfileModal'
 import ManageAgentLocations from '../components/agent/ManageAgentLocations'
 import WalletManager from '../components/wallet/WalletManager'
 import { authAPI } from '../api/client'
@@ -11,15 +12,15 @@ import { Loader2, MessageSquare, MapPin, CheckCircle2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 export default function DashboardPage() {
-  const { user, isAuthenticated, isRealtor, isAgent, isKycVerified, refreshUser } = useAuth()
+  const { user, isAuthenticated, isRealtor, isAgent, isArchitect, isKycVerified, refreshUser } = useAuth()
   const [upgrading, setUpgrading] = useState(false)
 
   if (!isAuthenticated) {
     return <Navigate to="/" replace />
   }
 
-  // 1. Enforce KYC Verification — only for realtors and buyers, not agents
-  if (!isKycVerified && !isAgent) {
+  // 1. Enforce KYC Verification — only for realtors and buyers, not agents or architects
+  if (!isKycVerified && !isAgent && !isArchitect) {
     return <Navigate to="/verify-identity" replace />
   }
 
@@ -37,6 +38,15 @@ export default function DashboardPage() {
     return (
       <div className="min-h-screen pt-24 pb-16 bg-surface-dim">
         <CompleteAgentProfileModal />
+      </div>
+    )
+  }
+
+  // 4. Architect needs to complete their profile
+  if (isArchitect && !user?.is_profile_complete) {
+    return (
+      <div className="min-h-screen pt-24 pb-16 bg-surface-dim">
+        <CompleteArchitectProfileModal onClose={() => {}} />
       </div>
     )
   }
@@ -63,6 +73,29 @@ export default function DashboardPage() {
           
           <ManageAgentLocations />
 
+          <div className="mt-8">
+            <WalletManager />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // 5. Architect dashboard
+  if (isArchitect) {
+    return (
+      <div className="min-h-screen py-12 bg-surface-dim">
+        <div className="max-w-3xl mx-auto px-4">
+          <h1 className="text-2xl font-bold text-text-primary mb-2">Architect Dashboard</h1>
+          <p className="text-text-muted mb-8">Manage your profile and showcase your design portfolio to buyers.</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <Link to="/architects" className="bg-surface border border-border rounded-2xl p-6 hover:shadow-card-hover transition-all group">
+              <MapPin className="w-8 h-8 text-primary mb-3 group-hover:scale-110 transition-transform" />
+              <h3 className="font-bold text-text-primary mb-1">My Public Profile</h3>
+              <p className="text-sm text-text-muted">See how you appear in the public Architects directory.</p>
+            </Link>
+          </div>
+          
           <div className="mt-8">
             <WalletManager />
           </div>

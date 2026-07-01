@@ -44,11 +44,13 @@ export default function Navbar() {
           <div className="flex items-center justify-between h-[64px]">
             {/* Logo */}
             <Link to="/" className="flex items-center shrink-0 group" id="nav-logo">
-              <img
-                src="/landmarket-logo.png"
-                alt="LandMarket Logo"
-                className="h-9 w-auto transition-transform duration-200 group-hover:scale-105 object-contain"
-              />
+              <div className="bg-white rounded-xl px-2.5 py-1 shadow-sm group-hover:shadow transition-all">
+                <img
+                  src="/landmarket-logo.png"
+                  alt="LandMarket Logo"
+                  className="h-8 w-auto transition-transform duration-200 group-hover:scale-105 object-contain"
+                />
+              </div>
             </Link>
 
             {/* Desktop Nav Links */}

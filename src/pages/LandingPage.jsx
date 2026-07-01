@@ -126,7 +126,7 @@ export default function LandingPage() {
               Safely &amp; Smartly
             </h1>
 
-            <p className="text-lg sm:text-xl text-navy-100/90 max-w-2xl leading-relaxed mb-10">
+            <p className="text-lg sm:text-xl text-white max-w-2xl leading-relaxed mb-10">
               Browse thousands of verified listings across Lagos, Abuja, and all 36 states.
               Connect with trusted realtors, hire certified architects, and close deals through
               our secure escrow wallet — no fraud, no middlemen, no regrets.

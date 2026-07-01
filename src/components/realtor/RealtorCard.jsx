@@ -19,10 +19,22 @@ export default function RealtorCard({ realtor, propertyTitle = '' }) {
       <div className="flex items-center gap-4 mb-5">
         <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
           {realtor?.profile_picture_url ? (
-            <img src={realtor.profile_picture_url} alt={name} className="w-full h-full object-cover" />
-          ) : (
-            <User className="w-6 h-6 text-primary" />
-          )}
+            <img
+              src={realtor.profile_picture_url}
+              alt={name}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                e.target.style.display = 'none'
+                e.target.nextSibling.style.display = 'flex'
+              }}
+            />
+          ) : null}
+          <span
+            className="w-full h-full items-center justify-center text-primary font-bold text-lg"
+            style={{ display: realtor?.profile_picture_url ? 'none' : 'flex' }}
+          >
+            {name.charAt(0).toUpperCase()}
+          </span>
         </div>
         <div className="min-w-0">
           <div className="flex items-center gap-1.5">

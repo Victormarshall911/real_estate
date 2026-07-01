@@ -10,10 +10,22 @@ export default function AgentCard({ agent, onConnect }) {
       <div className="p-5 flex items-start gap-4">
         <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0 overflow-hidden border-2 border-transparent group-hover:border-primary/20 transition-colors">
           {profilePic ? (
-            <img src={profilePic} alt={name} className="w-full h-full object-cover" />
-          ) : (
-            <User className="w-8 h-8 text-primary" />
-          )}
+            <img
+              src={profilePic}
+              alt={name}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                e.target.style.display = 'none'
+                e.target.nextSibling.style.display = 'flex'
+              }}
+            />
+          ) : null}
+          <span
+            className="w-full h-full items-center justify-center text-primary font-bold text-xl"
+            style={{ display: profilePic ? 'none' : 'flex' }}
+          >
+            {name.charAt(0).toUpperCase()}
+          </span>
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 mb-1">

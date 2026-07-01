@@ -18,12 +18,18 @@ export default function ArchitectCard({ architect, onRate }) {
               src={architect.profile_picture_url}
               alt={name}
               className="w-16 h-16 rounded-2xl object-cover ring-2 ring-primary/20 group-hover:ring-primary transition-all"
+              onError={(e) => {
+                e.target.style.display = 'none'
+                e.target.nextSibling.style.display = 'flex'
+              }}
             />
-          ) : (
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-100 to-primary-200 text-primary font-bold text-2xl flex items-center justify-center ring-2 ring-primary/20">
-              {name.charAt(0)}
-            </div>
-          )}
+          ) : null}
+          <div
+            className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-100 to-primary-200 text-primary font-bold text-2xl items-center justify-center ring-2 ring-primary/20"
+            style={{ display: architect?.profile_picture_url ? 'none' : 'flex' }}
+          >
+            {name.charAt(0)}
+          </div>
           {architect?.is_verified && (
             <div className="absolute -bottom-1 -right-1 bg-white dark:bg-surface rounded-full p-0.5 shadow-sm" title="Verified Architect">
               <ShieldCheck className="w-5 h-5 text-primary fill-primary-50" />

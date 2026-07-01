@@ -178,7 +178,7 @@ export default function LandingPage() {
             {STATS.map(({ value, label }) => (
               <div key={label} className="group">
                 <p className="text-3xl sm:text-4xl font-black text-gold mb-1 group-hover:scale-105 transition-transform">{value}</p>
-                <p className="text-white/80 text-sm font-semibold uppercase tracking-wider">{label}</p>
+                <p className="text-sm font-semibold uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.80)' }}>{label}</p>
               </div>
             ))}
           </div>

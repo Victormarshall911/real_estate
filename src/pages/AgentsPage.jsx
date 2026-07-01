@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Search, MapPin, Loader2 } from 'lucide-react'
 import { agentsAPI } from '../api/client'
 import AgentCard from '../components/agent/AgentCard'
+import AgentSkeleton from '../components/agent/AgentSkeleton'
 import AgentConnectionModal from '../components/agent/AgentConnectionModal'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
@@ -103,8 +104,10 @@ export default function AgentsPage() {
       {/* Agents Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
         {loading ? (
-          <div className="flex justify-center py-20">
-            <Loader2 className="w-10 h-10 text-primary animate-spin" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <AgentSkeleton key={i} />
+            ))}
           </div>
         ) : agents.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -124,8 +124,12 @@ export default function Navbar() {
                     className="flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-surface-muted transition-colors duration-200"
                     id="nav-profile-btn"
                   >
-                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                      <User className="w-4 h-4 text-primary" />
+                    <div className="w-8 h-8 rounded-full bg-primary/10 overflow-hidden flex items-center justify-center shrink-0 border border-primary/20">
+                      {user?.profile_photo ? (
+                        <img src={user.profile_photo} alt={user.first_name || 'User'} className="w-full h-full object-cover" />
+                      ) : (
+                        <User className="w-4 h-4 text-primary" />
+                      )}
                     </div>
                     <span className="text-sm font-medium text-text-primary max-w-[120px] truncate">
                       {user?.first_name}

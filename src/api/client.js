@@ -77,6 +77,17 @@ export const authAPI = {
     })
   },
   updateProfile: (data) => client.patch('/auth/complete-profile/', data),
+  updateAccountProfile: (data) => {
+    const formData = new FormData()
+    Object.entries(data).forEach(([key, value]) => {
+      if (value !== null && value !== undefined && value !== '') {
+        formData.append(key, value)
+      }
+    })
+    return client.patch('/auth/profile/', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+  },
   upgradeToRealtor: () => client.post('/auth/upgrade-to-realtor/'),
 }
 

@@ -4,12 +4,14 @@ import { Menu, X, MapPin, User, LogOut, LayoutDashboard, ChevronDown, MessageSqu
 import { useAuth } from '../../hooks/useAuth'
 import LoginModal from '../auth/LoginModal'
 import RegisterModal from '../auth/RegisterModal'
+import EditProfileModal from '../profile/EditProfileModal'
 
 export default function Navbar() {
   const { user, isAuthenticated, isRealtor, logout } = useAuth()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [showLogin, setShowLogin] = useState(false)
   const [showRegister, setShowRegister] = useState(false)
+  const [showEditProfile, setShowEditProfile] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
@@ -137,6 +139,12 @@ export default function Navbar() {
                         <p className="text-sm font-semibold text-text-primary truncate">{user?.first_name} {user?.last_name}</p>
                         <p className="text-xs text-text-muted truncate mt-0.5">{user?.email}</p>
                       </div>
+                      <button
+                        onClick={() => { setProfileOpen(false); setShowEditProfile(true) }}
+                        className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-text-secondary hover:bg-surface-muted transition-colors text-left"
+                      >
+                        <User className="w-4 h-4" /> Edit Profile
+                      </button>
                       {isAuthenticated && (
                         <Link
                           to="/dashboard"
@@ -242,6 +250,12 @@ export default function Navbar() {
                     <p className="text-sm font-medium text-text-primary">{user?.first_name} {user?.last_name}</p>
                     <p className="text-xs text-text-muted">{user?.email}</p>
                   </div>
+                  <button
+                    onClick={() => { setMobileOpen(false); setShowEditProfile(true) }}
+                    className="w-full px-4 py-3 rounded-lg text-sm font-medium text-text-secondary hover:bg-surface-muted transition-colors text-left flex items-center gap-2.5"
+                  >
+                    <User className="w-4 h-4" /> Edit Profile
+                  </button>
                   <Link
                     to="/messages"
                     className="px-4 py-3 rounded-lg text-sm font-medium text-text-secondary hover:bg-surface-muted transition-colors"
@@ -292,6 +306,11 @@ export default function Navbar() {
         <RegisterModal
           onClose={() => setShowRegister(false)}
           onSwitchToLogin={() => { setShowRegister(false); setShowLogin(true) }}
+        />
+      )}
+      {showEditProfile && (
+        <EditProfileModal
+          onClose={() => setShowEditProfile(false)}
         />
       )}
     </>

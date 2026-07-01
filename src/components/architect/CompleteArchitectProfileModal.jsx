@@ -35,7 +35,7 @@ export default function CompleteArchitectProfileModal({ onClose, onSuccess }) {
         data.profile_picture = profilePicture
       }
       await architectsAPI.createProfile(data)
-      await authAPI.updateProfile({ is_profile_complete: true })
+      await authAPI.completeProfile({ is_profile_complete: true })
       await refreshUser()
       onSuccess?.()
       onClose()

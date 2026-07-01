@@ -11,7 +11,7 @@ const client = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 15000,
+  timeout: 60000,
 })
 
 // Request interceptor — attach JWT token
@@ -76,6 +76,7 @@ export const authAPI = {
       headers: { 'Content-Type': 'multipart/form-data' },
     })
   },
+  updateProfile: (data) => client.patch('/auth/complete-profile/', data),
   upgradeToRealtor: () => client.post('/auth/upgrade-to-realtor/'),
 }
 

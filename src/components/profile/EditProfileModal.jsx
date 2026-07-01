@@ -100,14 +100,20 @@ export default function EditProfileModal({ onClose }) {
           {/* Avatar Upload Block */}
           <div className="flex flex-col items-center justify-center py-2">
             <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-              <div className="w-24 h-24 rounded-full overflow-hidden bg-primary/10 border-4 border-white shadow-md flex items-center justify-center">
+              <div className="w-24 h-24 rounded-full overflow-hidden bg-primary/10 border-4 border-white shadow-md flex items-center justify-center relative">
                 {photoPreview ? (
-                  <img src={photoPreview} alt="Profile Preview" className="w-full h-full object-cover" />
-                ) : (
+                  <img 
+                    src={photoPreview.startsWith('/') ? `https://real-estate-api-orbx.onrender.com${photoPreview}` : photoPreview} 
+                    alt="Profile Preview" 
+                    className="w-full h-full object-cover"
+                    onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling && (e.target.nextSibling.style.display = 'flex'); }}
+                  />
+                ) : null}
+                <div className="w-full h-full flex items-center justify-center absolute inset-0 bg-primary/10" style={{ display: photoPreview ? 'none' : 'flex' }}>
                   <span className="text-3xl font-black text-primary uppercase">
                     {(user?.first_name || 'U').charAt(0)}
                   </span>
-                )}
+                </div>
               </div>
               <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                 <Camera className="w-6 h-6 text-white" />

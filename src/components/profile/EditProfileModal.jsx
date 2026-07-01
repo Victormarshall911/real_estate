@@ -19,6 +19,7 @@ export default function EditProfileModal({ onClose }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [successMessage, setSuccessMessage] = useState(false)
+  const [imgError, setImgError] = useState(false)
 
   const handlePhotoChange = (e) => {
     const file = e.target.files[0]
@@ -29,6 +30,7 @@ export default function EditProfileModal({ onClose }) {
       }
       setProfilePhoto(file)
       setPhotoPreview(URL.createObjectURL(file))
+      setImgError(false)
       setError(null)
     }
   }
@@ -101,15 +103,16 @@ export default function EditProfileModal({ onClose }) {
           <div className="flex flex-col items-center justify-center py-2">
             <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
               <div className="w-24 h-24 rounded-full overflow-hidden bg-primary/10 border-4 border-white shadow-md flex items-center justify-center relative">
-                {photoPreview ? (
+                {photoPreview && !imgError ? (
                   <img 
+                    key={photoPreview}
                     src={photoPreview.startsWith('/') ? `https://real-estate-api-orbx.onrender.com${photoPreview}` : photoPreview} 
                     alt="Profile Preview" 
                     className="w-full h-full object-cover"
-                    onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling && (e.target.nextSibling.style.display = 'flex'); }}
+                    onError={() => setImgError(true)}
                   />
                 ) : null}
-                <div className="w-full h-full flex items-center justify-center absolute inset-0 bg-primary/10" style={{ display: photoPreview ? 'none' : 'flex' }}>
+                <div className="w-full h-full flex items-center justify-center absolute inset-0 bg-primary/10" style={{ display: photoPreview && !imgError ? 'none' : 'flex' }}>
                   <span className="text-3xl font-black text-primary uppercase">
                     {(user?.first_name || 'U').charAt(0)}
                   </span>

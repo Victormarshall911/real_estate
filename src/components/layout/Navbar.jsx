@@ -127,6 +127,7 @@ export default function Navbar() {
                     <div className="w-8 h-8 rounded-full bg-primary/10 overflow-hidden flex items-center justify-center shrink-0 border border-primary/20 relative">
                       {user?.profile_photo ? (
                         <img 
+                          key={user.profile_photo}
                           src={user.profile_photo.startsWith('/') ? `https://real-estate-api-orbx.onrender.com${user.profile_photo}` : user.profile_photo} 
                           alt={user.first_name || 'User'} 
                           className="w-full h-full object-cover"

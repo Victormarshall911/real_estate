@@ -1,6 +1,14 @@
-import { Star, MessageCircle, Phone, Globe, ShieldCheck, Award } from 'lucide-react'
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { Star, MessageCircle, MessageSquare, Phone, Globe, ShieldCheck, Award, Loader2 } from 'lucide-react'
+import { useAuth } from '../../hooks/useAuth'
+import { chatAPI } from '../../api/client'
 
 export default function ArchitectCard({ architect, onRate }) {
+  const { isAuthenticated, user } = useAuth()
+  const navigate = useNavigate()
+  const [loadingChat, setLoadingChat] = useState(false)
+
   const whatsappUrl = architect?.formatted_whatsapp_url
     ? `${architect.formatted_whatsapp_url}?text=${encodeURIComponent('Hello! I saw your profile on LandMarket and I would like to inquire about architectural design services.')}`
     : `https://wa.me/${architect?.phone_number?.replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Hello! I saw your profile on LandMarket.')}`
@@ -8,6 +16,34 @@ export default function ArchitectCard({ architect, onRate }) {
   const name = architect?.user
     ? `${architect.user.first_name} ${architect.user.last_name}`
     : architect?.company_name || 'Architect'
+
+  const handleStartChat = async () => {
+    if (!isAuthenticated) {
+      navigate(`/login?redirect=${encodeURIComponent(window.location.pathname)}`)
+      return
+    }
+
+    if (architect?.user?.id === user?.id) {
+      alert("You cannot chat with your own profile.")
+      return
+    }
+
+    if (!architect?.user?.id) {
+      alert("This architect profile is not linked to a user account.")
+      return
+    }
+
+    setLoadingChat(true)
+    try {
+      await chatAPI.startDirect(architect.user.id)
+      navigate('/messages')
+    } catch (err) {
+      console.error(err)
+      alert(err.response?.data?.error || 'Failed to start chat session.')
+    } finally {
+      setLoadingChat(false)
+    }
+  }
 
   return (
     <div className="bg-surface border border-border rounded-2xl p-6 shadow-card hover:shadow-card-hover transition-all duration-300 flex flex-col h-full group">
@@ -74,30 +110,48 @@ export default function ArchitectCard({ architect, onRate }) {
       </div>
 
       {/* Action Buttons */}
-      <div className="grid grid-cols-2 gap-2 mt-auto">
-        <a
-          href={whatsappUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center justify-center space-x-1.5 py-2.5 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-xs transition-all shadow-sm hover:shadow"
-        >
-          <MessageCircle className="w-4 h-4" />
-          <span>WhatsApp</span>
-        </a>
-
-        {architect?.phone_number ? (
-          <a
-            href={`tel:${architect.phone_number}`}
-            className="flex items-center justify-center space-x-1.5 py-2.5 px-3 rounded-xl bg-surface-muted hover:bg-border text-text-primary font-semibold text-xs transition-all border border-border"
+      <div className="space-y-2 mt-auto">
+        {(!isAuthenticated || user?.id !== architect?.user?.id) && (
+          <button
+            onClick={handleStartChat}
+            disabled={loadingChat}
+            className="flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl bg-primary text-white font-semibold text-xs hover:bg-primary-dark transition-all duration-200 hover:shadow-md active:scale-[0.98] disabled:opacity-75"
+            id="architect-direct-chat-btn"
           >
-            <Phone className="w-4 h-4 text-primary" />
-            <span>Call Now</span>
-          </a>
-        ) : (
-          <div className="flex items-center justify-center py-2.5 px-3 rounded-xl bg-surface-muted text-text-muted font-semibold text-xs border border-border opacity-60">
-            No Phone
-          </div>
+            {loadingChat ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <MessageSquare className="w-4 h-4" />
+            )}
+            {loadingChat ? 'Connecting...' : 'Message on LandMarket'}
+          </button>
         )}
+
+        <div className="grid grid-cols-2 gap-2">
+          <a
+            href={whatsappUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center space-x-1.5 py-2.5 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-xs transition-all shadow-sm hover:shadow"
+          >
+            <MessageCircle className="w-4 h-4" />
+            <span>WhatsApp</span>
+          </a>
+
+          {architect?.phone_number ? (
+            <a
+              href={`tel:${architect.phone_number}`}
+              className="flex items-center justify-center space-x-1.5 py-2.5 px-3 rounded-xl bg-surface-muted hover:bg-border text-text-primary font-semibold text-xs transition-all border border-border"
+            >
+              <Phone className="w-4 h-4 text-primary" />
+              <span>Call Now</span>
+            </a>
+          ) : (
+            <div className="flex items-center justify-center py-2.5 px-3 rounded-xl bg-surface-muted text-text-muted font-semibold text-xs border border-border opacity-60">
+              No Phone
+            </div>
+          )}
+        </div>
       </div>
 
       {architect?.portfolio_url && (

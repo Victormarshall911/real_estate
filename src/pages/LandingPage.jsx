@@ -7,7 +7,7 @@ import {
 
 const STATS = [
   { value: '2,400+', label: 'Verified Listings' },
-  { value: '800+', label: 'Trusted Realtors' },
+  { value: '1,200+', label: 'Owners & Developers' },
   { value: '₦4.2B+', label: 'Transactions Secured' },
   { value: '15,000+', label: 'Happy Buyers' },
 ]
@@ -16,7 +16,7 @@ const HOW_IT_WORKS = [
   {
     step: '01',
     title: 'Create Your Free Account',
-    desc: 'Sign up in under 2 minutes. Choose your role — buyer, realtor, agent, or architect — and verify your identity via KYC.',
+    desc: 'Sign up in under 2 minutes. Choose your role — buyer, realtor, landlord, developer, agent, or architect — and verify your identity via KYC.',
     icon: Users,
   },
   {
@@ -27,8 +27,8 @@ const HOW_IT_WORKS = [
   },
   {
     step: '03',
-    title: 'Connect via WhatsApp',
-    desc: 'Found the perfect plot? Connect directly with the verified realtor or agent on WhatsApp — zero middlemen, zero commission fees.',
+    title: 'Connect & Negotiate',
+    desc: 'Found the perfect plot? Connect directly with verified sellers (realtors, landlords, developers) or agents on WhatsApp — zero middlemen.',
     icon: Phone,
   },
   {
@@ -60,8 +60,8 @@ const FEATURES = [
   },
   {
     image: '/feature-experts.png',
-    title: 'Hire Verified Experts',
-    desc: 'Connect with commission-based agents who know the terrain, or bring in a certified architect to plan your build. All professionals are rated and reviewed by real clients.',
+    title: 'Hire Verified Experts & Sellers',
+    desc: 'Connect with verified realtors, private landlords, estate developers, agents who know the terrain, or certified architects. All professionals are rated and reviewed by real clients.',
     badge: 'Top-Rated Pros',
     badgeColor: 'bg-amber-500',
     link: '/agents',
@@ -78,18 +78,18 @@ const TESTIMONIALS = [
     text: 'I was skeptical about buying land online but LandMarket changed everything. The escrow wallet made me feel completely safe. Got my plot in Lekki Phase 2 within 3 weeks!',
   },
   {
-    name: 'Emeka Nwosu',
-    role: 'Verified Realtor, Abuja',
-    avatar: 'E',
+    name: 'Alhaji Musa Bello',
+    role: 'Estate Developer, Abuja',
+    avatar: 'M',
     rating: 5,
-    text: "As a realtor, the platform is a game-changer. I've closed 14 deals in 2 months. Buyers come to me pre-verified and serious. Can't imagine going back to the old way.",
+    text: "Listing our serviced estates on LandMarket has expanded our reach across Nigeria. Direct client chats and pre-verified buyers make closing deals efficient and transparent.",
   },
   {
-    name: 'Fatima Abubakar',
-    role: 'Buyer, Port Harcourt',
-    avatar: 'F',
+    name: 'Obinna Okoye',
+    role: 'Private Landlord, Enugu',
+    avatar: 'O',
     rating: 5,
-    text: 'Found my architect right here on LandMarket. He designed my building plan within a week. Everything in one place — listing, agent, architect, and payment. Brilliant!',
+    text: "I listed my inherited family layout here. Normal buyers and verified agents messaged me directly. It's the most secure way to sell land directly in Nigeria.",
   },
 ]
 
@@ -132,26 +132,42 @@ export default function LandingPage() {
               our secure escrow wallet — no fraud, no middlemen, no regrets.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 mb-12">
-              <Link
-                to="/properties"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-primary text-white font-bold text-lg hover:bg-primary-dark transition-all hover:-translate-y-1 shadow-xl shadow-primary/40"
-              >
-                <Search className="w-5 h-5" />
-                Browse Land Listings
-              </Link>
-              <Link
-                to="/agents"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-white/10 text-white border border-white/25 font-bold text-lg hover:bg-white/20 transition-all hover:-translate-y-1 backdrop-blur-sm"
-              >
-                Hire an Agent <ArrowRight className="w-5 h-5" />
-              </Link>
-              <Link
-                to="/architects"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-white/10 text-white border border-white/25 font-bold text-lg hover:bg-white/20 transition-all hover:-translate-y-1 backdrop-blur-sm"
-              >
-                Find Architects <Ruler className="w-5 h-5" />
-              </Link>
+            <div className="flex flex-col gap-4 mb-12">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Link
+                  to="/properties"
+                  className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-primary text-white font-bold text-lg hover:bg-primary-dark transition-all hover:-translate-y-1 shadow-xl shadow-primary/40"
+                >
+                  <Search className="w-5 h-5" />
+                  Browse Land Listings
+                </Link>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-3xl">
+                <Link
+                  to="/agents"
+                  className="inline-flex items-center justify-center gap-1.5 px-4 py-3 rounded-xl bg-white/10 text-white border border-white/20 text-sm font-bold hover:bg-white/20 transition-all hover:-translate-y-0.5 backdrop-blur-sm"
+                >
+                  Hire an Agent
+                </Link>
+                <Link
+                  to="/architects"
+                  className="inline-flex items-center justify-center gap-1.5 px-4 py-3 rounded-xl bg-white/10 text-white border border-white/20 text-sm font-bold hover:bg-white/20 transition-all hover:-translate-y-0.5 backdrop-blur-sm"
+                >
+                  Find Architects
+                </Link>
+                <Link
+                  to="/landlords"
+                  className="inline-flex items-center justify-center gap-1.5 px-4 py-3 rounded-xl bg-white/10 text-white border border-white/20 text-sm font-bold hover:bg-white/20 transition-all hover:-translate-y-0.5 backdrop-blur-sm"
+                >
+                  Meet Landlords
+                </Link>
+                <Link
+                  to="/developers"
+                  className="inline-flex items-center justify-center gap-1.5 px-4 py-3 rounded-xl bg-white/10 text-white border border-white/20 text-sm font-bold hover:bg-white/20 transition-all hover:-translate-y-0.5 backdrop-blur-sm"
+                >
+                  Find Developers
+                </Link>
+              </div>
             </div>
 
             {/* Trust indicators */}

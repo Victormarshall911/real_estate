@@ -27,6 +27,7 @@ export default function App() {
           <Route path="/architects" element={<ArchitectsPage />} />
           <Route path="/pricing" element={<SubscriptionPage />} />
           <Route path="/messages" element={<ChatPage />} />
+          <Route path="/chat" element={<ChatPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </div>

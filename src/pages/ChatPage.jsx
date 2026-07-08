@@ -73,8 +73,12 @@ export default function ChatPage() {
   const connectWebSocket = (sessionId) => {
     if (ws) ws.close()
     
-    // In production, use wss:// and correct host
-    const wsUrl = `${import.meta.env.VITE_WS_URL || 'ws://localhost:8002'}/ws/chat/${sessionId}/?token=${token}`
+    let wsBaseUrl = import.meta.env.VITE_WS_URL
+    if (!wsBaseUrl) {
+      const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:8001/api/v1'
+      wsBaseUrl = apiBase.replace(/^http/, 'ws').replace(/\/api\/v1\/?$/, '')
+    }
+    const wsUrl = `${wsBaseUrl}/ws/chat/${sessionId}/?token=${token}`
     const socket = new WebSocket(wsUrl)
     
     socket.onmessage = (e) => {

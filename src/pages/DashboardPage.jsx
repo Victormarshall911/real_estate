@@ -59,7 +59,7 @@ export default function DashboardPage() {
           <h1 className="text-2xl font-bold text-text-primary mb-2">Agent Dashboard</h1>
           <p className="text-text-muted mb-8">Manage your connections and chat with clients.</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <Link to="/chat" className="bg-surface border border-border rounded-2xl p-6 hover:shadow-card-hover transition-all group">
+            <Link to="/messages" className="bg-surface border border-border rounded-2xl p-6 hover:shadow-card-hover transition-all group">
               <MessageSquare className="w-8 h-8 text-primary mb-3 group-hover:scale-110 transition-transform" />
               <h3 className="font-bold text-text-primary mb-1">Messages</h3>
               <p className="text-sm text-text-muted">Chat with clients who have connected with you.</p>

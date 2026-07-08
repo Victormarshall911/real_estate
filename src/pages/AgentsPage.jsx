@@ -58,7 +58,7 @@ export default function AgentsPage() {
       })
       setSelectedAgent(null)
       setSelectedLocation(null)
-      navigate('/chat') // Go directly to chat
+      navigate('/messages') // Go directly to chat
     } catch (err) {
       alert(err.response?.data?.error || 'Failed to initiate connection.')
     } finally {

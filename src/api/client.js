@@ -205,6 +205,7 @@ export const chatAPI = {
   sessionDetail: (id) => client.get(`/chat/sessions/${id}/`),
   messages: (id) => client.get(`/chat/sessions/${id}/messages/`),
   sendMessage: (id, data) => client.post(`/chat/sessions/${id}/send_message/`, data),
+  startDirect: (sellerId) => client.post('/chat/sessions/start_direct/', { seller_id: sellerId }),
 }
 
 export const walletsAPI = {

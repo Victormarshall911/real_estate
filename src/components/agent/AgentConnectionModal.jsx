@@ -1,10 +1,33 @@
+import { useState, useEffect } from 'react'
 import { X, ShieldCheck, CreditCard, Loader2 } from 'lucide-react'
+import { walletsAPI } from '../../api/client'
 
 export default function AgentConnectionModal({ agent, locationPrice, onClose, onConfirm, loading }) {
+  const [wallet, setWallet] = useState(null)
+  const [loadingWallet, setLoadingWallet] = useState(true)
+
+  const fee = locationPrice ? parseFloat(locationPrice.connection_fee) : 0
+  const formattedFee = fee.toLocaleString()
+
+  useEffect(() => {
+    if (agent && locationPrice) {
+      setLoadingWallet(true)
+      walletsAPI.me()
+        .then(res => {
+          setWallet(res.data)
+        })
+        .catch(err => {
+          console.error('Failed to fetch wallet info', err)
+        })
+        .finally(() => {
+          setLoadingWallet(false)
+        })
+    }
+  }, [agent, locationPrice])
+
   if (!agent || !locationPrice) return null
 
-  const fee = parseFloat(locationPrice.connection_fee)
-  const formattedFee = fee.toLocaleString()
+  const hasInsufficientBalance = wallet && parseFloat(wallet.balance) < fee
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-navy/60 backdrop-blur-sm animate-fade-in">
@@ -48,17 +71,33 @@ export default function AgentConnectionModal({ agent, locationPrice, onClose, on
             </div>
           </div>
 
-          <div className="bg-success/10 rounded-xl p-4 border border-success/20 mb-6">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-bold text-text-primary">Total to Pay</span>
-              <span className="text-lg font-bold text-success">
-                Free (Limited Time)
-              </span>
+          {loadingWallet ? (
+            <div className="flex justify-center p-6">
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
             </div>
-            <p className="text-xs text-text-muted mt-2">
-              Agent connection fees are currently waived. Connect instantly for free!
-            </p>
-          </div>
+          ) : hasInsufficientBalance ? (
+            <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-xs text-danger font-medium mb-6">
+              <p className="font-bold mb-1">Insufficient Wallet Balance</p>
+              <p className="text-text-secondary mb-2">
+                This connection costs <strong>₦{formattedFee}</strong>, but your wallet balance is only <strong>₦{parseFloat(wallet.balance).toLocaleString()}</strong>.
+              </p>
+              <p className="text-text-muted">Please close this modal and add funds via the dashboard wallet to proceed.</p>
+            </div>
+          ) : (
+            <div className="bg-success/10 rounded-xl p-4 border border-success/20 mb-6">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-bold text-text-primary">Total to Pay</span>
+                <span className="text-lg font-bold text-success">
+                  {fee > 0 ? `₦${formattedFee}` : 'Free'}
+                </span>
+              </div>
+              <p className="text-xs text-text-muted mt-2">
+                {fee > 0 
+                  ? 'This amount will be deducted from your wallet and held in escrow until the connection is closed.' 
+                  : 'Connect instantly for free!'}
+              </p>
+            </div>
+          )}
 
           <div className="space-y-3">
             <div className="flex items-start gap-3">
@@ -74,8 +113,8 @@ export default function AgentConnectionModal({ agent, locationPrice, onClose, on
         <div className="p-5 sm:p-6 border-t border-border bg-surface-dim/50 flex flex-col gap-3">
           <button
             onClick={() => onConfirm(agent.id, locationPrice.id)}
-            disabled={loading}
-            className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-primary text-white font-bold text-sm hover:bg-primary-dark transition-all disabled:opacity-70 active:scale-[0.98] shadow-lg shadow-primary/20"
+            disabled={loading || loadingWallet || hasInsufficientBalance}
+            className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-primary text-white font-bold text-sm hover:bg-primary-dark transition-all disabled:opacity-75 disabled:bg-primary/50 disabled:cursor-not-allowed active:scale-[0.98] shadow-lg shadow-primary/20"
           >
             {loading ? (
               <Loader2 className="w-5 h-5 animate-spin" />

@@ -1,6 +1,14 @@
-import { Phone, MessageCircle, BadgeCheck, User } from 'lucide-react'
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { Phone, MessageCircle, MessageSquare, BadgeCheck, User, Loader2 } from 'lucide-react'
+import { useAuth } from '../../hooks/useAuth'
+import { chatAPI } from '../../api/client'
 
 export default function RealtorCard({ realtor, propertyTitle = '' }) {
+  const { isAuthenticated, user } = useAuth()
+  const navigate = useNavigate()
+  const [loadingChat, setLoadingChat] = useState(false)
+
   const whatsappMessage = propertyTitle
     ? `Hi, I'm interested in your property listing: "${propertyTitle}" on LandMarket. Is it still available?`
     : `Hi, I found your profile on LandMarket and would like to inquire about your listings.`
@@ -12,6 +20,34 @@ export default function RealtorCard({ realtor, propertyTitle = '' }) {
   const name = realtor?.user
     ? `${realtor.user.first_name} ${realtor.user.last_name}`
     : realtor?.realtor_name || 'Realtor'
+
+  const handleStartChat = async () => {
+    if (!isAuthenticated) {
+      navigate(`/login?redirect=${encodeURIComponent(window.location.pathname)}`)
+      return
+    }
+
+    if (realtor?.user?.id === user?.id) {
+      alert("You cannot chat with your own listing.")
+      return
+    }
+
+    if (!realtor?.user?.id) {
+      alert("This realtor profile is not linked to a user account.")
+      return
+    }
+
+    setLoadingChat(true)
+    try {
+      await chatAPI.startDirect(realtor.user.id)
+      navigate('/messages')
+    } catch (err) {
+      console.error(err)
+      alert(err.response?.data?.error || 'Failed to start chat session.')
+    } finally {
+      setLoadingChat(false)
+    }
+  }
 
   return (
     <div className="bg-surface rounded-2xl border border-border-light p-6 shadow-card">
@@ -52,6 +88,22 @@ export default function RealtorCard({ realtor, propertyTitle = '' }) {
 
       {/* CTA Buttons */}
       <div className="space-y-3">
+        {/* Only show chat option if not own listing */}
+        {(!isAuthenticated || user?.id !== realtor?.user?.id) && (
+          <button
+            onClick={handleStartChat}
+            disabled={loadingChat}
+            className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-primary text-white font-semibold text-sm hover:bg-primary-dark transition-all duration-200 hover:shadow-lg hover:shadow-primary/25 active:scale-[0.98] disabled:opacity-75"
+            id="realtor-direct-chat-btn"
+          >
+            {loadingChat ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <MessageSquare className="w-4 h-4" />
+            )}
+            {loadingChat ? 'Connecting...' : 'Message on LandMarket'}
+          </button>
+        )}
         <a
           href={whatsappUrl}
           target="_blank"

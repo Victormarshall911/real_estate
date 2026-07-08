@@ -88,6 +88,8 @@ export function AuthProvider({ children }) {
     isRealtor: user?.role === 'realtor',
     isAgent: user?.role === 'agent',
     isArchitect: user?.role === 'architect',
+    isLandlord: user?.role === 'landlord',
+    isDeveloper: user?.role === 'developer',
     isFullyVerified: user?.is_fully_verified,
     isKycVerified: user?.is_kyc_verified,
     isProfileComplete: user?.is_profile_complete,

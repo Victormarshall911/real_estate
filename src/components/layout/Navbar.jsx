@@ -88,6 +88,26 @@ export default function Navbar() {
               >
                 Find Architects
               </Link>
+              <Link
+                to="/landlords"
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
+                  location.pathname === '/landlords'
+                    ? 'text-primary bg-primary/5'
+                    : 'text-text-secondary hover:text-text-primary hover:bg-surface-muted'
+                }`}
+              >
+                Landlords
+              </Link>
+              <Link
+                to="/developers"
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
+                  location.pathname === '/developers'
+                    ? 'text-primary bg-primary/5'
+                    : 'text-text-secondary hover:text-text-primary hover:bg-surface-muted'
+                }`}
+              >
+                Developers
+              </Link>
               {isRealtor && (
                 <Link
                   to="/pricing"
@@ -235,6 +255,18 @@ export default function Navbar() {
                 className="px-4 py-3 rounded-lg text-sm font-medium text-text-secondary hover:bg-surface-muted transition-colors"
               >
                 Find Architects
+              </Link>
+              <Link
+                to="/landlords"
+                className="px-4 py-3 rounded-lg text-sm font-medium text-text-secondary hover:bg-surface-muted transition-colors"
+              >
+                Landlords
+              </Link>
+              <Link
+                to="/developers"
+                className="px-4 py-3 rounded-lg text-sm font-medium text-text-secondary hover:bg-surface-muted transition-colors"
+              >
+                Developers
               </Link>
               {isRealtor && (
                 <Link

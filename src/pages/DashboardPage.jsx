@@ -5,6 +5,8 @@ import RealtorDashboard from '../components/realtor/RealtorDashboard'
 import CompleteProfileModal from '../components/realtor/CompleteProfileModal'
 import CompleteAgentProfileModal from '../components/agent/CompleteAgentProfileModal'
 import CompleteArchitectProfileModal from '../components/architect/CompleteArchitectProfileModal'
+import CompleteLandlordProfileModal from '../components/landlord/CompleteLandlordProfileModal'
+import CompleteDeveloperProfileModal from '../components/developer/CompleteDeveloperProfileModal'
 import ManageAgentLocations from '../components/agent/ManageAgentLocations'
 import WalletManager from '../components/wallet/WalletManager'
 import { authAPI } from '../api/client'
@@ -12,14 +14,14 @@ import { Loader2, MessageSquare, MapPin, CheckCircle2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 export default function DashboardPage() {
-  const { user, isAuthenticated, isRealtor, isAgent, isArchitect, isKycVerified, refreshUser } = useAuth()
+  const { user, isAuthenticated, isRealtor, isAgent, isArchitect, isLandlord, isDeveloper, isKycVerified, refreshUser } = useAuth()
   const [upgrading, setUpgrading] = useState(false)
 
   if (!isAuthenticated) {
     return <Navigate to="/" replace />
   }
 
-  // 1. Enforce KYC Verification — only for realtors and buyers, not agents or architects
+  // 1. Enforce KYC Verification — only for realtors, landlords, developers, and buyers
   if (!isKycVerified && !isAgent && !isArchitect) {
     return <Navigate to="/verify-identity" replace />
   }
@@ -33,7 +35,25 @@ export default function DashboardPage() {
     )
   }
 
-  // 3. Agent needs to complete their agent profile
+  // 3. Landlord needs to complete profile
+  if (isLandlord && !user?.has_landlord_profile) {
+    return (
+      <div className="min-h-screen pt-24 pb-16 bg-surface-dim">
+        <CompleteLandlordProfileModal onClose={() => {}} />
+      </div>
+    )
+  }
+
+  // 4. Developer needs to complete profile
+  if (isDeveloper && !user?.has_developer_profile) {
+    return (
+      <div className="min-h-screen pt-24 pb-16 bg-surface-dim">
+        <CompleteDeveloperProfileModal onClose={() => {}} />
+      </div>
+    )
+  }
+
+  // 5. Agent needs to complete their agent profile
   if (isAgent && !user?.has_agent_profile) {
     return (
       <div className="min-h-screen pt-24 pb-16 bg-surface-dim">
@@ -116,41 +136,42 @@ export default function DashboardPage() {
     }
   }
 
-  // 5. Buyer dashboard
-  if (!isRealtor) {
-    return (
-      <div className="min-h-screen py-16 flex flex-col items-center justify-center bg-surface-dim">
-        <div className="text-center max-w-md mx-auto px-4 bg-surface p-8 rounded-2xl shadow-card border border-border">
-          <div className="text-5xl mb-4">👋</div>
-          <h2 className="text-2xl font-bold text-text-primary mb-2">Welcome to your Dashboard</h2>
-          <p className="text-sm text-text-muted mb-6">
-            You are currently registered as a property buyer. Looking for expert help to find the perfect land?
-          </p>
-          <a
-            href="/agents"
-            className="inline-flex items-center justify-center w-full py-3 rounded-xl bg-primary text-white font-bold text-sm hover:bg-primary-dark transition-all shadow-lg shadow-primary/20"
-          >
-            Hire a Verified Agent
-          </a>
-          <div className="mt-6 pt-6 border-t border-border-light">
-            <p className="text-xs text-text-muted mb-3">Want to list your own properties?</p>
-            <button
-              onClick={handleUpgrade}
-              disabled={upgrading}
-              className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border-2 border-primary text-primary font-bold text-sm hover:bg-primary hover:text-white transition-all disabled:opacity-60"
-            >
-              {upgrading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-              {upgrading ? 'Upgrading...' : 'Upgrade to Realtor Account — Free'}
-            </button>
-          </div>
-        </div>
-        
-        <div className="w-full max-w-md mx-auto px-4 mt-8">
-          <WalletManager />
-        </div>
-      </div>
-    )
+  // 6. Seller dashboard (Realtor, Landlord, Developer)
+  if (isRealtor || isLandlord || isDeveloper) {
+    return <RealtorDashboard />
   }
 
-  return <RealtorDashboard />
+  // 7. Buyer dashboard
+  return (
+    <div className="min-h-screen py-16 flex flex-col items-center justify-center bg-surface-dim">
+      <div className="text-center max-w-md mx-auto px-4 bg-surface p-8 rounded-2xl shadow-card border border-border">
+        <div className="text-5xl mb-4">👋</div>
+        <h2 className="text-2xl font-bold text-text-primary mb-2">Welcome to your Dashboard</h2>
+        <p className="text-sm text-text-muted mb-6">
+          You are currently registered as a property buyer. Looking for expert help to find the perfect land?
+        </p>
+        <a
+          href="/agents"
+          className="inline-flex items-center justify-center w-full py-3 rounded-xl bg-primary text-white font-bold text-sm hover:bg-primary-dark transition-all shadow-lg shadow-primary/20"
+        >
+          Hire a Verified Agent
+        </a>
+        <div className="mt-6 pt-6 border-t border-border-light">
+          <p className="text-xs text-text-muted mb-3">Want to list your own properties?</p>
+          <button
+            onClick={handleUpgrade}
+            disabled={upgrading}
+            className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border-2 border-primary text-primary font-bold text-sm hover:bg-primary hover:text-white transition-all disabled:opacity-60"
+          >
+            {upgrading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+            {upgrading ? 'Upgrading...' : 'Upgrade to Realtor Account — Free'}
+          </button>
+        </div>
+      </div>
+      
+      <div className="w-full max-w-md mx-auto px-4 mt-8">
+        <WalletManager />
+      </div>
+    </div>
+  )
 }

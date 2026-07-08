@@ -194,6 +194,36 @@ export const architectsAPI = {
   rate: (id, data) => client.post(`/architects/profiles/${id}/rate/`, data),
 }
 
+export const landlordsAPI = {
+  list: (params) => client.get('/landlords/profiles/', { params }),
+  myProfile: () => client.get('/landlords/profiles/me/'),
+  createProfile: (data) => {
+    const formData = new FormData()
+    Object.entries(data).forEach(([key, value]) => {
+      if (value !== null && value !== undefined) formData.append(key, value)
+    })
+    return client.post('/landlords/profiles/me/', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+  },
+  rate: (id, data) => client.post(`/landlords/profiles/${id}/rate/`, data),
+}
+
+export const developersAPI = {
+  list: (params) => client.get('/developers/profiles/', { params }),
+  myProfile: () => client.get('/developers/profiles/me/'),
+  createProfile: (data) => {
+    const formData = new FormData()
+    Object.entries(data).forEach(([key, value]) => {
+      if (value !== null && value !== undefined) formData.append(key, value)
+    })
+    return client.post('/developers/profiles/me/', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+  },
+  rate: (id, data) => client.post(`/developers/profiles/${id}/rate/`, data),
+}
+
 export const subscriptionsAPI = {
   listPlans: () => client.get('/subscriptions/plans/'),
   mySubscription: () => client.get('/subscriptions/my/current/'),

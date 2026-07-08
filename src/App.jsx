@@ -8,6 +8,8 @@ import DashboardPage from './pages/DashboardPage'
 import KYCPage from './pages/KYCPage'
 import AgentsPage from './pages/AgentsPage'
 import ArchitectsPage from './pages/ArchitectsPage'
+import LandlordsPage from './pages/LandlordsPage'
+import DevelopersPage from './pages/DevelopersPage'
 import SubscriptionPage from './pages/SubscriptionPage'
 import ChatPage from './pages/ChatPage'
 import NotFoundPage from './pages/NotFoundPage'
@@ -25,6 +27,8 @@ export default function App() {
           <Route path="/verify-identity" element={<KYCPage />} />
           <Route path="/agents" element={<AgentsPage />} />
           <Route path="/architects" element={<ArchitectsPage />} />
+          <Route path="/landlords" element={<LandlordsPage />} />
+          <Route path="/developers" element={<DevelopersPage />} />
           <Route path="/pricing" element={<SubscriptionPage />} />
           <Route path="/messages" element={<ChatPage />} />
           <Route path="/chat" element={<ChatPage />} />

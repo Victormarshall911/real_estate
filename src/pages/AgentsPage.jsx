@@ -6,6 +6,7 @@ import AgentSkeleton from '../components/agent/AgentSkeleton'
 import AgentConnectionModal from '../components/agent/AgentConnectionModal'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import useScrollReveal from '../hooks/useScrollReveal'
 
 export default function AgentsPage() {
   const { isAuthenticated } = useAuth()
@@ -17,6 +18,7 @@ export default function AgentsPage() {
   const [selectedAgent, setSelectedAgent] = useState(null)
   const [selectedLocation, setSelectedLocation] = useState(null)
   const [connecting, setConnecting] = useState(false)
+  const gridRef = useScrollReveal({ stagger: true })
 
   useEffect(() => {
     fetchAgents()
@@ -110,13 +112,14 @@ export default function AgentsPage() {
             ))}
           </div>
         ) : agents.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" ref={gridRef}>
             {agents.map(agent => (
-              <AgentCard 
-                key={agent.id} 
-                agent={agent} 
-                onConnect={handleConnectClick} 
-              />
+              <div key={agent.id} className="reveal reveal-up">
+                <AgentCard 
+                  agent={agent} 
+                  onConnect={handleConnectClick} 
+                />
+              </div>
             ))}
           </div>
         ) : (

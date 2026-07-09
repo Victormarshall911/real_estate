@@ -4,6 +4,7 @@ import { developersAPI } from '../api/client'
 import DeveloperCard from '../components/developer/DeveloperCard'
 import DeveloperSkeleton from '../components/developer/DeveloperSkeleton'
 import { useAuth } from '../hooks/useAuth'
+import useScrollReveal from '../hooks/useScrollReveal'
 
 export default function DevelopersPage() {
   const { isAuthenticated } = useAuth()
@@ -17,6 +18,7 @@ export default function DevelopersPage() {
   const [commentVal, setCommentVal] = useState('')
   const [submittingReview, setSubmittingReview] = useState(false)
   const [reviewError, setReviewError] = useState(null)
+  const gridRef = useScrollReveal({ stagger: true })
 
   const fetchDevelopers = async () => {
     setLoading(true)
@@ -140,9 +142,11 @@ export default function DevelopersPage() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" ref={gridRef}>
             {developers.map((developer) => (
-              <DeveloperCard key={developer.id} developer={developer} onRate={handleOpenRateModal} />
+              <div key={developer.id} className="reveal reveal-up">
+                <DeveloperCard developer={developer} onRate={handleOpenRateModal} />
+              </div>
             ))}
           </div>
         )}

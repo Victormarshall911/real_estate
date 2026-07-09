@@ -1,8 +1,10 @@
 import PropertyCard from './PropertyCard'
 import PropertySkeleton from './PropertySkeleton'
 import { SearchX } from 'lucide-react'
+import useScrollReveal from '../../hooks/useScrollReveal'
 
 export default function PropertyGrid({ properties, loading }) {
+  const gridRef = useScrollReveal({ stagger: true })
   if (loading) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -28,12 +30,11 @@ export default function PropertyGrid({ properties, loading }) {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" ref={gridRef}>
       {properties.map((property, index) => (
         <div
           key={property.id}
-          className="animate-fade-in-up"
-          style={{ animationDelay: `${index * 60}ms` }}
+          className="reveal reveal-up"
         >
           <PropertyCard property={property} />
         </div>

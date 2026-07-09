@@ -4,6 +4,7 @@ import {
   CheckCircle2, Star, Users, TrendingUp,
   MapPin, Wallet, Phone, ChevronRight
 } from 'lucide-react'
+import useScrollReveal from '../hooks/useScrollReveal'
 
 const STATS = [
   { value: '2,400+', label: 'Verified Listings' },
@@ -94,6 +95,12 @@ const TESTIMONIALS = [
 ]
 
 export default function LandingPage() {
+  const statsRef = useScrollReveal({ stagger: true })
+  const featuresRef = useScrollReveal()
+  const howRef = useScrollReveal({ stagger: true })
+  const testimonialsRef = useScrollReveal({ stagger: true })
+  const ctaRef = useScrollReveal()
+
   return (
     <div className="min-h-screen bg-surface flex flex-col">
 
@@ -183,10 +190,10 @@ export default function LandingPage() {
 
       {/* ─── STATS SECTION ─── */}
       <section className="py-14 bg-navy">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" ref={statsRef}>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
             {STATS.map(({ value, label }) => (
-              <div key={label} className="group">
+              <div key={label} className="group reveal reveal-up">
                 <p className="text-3xl sm:text-4xl font-black text-gold mb-1 group-hover:scale-105 transition-transform">{value}</p>
                 <p className="text-sm font-semibold uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.80)' }}>{label}</p>
               </div>
@@ -197,8 +204,8 @@ export default function LandingPage() {
 
       {/* ─── FEATURES SECTION ─── */}
       <section className="py-24 bg-surface">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" ref={featuresRef}>
+          <div className="text-center mb-16 reveal reveal-up">
             <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest mb-4">Platform Features</span>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-text-primary mb-4 tracking-tight">
               Everything You Need,<br />
@@ -213,7 +220,7 @@ export default function LandingPage() {
             {FEATURES.map(({ image, title, desc, badge, badgeColor, link, linkText }, i) => (
               <div
                 key={title}
-                className={`flex flex-col ${i % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'} gap-10 lg:gap-16 items-center`}
+                className={`reveal ${i % 2 === 0 ? 'reveal-left' : 'reveal-right'} flex flex-col ${i % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'} gap-10 lg:gap-16 items-center`}
               >
                 {/* Image / Flyer */}
                 <div className="w-full lg:w-1/2 shrink-0">
@@ -248,8 +255,8 @@ export default function LandingPage() {
 
       {/* ─── HOW IT WORKS SECTION ─── */}
       <section className="py-24 bg-surface-dim border-t border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" ref={howRef}>
+          <div className="text-center mb-16 reveal reveal-up">
             <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest mb-4">How It Works</span>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-text-primary mb-4 tracking-tight">
               Close a Land Deal in{' '}
@@ -259,7 +266,7 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {HOW_IT_WORKS.map(({ step, title, desc, icon: Icon }) => (
-              <div key={step} className="relative bg-surface border border-border rounded-3xl p-7 hover:shadow-elevated transition-all group hover:-translate-y-1">
+              <div key={step} className="reveal reveal-up relative bg-surface border border-border rounded-3xl p-7 hover:shadow-elevated transition-all group hover:-translate-y-1">
                 <div className="text-5xl font-black text-primary/10 absolute top-4 right-5 leading-none select-none group-hover:text-primary/20 transition-colors">{step}</div>
                 <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mb-5 group-hover:bg-primary group-hover:text-white transition-all">
                   <Icon className="w-6 h-6 text-primary group-hover:text-white transition-colors" />
@@ -277,8 +284,8 @@ export default function LandingPage() {
         <div className="absolute inset-0 opacity-5">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-gold to-transparent" />
         </div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" ref={testimonialsRef}>
+          <div className="text-center mb-16 reveal reveal-up">
             <span className="inline-block px-4 py-1.5 rounded-full bg-white/10 text-gold text-xs font-bold uppercase tracking-widest mb-4">Testimonials</span>
             <h2 className="text-3xl sm:text-4xl font-black text-white mb-4">
               Trusted by Thousands of{' '}
@@ -291,7 +298,7 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {TESTIMONIALS.map(({ name, role, avatar, rating, text }) => (
-              <div key={name} className="bg-white/5 backdrop-blur border border-white/10 rounded-3xl p-7 hover:bg-white/10 transition-all group">
+              <div key={name} className="reveal reveal-up bg-white/5 backdrop-blur border border-white/10 rounded-3xl p-7 hover:bg-white/10 transition-all group">
                 <div className="flex items-center gap-1 mb-4">
                   {Array.from({ length: rating }).map((_, i) => (
                     <Star key={i} className="w-4 h-4 text-gold fill-gold" />
@@ -316,18 +323,18 @@ export default function LandingPage() {
       {/* ─── CTA SECTION ─── */}
       <section className="py-28 bg-gradient-to-b from-surface-dim to-surface relative overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
-        <div className="relative max-w-4xl mx-auto px-4 text-center">
-          <div className="w-20 h-20 rounded-3xl bg-primary/10 flex items-center justify-center mx-auto mb-6">
+        <div className="relative max-w-4xl mx-auto px-4 text-center" ref={ctaRef}>
+          <div className="w-20 h-20 rounded-3xl bg-primary/10 flex items-center justify-center mx-auto mb-6 reveal reveal-scale">
             <TrendingUp className="w-10 h-10 text-primary" />
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-text-primary mb-6 tracking-tight">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-text-primary mb-6 tracking-tight reveal reveal-up">
             Start Your Land Journey{' '}
             <span className="text-primary">Today</span>
           </h2>
-          <p className="text-lg text-text-muted mb-10 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-lg text-text-muted mb-10 max-w-2xl mx-auto leading-relaxed reveal reveal-up">
             Join over 15,000 buyers and sellers who trust LandMarket to find, buy, and sell land safely across Nigeria. Registration is free — always.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center reveal reveal-up">
             <Link
               to="/properties"
               className="inline-flex items-center justify-center gap-2 px-10 py-4 rounded-full bg-primary text-white font-bold text-lg hover:bg-primary-dark transition-all shadow-xl shadow-primary/30 hover:-translate-y-1"
@@ -343,7 +350,7 @@ export default function LandingPage() {
             </Link>
           </div>
 
-          <div className="mt-12 flex flex-wrap items-center justify-center gap-8 text-text-muted text-sm">
+          <div className="mt-12 flex flex-wrap items-center justify-center gap-8 text-text-muted text-sm reveal reveal-up">
             <span className="flex items-center gap-2"><CheckCircle2 className="w-5 h-5 text-primary" /> 100% Free to Register</span>
             <span className="flex items-center gap-2"><CheckCircle2 className="w-5 h-5 text-primary" /> Government-backed KYC</span>
             <span className="flex items-center gap-2"><CheckCircle2 className="w-5 h-5 text-primary" /> Escrow-Protected Payments</span>

@@ -4,6 +4,7 @@ import { landlordsAPI } from '../api/client'
 import LandlordCard from '../components/landlord/LandlordCard'
 import LandlordSkeleton from '../components/landlord/LandlordSkeleton'
 import { useAuth } from '../hooks/useAuth'
+import useScrollReveal from '../hooks/useScrollReveal'
 
 export default function LandlordsPage() {
   const { isAuthenticated } = useAuth()
@@ -17,6 +18,7 @@ export default function LandlordsPage() {
   const [commentVal, setCommentVal] = useState('')
   const [submittingReview, setSubmittingReview] = useState(false)
   const [reviewError, setReviewError] = useState(null)
+  const gridRef = useScrollReveal({ stagger: true })
 
   const fetchLandlords = async () => {
     setLoading(true)
@@ -140,9 +142,11 @@ export default function LandlordsPage() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" ref={gridRef}>
             {landlords.map((landlord) => (
-              <LandlordCard key={landlord.id} landlord={landlord} onRate={handleOpenRateModal} />
+              <div key={landlord.id} className="reveal reveal-up">
+                <LandlordCard landlord={landlord} onRate={handleOpenRateModal} />
+              </div>
             ))}
           </div>
         )}

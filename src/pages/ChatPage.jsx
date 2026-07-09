@@ -127,10 +127,19 @@ export default function ChatPage() {
   }
 
   const getOtherUser = (session) => {
-    if (session.client.id === user.id) {
-      return session.agent.user
+    if (!session) return { first_name: '', last_name: '' }
+    // Direct chat sessions: agent field may be a profile object with nested .user
+    // or a plain user-like object without .user
+    const client = session.client || {}
+    const agent = session.agent || {}
+    
+    // If the current user is the "client" (buyer), the other party is "agent"
+    if (client.id === user?.id) {
+      // agent could be a profile with .user, or a fallback dict with .user inside
+      return agent.user || agent
     }
-    return session.client
+    // Otherwise we are the "agent" side, other party is the client
+    return client
   }
 
   const handleCompleteDeal = async () => {
@@ -158,8 +167,25 @@ export default function ChatPage() {
     setActiveSession(current)
   }
 
+  if (!user) {
+    return (
+      <div className="min-h-[calc(100vh-80px)] flex flex-col items-center justify-center bg-surface-dim text-center px-6">
+        <MessageSquare className="w-16 h-16 text-text-muted/30 mb-4" />
+        <h2 className="text-xl font-bold text-text-primary mb-2">Sign in to view messages</h2>
+        <p className="text-sm text-text-muted max-w-md">You need to be logged in to access your chat conversations.</p>
+      </div>
+    )
+  }
+
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center bg-surface-dim"><Loader2 className="w-8 h-8 text-primary animate-spin" /></div>
+    return (
+      <div className="min-h-[calc(100vh-80px)] flex items-center justify-center bg-surface-dim">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="w-8 h-8 text-primary animate-spin" />
+          <p className="text-sm text-text-muted">Loading conversations...</p>
+        </div>
+      </div>
+    )
   }
 
   return (

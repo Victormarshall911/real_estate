@@ -54,6 +54,19 @@ client.interceptors.response.use(
       }
     }
 
+    // Automatic retry logic with exponential backoff for GET requests on network failures or 5xx (up to 3 retries)
+    if (
+      originalRequest &&
+      originalRequest.method?.toLowerCase() === 'get' &&
+      (!error.response || error.code === 'ECONNABORTED' || error.response.status >= 500) &&
+      (originalRequest._retryCount || 0) < 3
+    ) {
+      originalRequest._retryCount = (originalRequest._retryCount || 0) + 1
+      const backoffDelay = Math.pow(2, originalRequest._retryCount) * 500
+      await new Promise((resolve) => setTimeout(resolve, backoffDelay))
+      return client(originalRequest)
+    }
+
     return Promise.reject(error)
   }
 )

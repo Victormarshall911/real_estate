@@ -13,10 +13,12 @@ import DevelopersPage from './pages/DevelopersPage'
 import SubscriptionPage from './pages/SubscriptionPage'
 import ChatPage from './pages/ChatPage'
 import NotFoundPage from './pages/NotFoundPage'
+import NetworkStatus from './components/shared/NetworkStatus'
 
 export default function App() {
   return (
     <div className="flex flex-col min-h-screen">
+      <NetworkStatus />
       <Navbar />
       <div className="flex-1">
         <Routes>

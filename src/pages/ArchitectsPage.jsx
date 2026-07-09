@@ -4,6 +4,7 @@ import { architectsAPI } from '../api/client'
 import ArchitectCard from '../components/architect/ArchitectCard'
 import ArchitectSkeleton from '../components/architect/ArchitectSkeleton'
 import { useAuth } from '../hooks/useAuth'
+import useScrollReveal from '../hooks/useScrollReveal'
 
 export default function ArchitectsPage() {
   const { isAuthenticated } = useAuth()
@@ -18,6 +19,7 @@ export default function ArchitectsPage() {
   const [commentVal, setCommentVal] = useState('')
   const [submittingReview, setSubmittingReview] = useState(false)
   const [reviewError, setReviewError] = useState(null)
+  const gridRef = useScrollReveal({ stagger: true })
 
   const fetchArchitects = async () => {
     setLoading(true)
@@ -161,9 +163,11 @@ export default function ArchitectsPage() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" ref={gridRef}>
             {architects.map((arch) => (
-              <ArchitectCard key={arch.id} architect={arch} onRate={handleOpenRateModal} />
+              <div key={arch.id} className="reveal reveal-up">
+                <ArchitectCard architect={arch} onRate={handleOpenRateModal} />
+              </div>
             ))}
           </div>
         )}

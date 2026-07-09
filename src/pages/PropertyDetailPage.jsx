@@ -6,6 +6,7 @@ import RealtorCard from '../components/realtor/RealtorCard'
 import ReviewSection from '../components/shared/ReviewSection'
 import ProposeBuyModal from '../components/escrow/ProposeBuyModal'
 import { useAuth } from '../hooks/useAuth'
+import useScrollReveal from '../hooks/useScrollReveal'
 import { ArrowLeft, MapPin, Maximize2, Eye, Calendar, BadgeCheck, Share2, ShieldCheck, FileText, Clock } from 'lucide-react'
 
 function formatPrice(price) {
@@ -65,6 +66,8 @@ export default function PropertyDetailPage() {
   const [property, setProperty] = useState(null)
   const [loading, setLoading] = useState(true)
   const [showEscrowModal, setShowEscrowModal] = useState(false)
+  const leftRef = useScrollReveal()
+  const rightRef = useScrollReveal()
 
   const fetchProperty = useCallback(async () => {
     setLoading(true)
@@ -172,7 +175,7 @@ export default function PropertyDetailPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column — Gallery & Details */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="lg:col-span-2 space-y-8" ref={leftRef}>
             <ImageGallery images={property.images} />
 
             {/* Title & Meta */}
@@ -243,7 +246,7 @@ export default function PropertyDetailPage() {
 
             {/* Tenancy Fee Breakdown */}
             {property.listing_type !== 'sale' && (property.caution_fee || property.agency_fee || property.legal_fee) && (
-              <div className="bg-surface rounded-2xl border border-border-light p-6">
+              <div className="bg-surface rounded-2xl border border-border-light p-6 reveal reveal-up">
                 <h2 className="text-base font-bold text-text-primary mb-4">Tenancy Fee Breakdown</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   {property.caution_fee && (
@@ -269,7 +272,7 @@ export default function PropertyDetailPage() {
             )}
 
             {/* Specifications Grid */}
-            <div className="bg-surface rounded-2xl border border-border-light p-6">
+            <div className="bg-surface rounded-2xl border border-border-light p-6 reveal reveal-up">
               <h2 className="text-base font-bold text-text-primary mb-4">Property Specifications</h2>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div className="p-3 rounded-xl bg-surface-dim border border-border-light text-center">
@@ -307,7 +310,7 @@ export default function PropertyDetailPage() {
             </div>
 
             {/* Amenities & Titles */}
-            <div className="bg-surface rounded-2xl border border-border-light p-6">
+            <div className="bg-surface rounded-2xl border border-border-light p-6 reveal reveal-up">
               <h2 className="text-base font-bold text-text-primary mb-4">Features, Amenities & Legal Documents</h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 <div className="flex items-center gap-2">
@@ -342,7 +345,7 @@ export default function PropertyDetailPage() {
             </div>
 
             {/* Legal Documents & Platform Verification Panel */}
-            <div className="bg-surface rounded-2xl border border-border-light p-6">
+            <div className="bg-surface rounded-2xl border border-border-light p-6 reveal reveal-up">
               <h2 className="text-base font-bold text-text-primary mb-4 flex items-center gap-2">
                 <ShieldCheck className="w-5 h-5 text-primary" /> Title Documents & Verification
               </h2>
@@ -428,7 +431,7 @@ export default function PropertyDetailPage() {
                 </div>
               )}
             </div>
-            <div className="bg-surface rounded-2xl border border-border-light p-6 sm:p-8">
+            <div className="bg-surface rounded-2xl border border-border-light p-6 sm:p-8 reveal reveal-up">
               <h2 className="text-lg font-bold text-text-primary mb-4">About This Property</h2>
               <div
                 className="text-sm text-text-secondary leading-relaxed prose-sm"
@@ -438,8 +441,8 @@ export default function PropertyDetailPage() {
           </div>
 
           {/* Right Column — Sticky Realtor Card */}
-          <div className="lg:col-span-1">
-            <div className="lg:sticky lg:top-[80px] space-y-6">
+          <div className="lg:col-span-1" ref={rightRef}>
+            <div className="lg:sticky lg:top-[80px] space-y-6 reveal reveal-up">
               <RealtorCard realtor={seller} sellerRole={sellerRole} propertyTitle={property.title} />
 
               {seller && (

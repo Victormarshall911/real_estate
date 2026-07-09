@@ -12,6 +12,7 @@ import WalletManager from '../components/wallet/WalletManager'
 import { authAPI } from '../api/client'
 import { Loader2, MessageSquare, MapPin, CheckCircle2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import TransactionList from '../components/escrow/TransactionList'
 
 export default function DashboardPage() {
   const { user, isAuthenticated, isRealtor, isAgent, isArchitect, isLandlord, isDeveloper, isKycVerified, refreshUser } = useAuth()
@@ -169,8 +170,11 @@ export default function DashboardPage() {
         </div>
       </div>
       
-      <div className="w-full max-w-md mx-auto px-4 mt-8">
+      <div className="w-full max-w-2xl mx-auto px-4 mt-8 space-y-8">
         <WalletManager />
+        <div className="border-t border-border/60 pt-6">
+          <TransactionList />
+        </div>
       </div>
     </div>
   )

@@ -121,6 +121,16 @@ export const propertiesAPI = {
       headers: { 'Content-Type': 'multipart/form-data' },
     })
   },
+  uploadDocument: (id, file, documentType) => {
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('document_type', documentType)
+    return client.post(`/properties/${id}/upload-document/`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+  },
+  requestVerification: (id) => client.post(`/properties/${id}/request-verification/`),
+  myVerifications: () => client.get('/properties/my-verifications/'),
 }
 
 export const realtorsAPI = {
@@ -243,6 +253,16 @@ export const chatAPI = {
 export const walletsAPI = {
   me: () => client.get('/wallets/me/'),
   deposit: (data) => client.post('/wallets/deposit/', data),
+}
+
+export const escrowsAPI = {
+  list: () => client.get('/escrows/'),
+  create: (data) => client.post('/escrows/', data),
+  accept: (id) => client.post(`/escrows/${id}/accept/`),
+  cancel: (id) => client.post(`/escrows/${id}/cancel/`),
+  verifyMilestone: (id, milestone, value) => client.post(`/escrows/${id}/verify_milestone/`, { milestone, value }),
+  release: (id) => client.post(`/escrows/${id}/release/`),
+  dispute: (id, reason) => client.post(`/escrows/${id}/dispute/`, { reason }),
 }
 
 export default client

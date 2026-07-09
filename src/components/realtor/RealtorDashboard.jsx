@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useAuth } from '../../hooks/useAuth'
 import { propertiesAPI, subscriptionsAPI } from '../../api/client'
-import { Plus, Eye, Home, TrendingUp, Trash2, Upload, X, ImageIcon, Star, ArrowRight } from 'lucide-react'
+import { Plus, Eye, Home, TrendingUp, Trash2, Upload, X, ImageIcon, Star, ArrowRight, FileText, CheckCircle2, Clock, Lock, AlertCircle } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import WalletManager from '../wallet/WalletManager'
+import TransactionList from '../escrow/TransactionList'
 
 function StatCard({ icon: Icon, label, value, color }) {
   return (
@@ -46,6 +47,8 @@ export default function RealtorDashboard() {
   const [subscription, setSubscription] = useState(null)
   const [loading, setLoading] = useState(true)
   const [showCreateForm, setShowCreateForm] = useState(false)
+  const [selectedListingForDocs, setSelectedListingForDocs] = useState(null)
+  const [activeTab, setActiveTab] = useState('listings')
 
   const fetchData = useCallback(async () => {
     setLoading(true)
@@ -132,11 +135,35 @@ export default function RealtorDashboard() {
           <WalletManager />
         </div>
 
-        {/* Listings Table */}
-        <div className="bg-surface rounded-2xl border border-border-light shadow-card overflow-hidden">
-          <div className="px-6 py-4 border-b border-border-light">
-            <h3 className="font-semibold text-text-primary">Your Listings</h3>
-          </div>
+        {/* Tabs */}
+        <div className="flex border-b border-border-light mb-6 space-x-6">
+          <button 
+            onClick={() => setActiveTab('listings')}
+            className={`pb-3 text-sm font-bold border-b-2 transition-all ${
+              activeTab === 'listings' 
+                ? 'border-primary text-primary' 
+                : 'border-transparent text-text-secondary hover:text-text-primary'
+            }`}
+          >
+            My Listings
+          </button>
+          <button 
+            onClick={() => setActiveTab('escrows')}
+            className={`pb-3 text-sm font-bold border-b-2 transition-all ${
+              activeTab === 'escrows' 
+                ? 'border-primary text-primary' 
+                : 'border-transparent text-text-secondary hover:text-text-primary'
+            }`}
+          >
+            Escrow Deals
+          </button>
+        </div>
+
+        {activeTab === 'listings' ? (
+          <div className="bg-surface rounded-2xl border border-border-light shadow-card overflow-hidden">
+            <div className="px-6 py-4 border-b border-border-light">
+              <h3 className="font-semibold text-text-primary">Your Listings</h3>
+            </div>
 
           {loading ? (
             <div className="p-6 space-y-4">
@@ -192,16 +219,233 @@ export default function RealtorDashboard() {
                   }`}>
                     {listing.status === 'available' ? 'Active' : 'Sold'}
                   </span>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setSelectedListingForDocs(listing)}
+                      className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-surface border border-border-light text-text-primary hover:bg-surface-dim transition-all"
+                    >
+                      Documents
+                    </button>
+                    <Link
+                      to={`/properties/${listing.id}`}
+                      className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-primary/10 text-primary hover:bg-primary/20 transition-all"
+                    >
+                      View
+                    </Link>
+                  </div>
                 </div>
               ))}
             </div>
           )}
-        </div>
+          </div>
+        ) : (
+          <div className="bg-surface rounded-2xl border border-border-light shadow-card p-6">
+            <TransactionList />
+          </div>
+        )}
 
         {/* Create Form Modal */}
         {showCreateForm && (
           <CreateListingModal onClose={() => setShowCreateForm(false)} onCreated={() => { setShowCreateForm(false); fetchData() }} />
         )}
+
+        {/* Manage Documents Modal */}
+        {selectedListingForDocs && (
+          <ManageDocumentsModal
+            property={selectedListingForDocs}
+            onClose={() => setSelectedListingForDocs(null)}
+          />
+        )}
+      </div>
+    </div>
+  )
+}
+
+function ManageDocumentsModal({ property, onClose }) {
+  const [documents, setDocuments] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [uploading, setUploading] = useState(false)
+  const [docType, setDocType] = useState('c_of_o')
+  const [file, setFile] = useState(null)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
+
+  const fetchDocs = useCallback(async () => {
+    setLoading(true)
+    setError('')
+    try {
+      const res = await propertiesAPI.detail(property.id)
+      setDocuments(res.data.documents || [])
+    } catch (err) {
+      console.error("Error loading property documents:", err)
+      setError("Failed to load documents.")
+    } finally {
+      setLoading(false)
+    }
+  }, [property.id])
+
+  useEffect(() => {
+    fetchDocs()
+  }, [fetchDocs])
+
+  const handleUpload = async (e) => {
+    e.preventDefault()
+    if (!file) {
+      setError("Please select a file to upload.")
+      return
+    }
+    setUploading(true)
+    setError('')
+    setSuccess('')
+    try {
+      await propertiesAPI.uploadDocument(property.id, file, docType)
+      setSuccess("Document uploaded successfully!")
+      setFile(null)
+      e.target.reset()
+      fetchDocs()
+    } catch (err) {
+      console.error("Error uploading document:", err)
+      setError(err.response?.data?.error || "Failed to upload document. Ensure the file is a PDF, PNG, or JPG.")
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
+      <div className="bg-surface w-full max-w-2xl rounded-3xl border border-border-light shadow-card overflow-hidden max-h-[90vh] flex flex-col">
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b border-border-light">
+          <div>
+            <h3 className="text-xl font-bold text-text-primary">Legal Documents</h3>
+            <p className="text-sm text-text-muted mt-1 truncate max-w-md">{property.title}</p>
+          </div>
+          <button onClick={onClose} className="p-2 rounded-xl hover:bg-surface-dim transition-colors">
+            <X className="w-5 h-5 text-text-secondary" />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          {error && (
+            <div className="p-4 bg-red-50 text-red-700 rounded-2xl flex items-start gap-3 border border-red-100 text-sm">
+              <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+              <span>{error}</span>
+            </div>
+          )}
+
+          {success && (
+            <div className="p-4 bg-green-50 text-green-700 rounded-2xl flex items-start gap-3 border border-green-100 text-sm">
+              <CheckCircle2 className="w-5 h-5 flex-shrink-0 mt-0.5" />
+              <span>{success}</span>
+            </div>
+          )}
+
+          {/* Current Documents List */}
+          <div>
+            <h4 className="font-semibold text-text-primary mb-3">Uploaded Documents</h4>
+            {loading ? (
+              <div className="space-y-3">
+                {[1, 2].map((i) => (
+                  <div key={i} className="h-16 skeleton rounded-2xl" />
+                ))}
+              </div>
+            ) : documents.length === 0 ? (
+              <div className="p-8 text-center border-2 border-dashed border-border-light rounded-2xl bg-surface-dim">
+                <FileText className="w-10 h-10 text-text-muted mx-auto mb-2" />
+                <p className="text-sm font-medium text-text-secondary">No documents uploaded yet</p>
+                <p className="text-xs text-text-muted mt-1">Upload deeds or survey plans below to verify listing authenticity.</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {documents.map((doc) => (
+                  <div key={doc.id} className="flex items-center justify-between p-4 rounded-2xl border border-border-light bg-surface hover:shadow-sm transition-all">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                        <FileText className="w-5 h-5 text-primary" />
+                      </div>
+                      <div>
+                        <a 
+                          href={doc.file_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="font-medium text-sm text-text-primary hover:underline hover:text-primary transition-all"
+                        >
+                          {doc.document_type_display}
+                        </a>
+                        <p className="text-xs text-text-muted mt-0.5">Uploaded {new Date(doc.uploaded_at).toLocaleDateString()}</p>
+                      </div>
+                    </div>
+                    <div>
+                      {doc.is_verified ? (
+                        <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-50 text-green-700 text-xs font-semibold border border-green-100">
+                          <CheckCircle2 className="w-3.5 h-3.5" /> Verified
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-yellow-50 text-yellow-700 text-xs font-semibold border border-yellow-100">
+                          <Clock className="w-3.5 h-3.5" /> Pending Verification
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <hr className="border-border-light" />
+
+          {/* Upload New Document Form */}
+          <div>
+            <h4 className="font-semibold text-text-primary mb-3">Upload New Document</h4>
+            <form onSubmit={handleUpload} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-text-secondary uppercase tracking-wider mb-2">
+                    Document Type
+                  </label>
+                  <select
+                    value={docType}
+                    onChange={(e) => setDocType(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border border-border-light bg-surface text-text-primary text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                  >
+                    <option value="c_of_o">Certificate of Occupancy (C of O)</option>
+                    <option value="deed_of_assignment">Deed of Assignment</option>
+                    <option value="survey_plan">Registered Survey Plan</option>
+                    <option value="gazette">Excision Gazette</option>
+                    <option value="other">Other Document</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-text-secondary uppercase tracking-wider mb-2">
+                    File Selection
+                  </label>
+                  <input
+                    type="file"
+                    accept=".pdf,.png,.jpg,.jpeg"
+                    onChange={(e) => setFile(e.target.files[0])}
+                    className="w-full px-3 py-2 rounded-xl border border-border-light bg-surface text-text-primary text-sm file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary file:hover:bg-primary/20 file:transition-all cursor-pointer outline-none"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={uploading}
+                className="w-full flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary-dark transition-all disabled:opacity-50 active:scale-[0.98] mt-2"
+              >
+                {uploading ? (
+                  <>Uploading...</>
+                ) : (
+                  <>
+                    <Upload className="w-4 h-4" /> Upload Document
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
+        </div>
       </div>
     </div>
   )

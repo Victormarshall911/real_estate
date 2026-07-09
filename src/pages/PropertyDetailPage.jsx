@@ -4,8 +4,9 @@ import { propertiesAPI, realtorsAPI } from '../api/client'
 import ImageGallery from '../components/property/ImageGallery'
 import RealtorCard from '../components/realtor/RealtorCard'
 import ReviewSection from '../components/shared/ReviewSection'
+import ProposeBuyModal from '../components/escrow/ProposeBuyModal'
 import { useAuth } from '../hooks/useAuth'
-import { ArrowLeft, MapPin, Maximize2, Eye, Calendar, BadgeCheck, Share2 } from 'lucide-react'
+import { ArrowLeft, MapPin, Maximize2, Eye, Calendar, BadgeCheck, Share2, ShieldCheck, FileText, Clock } from 'lucide-react'
 
 function formatPrice(price) {
   return `₦${parseFloat(price).toLocaleString()}`
@@ -63,6 +64,7 @@ export default function PropertyDetailPage() {
   const { user, isAuthenticated, isRealtor } = useAuth()
   const [property, setProperty] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [showEscrowModal, setShowEscrowModal] = useState(false)
 
   const fetchProperty = useCallback(async () => {
     setLoading(true)
@@ -80,9 +82,46 @@ export default function PropertyDetailPage() {
     fetchProperty()
   }, [fetchProperty])
 
+  const [verifications, setVerifications] = useState([])
+  const [requestingVerification, setRequestingVerification] = useState(false)
+  const [verificationError, setVerificationError] = useState('')
+
+  const fetchVerifications = useCallback(async () => {
+    if (isAuthenticated) {
+      try {
+        const res = await propertiesAPI.myVerifications()
+        setVerifications(res.data.results || res.data || [])
+      } catch (err) {
+        console.error("Error loading verification requests:", err)
+      }
+    }
+  }, [isAuthenticated])
+
+  useEffect(() => {
+    fetchVerifications()
+  }, [fetchVerifications])
+
+  const handleRequestVerification = async () => {
+    const confirmVerify = window.confirm("Are you sure you want to request title verification for this property? ₦10,000 will be debited from your wallet.")
+    if (!confirmVerify) return
+
+    setRequestingVerification(true)
+    setVerificationError('')
+    try {
+      await propertiesAPI.requestVerification(property.id)
+      alert("Verification request submitted successfully! ₦10,000 has been debited from your wallet. Our legal team is now processing the request.")
+      fetchVerifications()
+      fetchProperty()
+    } catch (err) {
+      console.error("Error requesting verification:", err)
+      setVerificationError(err.response?.data?.error || "Failed to request title verification. Please ensure you have sufficient balance.")
+    } finally {
+      setRequestingVerification(false)
+    }
+  }
+
   const handleReviewSubmit = async (targetId, reviewData) => {
     await realtorsAPI.rate(targetId, reviewData)
-    // Refresh the property to get the updated realtor rating
     await fetchProperty()
   }
 
@@ -138,19 +177,24 @@ export default function PropertyDetailPage() {
 
             {/* Title & Meta */}
             <div>
-              <div className="flex items-start gap-3 mb-3">
+              <div className="flex flex-wrap items-center gap-2 mb-3">
                 {seller?.is_verified && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium flex-shrink-0 mt-1">
-                    <BadgeCheck className="w-3.5 h-3.5" /> Verified
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium flex-shrink-0">
+                    <BadgeCheck className="w-3.5 h-3.5" /> Verified Realtor
                   </span>
                 )}
-                <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium flex-shrink-0 mt-1 ${
+                {property.is_title_verified && (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-100 text-green-700 text-xs font-semibold flex-shrink-0 border border-green-200">
+                    <ShieldCheck className="w-3.5 h-3.5 text-green-600 fill-green-100" /> Title Verified
+                  </span>
+                )}
+                <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium flex-shrink-0 ${
                   property.status === 'available' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
                 }`}>
                   {property.status === 'available' ? 'Available' : 'Sold'}
                 </span>
                 {property.property_type && (
-                  <span className="inline-flex px-2.5 py-1 rounded-full bg-surface-muted text-text-secondary text-xs font-medium uppercase tracking-wider flex-shrink-0 mt-1">
+                  <span className="inline-flex px-2.5 py-1 rounded-full bg-surface-muted text-text-secondary text-xs font-medium uppercase tracking-wider flex-shrink-0">
                     {property.property_type.replace('_', ' ')}
                   </span>
                 )}
@@ -297,7 +341,93 @@ export default function PropertyDetailPage() {
               </div>
             </div>
 
-            {/* Description */}
+            {/* Legal Documents & Platform Verification Panel */}
+            <div className="bg-surface rounded-2xl border border-border-light p-6">
+              <h2 className="text-base font-bold text-text-primary mb-4 flex items-center gap-2">
+                <ShieldCheck className="w-5 h-5 text-primary" /> Title Documents & Verification
+              </h2>
+              
+              <div className="space-y-3 mb-6">
+                {property.documents && property.documents.length > 0 ? (
+                  property.documents.map((doc) => (
+                    <div key={doc.id} className="flex items-center justify-between p-4 rounded-xl bg-surface-dim border border-border-light text-sm">
+                      <div className="flex items-center gap-2.5">
+                        <FileText className="w-4.5 h-4.5 text-primary" />
+                        <span className="font-semibold text-text-primary">{doc.document_type_display}</span>
+                      </div>
+                      <a 
+                        href={doc.file_url} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="text-xs font-semibold text-primary hover:underline"
+                      >
+                        View File
+                      </a>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-xs text-text-muted italic bg-surface-dim p-4 rounded-xl border border-border-light">
+                    No verified legal documents have been uploaded for public view yet.
+                  </p>
+                )}
+              </div>
+
+              {property.is_title_verified ? (
+                <div className="p-4 bg-green-50 text-green-700 rounded-2xl flex items-start gap-3 border border-green-100 text-sm">
+                  <ShieldCheck className="w-5 h-5 flex-shrink-0 mt-0.5 text-green-600 fill-green-50" />
+                  <div>
+                    <h5 className="font-bold">LandMarket Title Verified</h5>
+                    <p className="text-xs text-green-600/90 mt-0.5">
+                      This property's legal documents have been checked against the Land Registry and verified as authentic.
+                    </p>
+                  </div>
+                </div>
+              ) : verifications.find(v => v.property_listing === property.id) ? (
+                (() => {
+                  const req = verifications.find(v => v.property_listing === property.id)
+                  return (
+                    <div className="p-4 bg-yellow-50 text-yellow-700 rounded-2xl flex items-start gap-3 border border-yellow-100 text-sm">
+                      <Clock className="w-5 h-5 flex-shrink-0 mt-0.5 text-yellow-600" />
+                      <div>
+                        <h5 className="font-bold">Title Search Status: {req.status_display}</h5>
+                        <p className="text-xs text-yellow-600/90 mt-0.5">
+                          {req.status === 'pending' && "Our legal team is preparing to conduct a search at the land registry."}
+                          {req.status === 'in_progress' && "We are currently conducting the registry search."}
+                          {req.status === 'rejected' && `Registry search flagged issues: ${req.report_notes}`}
+                        </p>
+                      </div>
+                    </div>
+                  )
+                })()
+              ) : (
+                <div className="p-5 rounded-2xl bg-surface-dim border border-border-light">
+                  <h4 className="font-bold text-sm text-text-primary mb-1">Verify Land Title (₦10,000)</h4>
+                  <p className="text-xs text-text-muted leading-relaxed mb-4">
+                    Request our legal team to conduct a formal search at the state land registry. We will inspect the C of O, Deed of Assignment, or Survey Plan and publish a report.
+                  </p>
+                  
+                  {verificationError && (
+                    <div className="mb-4 text-xs text-red-600 bg-red-50 p-2.5 rounded-lg border border-red-100">
+                      {verificationError}
+                    </div>
+                  )}
+
+                  {!isAuthenticated ? (
+                    <p className="text-xs text-text-muted italic text-center">Please log in to request title verification.</p>
+                  ) : (!property.documents || property.documents.length === 0) && !property.has_c_of_o && !property.has_survey_plan ? (
+                    <p className="text-xs text-text-muted italic text-center">Title verification requires legal documents to be uploaded by the seller.</p>
+                  ) : (
+                    <button
+                      onClick={handleRequestVerification}
+                      disabled={requestingVerification}
+                      className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-navy text-white text-xs font-semibold hover:bg-navy-light transition-all disabled:opacity-50 active:scale-[0.98]"
+                    >
+                      <ShieldCheck className="w-4 h-4" /> {requestingVerification ? "Requesting..." : "Verify Land Title"}
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
             <div className="bg-surface rounded-2xl border border-border-light p-6 sm:p-8">
               <h2 className="text-lg font-bold text-text-primary mb-4">About This Property</h2>
               <div
@@ -350,6 +480,31 @@ export default function PropertyDetailPage() {
                 </div>
               )}
 
+              {/* Escrow Purchase Action */}
+              {(!isAuthenticated || user?.id !== seller?.user?.id) && property.status !== 'sold' && (
+                <div className="bg-primary/5 rounded-2xl border border-primary/20 p-5 mt-4">
+                  <h4 className="font-bold text-text-primary text-sm mb-1.5 flex items-center gap-1.5">
+                    <ShieldCheck className="w-4.5 h-4.5 text-primary" />
+                    <span>Secure with Escrow</span>
+                  </h4>
+                  <p className="text-xs text-text-muted mb-4 leading-relaxed">
+                    Buy this property safely using our wallet escrow system. Funds are held securely until physical inspection and documents are verified.
+                  </p>
+                  {isAuthenticated ? (
+                    <button 
+                      onClick={() => setShowEscrowModal(true)}
+                      className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-primary text-white font-semibold text-sm hover:bg-primary-dark transition-all duration-200"
+                    >
+                      Propose Purchase
+                    </button>
+                  ) : (
+                    <p className="text-xs text-center text-text-secondary font-medium">
+                      Please log in to purchase this property.
+                    </p>
+                  )}
+                </div>
+              )}
+
               {/* Location Map Placeholder */}
               {property.latitude && property.longitude && (
                 <div className="bg-surface rounded-2xl border border-border-light p-5">
@@ -373,6 +528,16 @@ export default function PropertyDetailPage() {
             </div>
           </div>
         </div>
+        {showEscrowModal && (
+          <ProposeBuyModal 
+            property={property} 
+            onClose={() => setShowEscrowModal(false)} 
+            onSuccess={() => {
+              setShowEscrowModal(false)
+              alert('Purchase proposal submitted successfully! You can track this deal in your Dashboard under Escrow Deals.')
+            }}
+          />
+        )}
       </div>
     </main>
   )

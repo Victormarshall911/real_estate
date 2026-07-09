@@ -4,7 +4,7 @@ import { Phone, MessageCircle, MessageSquare, BadgeCheck, User, Loader2 } from '
 import { useAuth } from '../../hooks/useAuth'
 import { chatAPI } from '../../api/client'
 
-export default function RealtorCard({ realtor, propertyTitle = '' }) {
+export default function RealtorCard({ realtor, sellerRole = 'realtor', propertyTitle = '' }) {
   const { isAuthenticated, user } = useAuth()
   const navigate = useNavigate()
   const [loadingChat, setLoadingChat] = useState(false)
@@ -17,9 +17,15 @@ export default function RealtorCard({ realtor, propertyTitle = '' }) {
     ? `${realtor.formatted_whatsapp_url}?text=${encodeURIComponent(whatsappMessage)}`
     : `https://wa.me/${realtor?.phone_number?.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(whatsappMessage)}`
 
-  const name = realtor?.user
-    ? `${realtor.user.first_name} ${realtor.user.last_name}`
-    : realtor?.realtor_name || 'Realtor'
+  const name = sellerRole === 'developer' && realtor?.company_name
+    ? realtor.company_name
+    : (realtor?.user
+      ? `${realtor.user.first_name} ${realtor.user.last_name}`
+      : 'Professional')
+
+  const roleLabel = sellerRole === 'developer' 
+    ? 'Developer' 
+    : (sellerRole === 'landlord' ? 'Landlord' : 'Realtor')
 
   const handleStartChat = async () => {
     if (!isAuthenticated) {
@@ -33,7 +39,7 @@ export default function RealtorCard({ realtor, propertyTitle = '' }) {
     }
 
     if (!realtor?.user?.id) {
-      alert("This realtor profile is not linked to a user account.")
+      alert("This seller profile is not linked to a user account.")
       return
     }
 
@@ -77,11 +83,9 @@ export default function RealtorCard({ realtor, propertyTitle = '' }) {
             <h4 className="font-semibold text-text-primary text-sm truncate">{name}</h4>
             {realtor?.is_verified && <BadgeCheck className="w-4 h-4 text-primary flex-shrink-0" />}
           </div>
-          {realtor?.company_name && (
-            <p className="text-xs text-text-muted truncate">{realtor.company_name}</p>
-          )}
-          {realtor?.listing_count !== undefined && (
-            <p className="text-xs text-text-muted mt-0.5">{realtor.listing_count} active listing{realtor.listing_count !== 1 ? 's' : ''}</p>
+          <p className="text-xs text-text-muted capitalize font-semibold tracking-wider text-primary/80 mt-0.5">{roleLabel}</p>
+          {sellerRole === 'developer' && realtor?.company_name && realtor?.user && (
+            <p className="text-[10px] text-text-muted truncate">Contact: {realtor.user.first_name}</p>
           )}
         </div>
       </div>
@@ -101,7 +105,7 @@ export default function RealtorCard({ realtor, propertyTitle = '' }) {
             ) : (
               <MessageSquare className="w-4 h-4" />
             )}
-            {loadingChat ? 'Connecting...' : 'Message on LandMarket'}
+            {loadingChat ? 'Connecting...' : 'Message Seller'}
           </button>
         )}
         <a

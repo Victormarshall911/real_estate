@@ -15,6 +15,15 @@ function formatDate(dateStr) {
   return new Date(dateStr).toLocaleDateString('en-NG', { year: 'numeric', month: 'long', day: 'numeric' })
 }
 
+function getPriceSuffix(listingType, freq) {
+  if (!listingType || listingType === 'sale') return ''
+  if (listingType === 'short_let') return ' / short-let'
+  if (freq === 'yearly') return ' / yr'
+  if (freq === 'monthly') return ' / mo'
+  if (freq === 'daily') return ' / day'
+  return ' / rent'
+}
+
 // Mock detail for demo
 const MOCK_DETAIL = {
   id: '1',
@@ -99,8 +108,12 @@ export default function PropertyDetailPage() {
 
   if (!property) return null
 
+  const seller = property.realtor || property.landlord || property.developer
+  const sellerRole = property.realtor ? 'realtor' : (property.landlord ? 'landlord' : 'developer')
+
   // Simple markdown to HTML (basic)
   const renderDescription = (md) => {
+    if (!md) return ''
     return md
       .replace(/^### (.+)$/gm, '<h3 class="text-lg font-semibold text-text-primary mt-6 mb-2">$1</h3>')
       .replace(/^## (.+)$/gm, '<h2 class="text-xl font-bold text-text-primary mt-8 mb-3">$1</h2>')
@@ -126,7 +139,7 @@ export default function PropertyDetailPage() {
             {/* Title & Meta */}
             <div>
               <div className="flex items-start gap-3 mb-3">
-                {property.realtor?.is_verified && (
+                {seller?.is_verified && (
                   <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium flex-shrink-0 mt-1">
                     <BadgeCheck className="w-3.5 h-3.5" /> Verified
                   </span>
@@ -136,6 +149,11 @@ export default function PropertyDetailPage() {
                 }`}>
                   {property.status === 'available' ? 'Available' : 'Sold'}
                 </span>
+                {property.property_type && (
+                  <span className="inline-flex px-2.5 py-1 rounded-full bg-surface-muted text-text-secondary text-xs font-medium uppercase tracking-wider flex-shrink-0 mt-1">
+                    {property.property_type.replace('_', ' ')}
+                  </span>
+                )}
               </div>
 
               <h1 className="text-2xl sm:text-3xl font-bold text-text-primary leading-tight mb-4">
@@ -160,16 +178,123 @@ export default function PropertyDetailPage() {
             </div>
 
             {/* Price Bar */}
-            <div className="flex items-center justify-between p-5 rounded-2xl bg-primary-50 border border-primary-100">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-primary-50 border border-primary-100">
               <div>
                 <p className="text-xs text-primary-dark font-medium uppercase tracking-wider">Price</p>
                 <p className="text-2xl sm:text-3xl font-extrabold text-primary-dark tracking-tight">
                   {formatPrice(property.price)}
+                  {property.listing_type !== 'sale' && (
+                    <span className="text-sm font-normal text-primary-dark/80 ml-1 lowercase">
+                      {getPriceSuffix(property.listing_type, property.rent_frequency)}
+                    </span>
+                  )}
                 </p>
               </div>
-              <button className="p-3 rounded-xl bg-white border border-border hover:bg-surface-muted transition-colors" title="Share">
-                <Share2 className="w-5 h-5 text-text-secondary" />
-              </button>
+              <div className="flex items-center gap-3">
+                <button className="p-3 rounded-xl bg-white border border-border hover:bg-surface-muted transition-colors" title="Share">
+                  <Share2 className="w-5 h-5 text-text-secondary" />
+                </button>
+              </div>
+            </div>
+
+            {/* Tenancy Fee Breakdown */}
+            {property.listing_type !== 'sale' && (property.caution_fee || property.agency_fee || property.legal_fee) && (
+              <div className="bg-surface rounded-2xl border border-border-light p-6">
+                <h2 className="text-base font-bold text-text-primary mb-4">Tenancy Fee Breakdown</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {property.caution_fee && (
+                    <div className="p-4 rounded-xl bg-surface-dim border border-border-light">
+                      <p className="text-[10px] text-text-muted uppercase font-bold tracking-wider mb-1">Caution Fee</p>
+                      <p className="text-base font-extrabold text-text-primary">{formatPrice(property.caution_fee)}</p>
+                    </div>
+                  )}
+                  {property.agency_fee && (
+                    <div className="p-4 rounded-xl bg-surface-dim border border-border-light">
+                      <p className="text-[10px] text-text-muted uppercase font-bold tracking-wider mb-1">Agency Fee</p>
+                      <p className="text-base font-extrabold text-text-primary">{formatPrice(property.agency_fee)}</p>
+                    </div>
+                  )}
+                  {property.legal_fee && (
+                    <div className="p-4 rounded-xl bg-surface-dim border border-border-light">
+                      <p className="text-[10px] text-text-muted uppercase font-bold tracking-wider mb-1">Legal Fee</p>
+                      <p className="text-base font-extrabold text-text-primary">{formatPrice(property.legal_fee)}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Specifications Grid */}
+            <div className="bg-surface rounded-2xl border border-border-light p-6">
+              <h2 className="text-base font-bold text-text-primary mb-4">Property Specifications</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div className="p-3 rounded-xl bg-surface-dim border border-border-light text-center">
+                  <p className="text-[10px] text-text-muted uppercase font-semibold">Category</p>
+                  <p className="text-sm font-bold text-text-primary capitalize mt-1">{property.property_category || 'Land'}</p>
+                </div>
+                <div className="p-3 rounded-xl bg-surface-dim border border-border-light text-center">
+                  <p className="text-[10px] text-text-muted uppercase font-semibold">Type</p>
+                  <p className="text-sm font-bold text-text-primary capitalize mt-1">{(property.property_type || 'Plot').replace('_', ' ')}</p>
+                </div>
+                {property.property_category === 'building' ? (
+                  <>
+                    <div className="p-3 rounded-xl bg-surface-dim border border-border-light text-center">
+                      <p className="text-[10px] text-text-muted uppercase font-semibold">Bedrooms</p>
+                      <p className="text-sm font-bold text-text-primary mt-1">{property.bedrooms || '—'}</p>
+                    </div>
+                    <div className="p-3 rounded-xl bg-surface-dim border border-border-light text-center">
+                      <p className="text-[10px] text-text-muted uppercase font-semibold">Bathrooms</p>
+                      <p className="text-sm font-bold text-text-primary mt-1">{property.bathrooms || '—'}</p>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="p-3 rounded-xl bg-surface-dim border border-border-light text-center">
+                      <p className="text-[10px] text-text-muted uppercase font-semibold">Size</p>
+                      <p className="text-sm font-bold text-text-primary mt-1">{parseFloat(property.land_size).toLocaleString()} sqm</p>
+                    </div>
+                    <div className="p-3 rounded-xl bg-surface-dim border border-border-light text-center">
+                      <p className="text-[10px] text-text-muted uppercase font-semibold">Plots</p>
+                      <p className="text-sm font-bold text-text-primary mt-1">{property.land_size_plots || '—'}</p>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Amenities & Titles */}
+            <div className="bg-surface rounded-2xl border border-border-light p-6">
+              <h2 className="text-base font-bold text-text-primary mb-4">Features, Amenities & Legal Documents</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                <div className="flex items-center gap-2">
+                  <span className={`w-2.5 h-2.5 rounded-full ${property.has_electricity ? 'bg-primary' : 'bg-text-muted/30'}`} />
+                  <span className={`text-sm ${property.has_electricity ? 'text-text-primary font-medium' : 'text-text-muted'}`}>24/7 Electricity</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={`w-2.5 h-2.5 rounded-full ${property.has_water ? 'bg-primary' : 'bg-text-muted/30'}`} />
+                  <span className={`text-sm ${property.has_water ? 'text-text-primary font-medium' : 'text-text-muted'}`}>Borehole Water</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={`w-2.5 h-2.5 rounded-full ${property.has_drainage ? 'bg-primary' : 'bg-text-muted/30'}`} />
+                  <span className={`text-sm ${property.has_drainage ? 'text-text-primary font-medium' : 'text-text-muted'}`}>Good Drainage</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={`w-2.5 h-2.5 rounded-full ${property.has_security ? 'bg-primary' : 'bg-text-muted/30'}`} />
+                  <span className={`text-sm ${property.has_security ? 'text-text-primary font-medium' : 'text-text-muted'}`}>Estate Security</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={`w-2.5 h-2.5 rounded-full ${property.has_generator ? 'bg-primary' : 'bg-text-muted/30'}`} />
+                  <span className={`text-sm ${property.has_generator ? 'text-text-primary font-medium' : 'text-text-muted'}`}>Backup Gen</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={`w-2.5 h-2.5 rounded-full ${property.has_c_of_o ? 'bg-primary' : 'bg-text-muted/30'}`} />
+                  <span className={`text-sm ${property.has_c_of_o ? 'text-text-primary font-medium' : 'text-text-muted'}`}>Certificate of Occupancy</span>
+                </div>
+                <div className="flex items-center gap-2 col-span-2">
+                  <span className={`w-2.5 h-2.5 rounded-full ${property.has_survey_plan ? 'bg-primary' : 'bg-text-muted/30'}`} />
+                  <span className={`text-sm ${property.has_survey_plan ? 'text-text-primary font-medium' : 'text-text-muted'}`}>Registered Survey Plan</span>
+                </div>
+              </div>
             </div>
 
             {/* Description */}
@@ -185,20 +310,20 @@ export default function PropertyDetailPage() {
           {/* Right Column — Sticky Realtor Card */}
           <div className="lg:col-span-1">
             <div className="lg:sticky lg:top-[80px] space-y-6">
-              <RealtorCard realtor={property.realtor} propertyTitle={property.title} />
+              <RealtorCard realtor={seller} sellerRole={sellerRole} propertyTitle={property.title} />
 
-              {property.realtor && (
+              {seller && (
                 <ReviewSection 
-                  targetId={property.realtor.id}
+                  targetId={seller.id}
                   targetType="seller"
                   onSubmit={handleReviewSubmit}
-                  averageRating={property.realtor.average_rating}
-                  totalReviews={property.realtor.total_reviews}
+                  averageRating={seller.average_rating}
+                  totalReviews={seller.total_reviews}
                 />
               )}
 
               {/* Owner actions */}
-              {isAuthenticated && isRealtor && user?.id === property.realtor?.user?.id && (
+              {isAuthenticated && user?.id === seller?.user?.id && (
                 <div className="bg-primary/5 rounded-2xl border border-primary/20 p-5 mt-4">
                   <h4 className="font-semibold text-text-primary text-sm mb-2">Need help selling?</h4>
                   <p className="text-xs text-text-muted mb-4">Hire a verified external agent to help you close this deal faster.</p>
@@ -212,7 +337,7 @@ export default function PropertyDetailPage() {
               )}
 
               {/* Buyer actions */}
-              {(!isAuthenticated || !isRealtor || user?.id !== property.realtor?.user?.id) && (
+              {(!isAuthenticated || user?.id !== seller?.user?.id) && (
                 <div className="bg-surface-dim rounded-2xl border border-border-light p-5 mt-4">
                   <h4 className="font-semibold text-text-primary text-sm mb-2">Need a professional?</h4>
                   <p className="text-xs text-text-muted mb-4">Hire a verified agent to inspect this property, negotiate, and handle paperwork securely.</p>

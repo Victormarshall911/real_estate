@@ -19,10 +19,20 @@ function timeAgo(dateStr) {
   return `${Math.floor(days / 30)}mo ago`
 }
 
+function getPriceSuffix(listingType, freq) {
+  if (!listingType || listingType === 'sale') return ''
+  if (listingType === 'short_let') return ' / short-let'
+  if (freq === 'yearly') return ' / yr'
+  if (freq === 'monthly') return ' / mo'
+  if (freq === 'daily') return ' / day'
+  return ' / rent'
+}
+
 export default function PropertyCard({ property }) {
   const {
     id, title, price, land_size, land_size_plots, location,
     primary_image_url, is_verified, image_count, view_count, created_at,
+    property_category, property_type, bedrooms, bathrooms, rent_frequency, listing_type
   } = property
 
   return (
@@ -49,12 +59,19 @@ export default function PropertyCard({ property }) {
         {/* Overlays */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
 
-        {/* Verified Badge */}
-        {is_verified && (
-          <div className="absolute top-3 left-3 flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/90 backdrop-blur-sm text-white text-xs font-medium">
-            <BadgeCheck className="w-3.5 h-3.5" /> Verified
-          </div>
-        )}
+        {/* Badges */}
+        <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
+          {property_type && (
+            <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-sm text-white text-[10px] uppercase font-bold tracking-wider">
+              {property_type.replace('_', ' ')}
+            </div>
+          )}
+          {is_verified && (
+            <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/95 backdrop-blur-sm text-white text-xs font-semibold">
+              <BadgeCheck className="w-3.5 h-3.5" /> Verified
+            </div>
+          )}
+        </div>
 
         {/* Image Count */}
         {image_count > 1 && (
@@ -65,7 +82,12 @@ export default function PropertyCard({ property }) {
 
         {/* Price */}
         <div className="absolute bottom-3 left-3">
-          <span className="price-tag text-base">{formatPrice(price)}</span>
+          <span className="price-tag text-base">
+            {formatPrice(price)}
+            <span className="text-[10px] font-normal text-white/90 lowercase ml-0.5">
+              {getPriceSuffix(listing_type, rent_frequency)}
+            </span>
+          </span>
         </div>
       </div>
 
@@ -82,14 +104,22 @@ export default function PropertyCard({ property }) {
 
         <div className="flex items-center justify-between pt-3 border-t border-border-light">
           <div className="flex items-center gap-3">
-            <span className="flex items-center gap-1 text-xs text-text-secondary font-medium">
-              <Maximize2 className="w-3.5 h-3.5 text-primary/70" />
-              {parseFloat(land_size).toLocaleString()} sqm
-            </span>
-            {land_size_plots && (
-              <span className="text-xs text-text-muted">
-                ({land_size_plots} plot{land_size_plots !== 1 ? 's' : ''})
-              </span>
+            {property_category === 'building' ? (
+              <div className="flex items-center gap-2 text-xs font-semibold text-text-secondary">
+                {bedrooms && <span>{bedrooms} Beds</span>}
+                {bedrooms && bathrooms && <span className="text-text-muted/50">•</span>}
+                {bathrooms && <span>{bathrooms} Baths</span>}
+              </div>
+            ) : (
+              <div className="flex items-center gap-1 text-xs text-text-secondary font-medium">
+                <Maximize2 className="w-3.5 h-3.5 text-primary/70" />
+                {parseFloat(land_size).toLocaleString()} sqm
+                {land_size_plots && (
+                  <span className="text-xs text-text-muted font-normal ml-1">
+                    ({land_size_plots} plot{land_size_plots !== 1 ? 's' : ''})
+                  </span>
+                )}
+              </div>
             )}
           </div>
           <div className="flex items-center gap-3 text-xs text-text-muted">

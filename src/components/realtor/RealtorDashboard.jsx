@@ -213,8 +213,28 @@ function CreateListingModal({ onClose, onCreated }) {
   const [form, setForm] = useState({
     title: '', description: '', price: '', land_size: '',
     location: '', state: '', latitude: '', longitude: '', status: 'available',
-    listing_type: 'regular'
+    listing_type: 'sale',
+    property_category: 'land',
+    property_type: 'plot',
+    bedrooms: '',
+    bathrooms: '',
+    built_up_area: '',
+    has_electricity: false,
+    has_water: false,
+    has_drainage: false,
+    has_security: false,
+    has_generator: false,
+    has_c_of_o: false,
+    has_survey_plan: false,
+    rent_frequency: '',
+    caution_fee: '',
+    agency_fee: '',
+    legal_fee: '',
+    state_ref: '',
+    lga_ref: ''
   })
+  const [states, setStates] = useState([])
+  const [lgas, setLgas] = useState([])
   const [images, setImages] = useState([])
   const [previews, setPreviews] = useState([])
   const [video, setVideo] = useState(null)
@@ -222,7 +242,43 @@ function CreateListingModal({ onClose, onCreated }) {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
 
+  useEffect(() => {
+    propertiesAPI.states().then(res => {
+      setStates(res.data)
+    }).catch(err => console.error("Error loading states:", err))
+  }, [])
+
+  useEffect(() => {
+    if (form.state_ref) {
+      propertiesAPI.lgas({ state: form.state_ref }).then(res => {
+        setLgas(res.data)
+      }).catch(err => console.error("Error loading LGAs:", err))
+    } else {
+      setLgas([])
+    }
+  }, [form.state_ref])
+
   const update = (key, val) => setForm((p) => ({ ...p, [key]: val }))
+
+  const handleStateChange = (stateId) => {
+    const selectedState = states.find(s => s.id === parseInt(stateId))
+    setForm(p => ({
+      ...p,
+      state_ref: stateId,
+      state: selectedState ? selectedState.name : '',
+      lga_ref: '',
+      location: ''
+    }))
+  }
+
+  const handleLgaChange = (lgaId) => {
+    const selectedLga = lgas.find(l => l.id === parseInt(lgaId))
+    setForm(p => ({
+      ...p,
+      lga_ref: lgaId,
+      location: selectedLga ? `${selectedLga.name}, ${p.state}` : ''
+    }))
+  }
 
   const handleImages = (e) => {
     const files = Array.from(e.target.files)
@@ -265,10 +321,31 @@ function CreateListingModal({ onClose, onCreated }) {
     try {
       const payload = { ...form, uploaded_images: images }
       if (video) payload.video = video
-      await propertiesAPI.create(payload)
+      
+      const cleanedPayload = {}
+      Object.entries(payload).forEach(([key, val]) => {
+        if (val === '' || val === null || val === undefined) {
+          // Skip empty fields
+        } else {
+          cleanedPayload[key] = val
+        }
+      })
+      
+      cleanedPayload.has_electricity = form.has_electricity
+      cleanedPayload.has_water = form.has_water
+      cleanedPayload.has_drainage = form.has_drainage
+      cleanedPayload.has_security = form.has_security
+      cleanedPayload.has_generator = form.has_generator
+      cleanedPayload.has_c_of_o = form.has_c_of_o
+      cleanedPayload.has_survey_plan = form.has_survey_plan
+
+      cleanedPayload.uploaded_images = images
+      if (video) cleanedPayload.video = video
+      
+      await propertiesAPI.create(cleanedPayload)
       onCreated()
     } catch (err) {
-      setError(err.response?.data?.detail || 'Failed to create listing. Make sure your realtor profile is set up.')
+      setError(err.response?.data?.detail || err.response?.data?.non_field_errors?.[0] || 'Failed to create listing. Please check the inputs.')
     } finally {
       setSubmitting(false)
     }
@@ -288,45 +365,198 @@ function CreateListingModal({ onClose, onCreated }) {
           <div>
             <label className="block text-sm font-medium text-text-secondary mb-1.5">Title</label>
             <input type="text" required value={form.title} onChange={(e) => update('title', e.target.value)}
-              placeholder="e.g., Prime Plot in Lekki Phase 1" className="w-full px-4 py-3 rounded-xl border border-border bg-surface-dim text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all" />
+              placeholder="e.g., Luxury 4 Bedroom Terrace in Lekki Phase 1" className="w-full px-4 py-3 rounded-xl border border-border bg-surface-dim text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all" />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-text-secondary mb-1.5">Description (Markdown supported)</label>
             <textarea required rows={4} value={form.description} onChange={(e) => update('description', e.target.value)}
-              placeholder="Detailed description of the property..." className="w-full px-4 py-3 rounded-xl border border-border bg-surface-dim text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all resize-none" />
+              placeholder="Detailed description of the property specifications, title docs, and neighborhood..." className="w-full px-4 py-3 rounded-xl border border-border bg-surface-dim text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all resize-none" />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-text-secondary mb-1.5">Property Category</label>
+              <select value={form.property_category} onChange={(e) => {
+                const cat = e.target.value
+                setForm(p => ({
+                  ...p,
+                  property_category: cat,
+                  property_type: cat === 'land' ? 'plot' : 'house',
+                  bedrooms: '', bathrooms: '', built_up_area: ''
+                }))
+              }} className="w-full px-4 py-3 rounded-xl border border-border bg-surface-dim text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all">
+                <option value="land">Land</option>
+                <option value="building">Building / House</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-text-secondary mb-1.5">Property Type</label>
+              <select value={form.property_type} onChange={(e) => update('property_type', e.target.value)} className="w-full px-4 py-3 rounded-xl border border-border bg-surface-dim text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all">
+                {form.property_category === 'land' ? (
+                  <>
+                    <option value="plot">Plot of Land</option>
+                    <option value="estate">Upcoming Estate</option>
+                  </>
+                ) : (
+                  <>
+                    <option value="house">House</option>
+                    <option value="apartment">Apartment</option>
+                    <option value="commercial">Commercial Space</option>
+                    <option value="office">Office Space</option>
+                    <option value="short_let_apartment">Short-Let Apartment</option>
+                  </>
+                )}
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-text-secondary mb-1.5">Listing Type</label>
+              <select value={form.listing_type} onChange={(e) => {
+                const type = e.target.value
+                setForm(p => ({
+                  ...p,
+                  listing_type: type,
+                  rent_frequency: type === 'sale' ? '' : 'yearly',
+                  caution_fee: '', agency_fee: '', legal_fee: ''
+                }))
+              }} className="w-full px-4 py-3 rounded-xl border border-border bg-surface-dim text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all">
+                <option value="sale">For Sale</option>
+                <option value="rent">For Rent</option>
+                <option value="lease">For Lease</option>
+                <option value="short_let">Short-Let</option>
+              </select>
+            </div>
             <div>
               <label className="block text-sm font-medium text-text-secondary mb-1.5">Price (₦)</label>
               <input type="number" required value={form.price} onChange={(e) => update('price', e.target.value)}
                 placeholder="50000000" className="w-full px-4 py-3 rounded-xl border border-border bg-surface-dim text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all" />
             </div>
+          </div>
+
+          {/* Conditional Building Details */}
+          {form.property_category === 'building' && (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 rounded-2xl bg-surface-dim border border-border-light">
+              <div>
+                <label className="block text-xs font-semibold text-text-secondary mb-1">Bedrooms</label>
+                <input type="number" value={form.bedrooms} onChange={(e) => update('bedrooms', e.target.value)}
+                  placeholder="e.g. 4" className="w-full px-3 py-2 rounded-lg border border-border bg-surface text-sm focus:outline-none focus:border-primary transition-all" />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-text-secondary mb-1">Bathrooms</label>
+                <input type="number" value={form.bathrooms} onChange={(e) => update('bathrooms', e.target.value)}
+                  placeholder="e.g. 4" className="w-full px-3 py-2 rounded-lg border border-border bg-surface text-sm focus:outline-none focus:border-primary transition-all" />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-text-secondary mb-1">Built area (sqm)</label>
+                <input type="number" value={form.built_up_area} onChange={(e) => update('built_up_area', e.target.value)}
+                  placeholder="e.g. 350" className="w-full px-3 py-2 rounded-lg border border-border bg-surface text-sm focus:outline-none focus:border-primary transition-all" />
+              </div>
+            </div>
+          )}
+
+          {/* Conditional Rental Fees */}
+          {form.listing_type !== 'sale' && (
+            <div className="p-4 rounded-2xl bg-surface-dim border border-border-light space-y-4">
+              <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider">Tenancy Details & Breakdown Fees</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-text-secondary mb-1">Rent Frequency</label>
+                  <select value={form.rent_frequency} onChange={(e) => update('rent_frequency', e.target.value)} className="w-full px-3 py-2 rounded-lg border border-border bg-surface text-xs focus:outline-none focus:border-primary transition-all">
+                    <option value="yearly">Yearly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="daily">Daily</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-text-secondary mb-1">Caution Fee (₦)</label>
+                  <input type="number" value={form.caution_fee} onChange={(e) => update('caution_fee', e.target.value)}
+                    placeholder="Caution" className="w-full px-3 py-2 rounded-lg border border-border bg-surface text-xs focus:outline-none focus:border-primary transition-all" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-text-secondary mb-1">Agency Fee (₦)</label>
+                  <input type="number" value={form.agency_fee} onChange={(e) => update('agency_fee', e.target.value)}
+                    placeholder="Agency" className="w-full px-3 py-2 rounded-lg border border-border bg-surface text-xs focus:outline-none focus:border-primary transition-all" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-text-secondary mb-1">Legal Fee (₦)</label>
+                  <input type="number" value={form.legal_fee} onChange={(e) => update('legal_fee', e.target.value)}
+                    placeholder="Legal" className="w-full px-3 py-2 rounded-lg border border-border bg-surface text-xs focus:outline-none focus:border-primary transition-all" />
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-text-secondary mb-1.5">Land Size (sqm)</label>
-              <input type="number" required value={form.land_size} onChange={(e) => update('land_size', e.target.value)}
-                placeholder="648" className="w-full px-4 py-3 rounded-xl border border-border bg-surface-dim text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all" />
+              <label className="block text-sm font-medium text-text-secondary mb-1.5">State</label>
+              <select required value={form.state_ref} onChange={(e) => handleStateChange(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-border bg-surface-dim text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all">
+                <option value="">Select State</option>
+                {states.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+              </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-text-secondary mb-1.5">Listing Type</label>
-              <select value={form.listing_type} onChange={(e) => update('listing_type', e.target.value)} className="w-full px-4 py-3 rounded-xl border border-border bg-surface-dim text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all">
-                <option value="regular">Regular</option>
-                <option value="upcoming">Upcoming Estate</option>
+              <label className="block text-sm font-medium text-text-secondary mb-1.5">LGA (Neighborhood)</label>
+              <select required value={form.lga_ref} onChange={(e) => handleLgaChange(e.target.value)} disabled={!form.state_ref} className="w-full px-4 py-3 rounded-xl border border-border bg-surface-dim text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all disabled:opacity-50">
+                <option value="">Select LGA</option>
+                {lgas.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
               </select>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-text-secondary mb-1.5">Location</label>
-              <input type="text" required value={form.location} onChange={(e) => update('location', e.target.value)}
-                placeholder="Lekki Phase 1, Lagos" className="w-full px-4 py-3 rounded-xl border border-border bg-surface-dim text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all" />
+              <label className="block text-sm font-medium text-text-secondary mb-1.5">Total Land Area (sqm)</label>
+              <input type="number" required value={form.land_size} onChange={(e) => update('land_size', e.target.value)}
+                placeholder="e.g. 648" className="w-full px-4 py-3 rounded-xl border border-border bg-surface-dim text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-text-secondary mb-1.5">State</label>
-              <input type="text" value={form.state} onChange={(e) => update('state', e.target.value)}
-                placeholder="Lagos" className="w-full px-4 py-3 rounded-xl border border-border bg-surface-dim text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all" />
+              <label className="block text-sm font-medium text-text-secondary mb-1.5">Street Address / Local Area</label>
+              <input type="text" placeholder="e.g. Plot 15, Admiralty Way" value={form.location.split(',')[0]} onChange={(e) => {
+                const street = e.target.value
+                const selectedLga = lgas.find(l => l.id === parseInt(form.lga_ref))
+                setForm(p => ({
+                  ...p,
+                  location: selectedLga ? `${street}, ${selectedLga.name}, ${p.state}` : `${street}, ${p.state}`
+                }))
+              }} className="w-full px-4 py-3 rounded-xl border border-border bg-surface-dim text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all" />
+            </div>
+          </div>
+
+          {/* Checklist of Features & Documents */}
+          <div className="p-4 rounded-2xl bg-surface-dim border border-border-light space-y-3">
+            <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider">Features, Amenities & Legal Documents</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <label className="flex items-center gap-2 text-xs font-medium text-text-secondary cursor-pointer select-none">
+                <input type="checkbox" checked={form.has_electricity} onChange={(e) => update('has_electricity', e.target.checked)} className="rounded text-primary focus:ring-primary w-4 h-4" />
+                24/7 Electricity
+              </label>
+              <label className="flex items-center gap-2 text-xs font-medium text-text-secondary cursor-pointer select-none">
+                <input type="checkbox" checked={form.has_water} onChange={(e) => update('has_water', e.target.checked)} className="rounded text-primary focus:ring-primary w-4 h-4" />
+                Water (Borehole)
+              </label>
+              <label className="flex items-center gap-2 text-xs font-medium text-text-secondary cursor-pointer select-none">
+                <input type="checkbox" checked={form.has_drainage} onChange={(e) => update('has_drainage', e.target.checked)} className="rounded text-primary focus:ring-primary w-4 h-4" />
+                Good Drainage
+              </label>
+              <label className="flex items-center gap-2 text-xs font-medium text-text-secondary cursor-pointer select-none">
+                <input type="checkbox" checked={form.has_security} onChange={(e) => update('has_security', e.target.checked)} className="rounded text-primary focus:ring-primary w-4 h-4" />
+                Estate Security
+              </label>
+              <label className="flex items-center gap-2 text-xs font-medium text-text-secondary cursor-pointer select-none">
+                <input type="checkbox" checked={form.has_generator} onChange={(e) => update('has_generator', e.target.checked)} className="rounded text-primary focus:ring-primary w-4 h-4" />
+                Backup Generator
+              </label>
+              <label className="flex items-center gap-2 text-xs font-medium text-text-secondary cursor-pointer select-none">
+                <input type="checkbox" checked={form.has_c_of_o} onChange={(e) => update('has_c_of_o', e.target.checked)} className="rounded text-primary focus:ring-primary w-4 h-4" />
+                Has C of O
+              </label>
+              <label className="flex items-center gap-2 text-xs font-medium text-text-secondary cursor-pointer select-none col-span-2">
+                <input type="checkbox" checked={form.has_survey_plan} onChange={(e) => update('has_survey_plan', e.target.checked)} className="rounded text-primary focus:ring-primary w-4 h-4" />
+                Registered Survey Plan
+              </label>
             </div>
           </div>
 

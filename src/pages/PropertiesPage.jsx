@@ -5,7 +5,7 @@ import FeaturedCarousel from '../components/property/FeaturedCarousel'
 import { useProperties } from '../hooks/useProperties'
 import { propertiesAPI } from '../api/client'
 
-export default function HomePage() {
+export default function PropertiesPage() {
   const { properties: regularProperties, loading: regularLoading, updateFilters } = useProperties()
   const [upcomingProperties, setUpcomingProperties] = useState([])
   const [upcomingLoading, setUpcomingLoading] = useState(true)

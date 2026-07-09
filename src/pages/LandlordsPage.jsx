@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Home, Search, Star, AlertCircle, Loader2, X, ShieldCheck } from 'lucide-react'
 import { landlordsAPI } from '../api/client'
 import LandlordCard from '../components/landlord/LandlordCard'
+import LandlordSkeleton from '../components/landlord/LandlordSkeleton'
 import { useAuth } from '../hooks/useAuth'
 
 export default function LandlordsPage() {
@@ -123,8 +124,10 @@ export default function LandlordsPage() {
 
         {/* Directory Grid */}
         {loading ? (
-          <div className="flex items-center justify-center py-24">
-            <Loader2 className="w-10 h-10 animate-spin text-primary" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <LandlordSkeleton key={i} />
+            ))}
           </div>
         ) : landlords.length === 0 ? (
           <div className="bg-surface rounded-3xl p-12 text-center max-w-xl mx-auto border border-border shadow-sm my-8">

@@ -144,6 +144,8 @@ export const propertiesAPI = {
   },
   requestVerification: (id) => client.post(`/properties/${id}/request-verification/`),
   myVerifications: () => client.get('/properties/my-verifications/'),
+  trackEvent: (id, eventType) => client.post(`/properties/${id}/track-event/`, { event_type: eventType }),
+  myAnalytics: () => client.get('/properties/my-analytics/'),
 }
 
 export const realtorsAPI = {

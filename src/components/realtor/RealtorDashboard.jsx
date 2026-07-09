@@ -5,6 +5,7 @@ import { Plus, Eye, Home, TrendingUp, Trash2, Upload, X, ImageIcon, Star, ArrowR
 import { Link } from 'react-router-dom'
 import WalletManager from '../wallet/WalletManager'
 import TransactionList from '../escrow/TransactionList'
+import AnalyticsSection from './AnalyticsSection'
 
 function StatCard({ icon: Icon, label, value, color }) {
   return (
@@ -157,6 +158,16 @@ export default function RealtorDashboard() {
           >
             Escrow Deals
           </button>
+          <button 
+            onClick={() => setActiveTab('analytics')}
+            className={`pb-3 text-sm font-bold border-b-2 transition-all ${
+              activeTab === 'analytics' 
+                ? 'border-primary text-primary' 
+                : 'border-transparent text-text-secondary hover:text-text-primary'
+            }`}
+          >
+            Analytics & Leads
+          </button>
         </div>
 
         {activeTab === 'listings' ? (
@@ -238,10 +249,12 @@ export default function RealtorDashboard() {
             </div>
           )}
           </div>
-        ) : (
+        ) : activeTab === 'escrows' ? (
           <div className="bg-surface rounded-2xl border border-border-light shadow-card p-6">
             <TransactionList />
           </div>
+        ) : (
+          <AnalyticsSection />
         )}
 
         {/* Create Form Modal */}

@@ -74,6 +74,7 @@ export default function PropertyDetailPage() {
     try {
       const { data } = await propertiesAPI.detail(id)
       setProperty(data)
+      propertiesAPI.trackEvent(id, 'view').catch(() => {})
     } catch {
       setProperty(MOCK_DETAIL)
     } finally {
@@ -443,7 +444,12 @@ export default function PropertyDetailPage() {
           {/* Right Column — Sticky Realtor Card */}
           <div className="lg:col-span-1" ref={rightRef}>
             <div className="lg:sticky lg:top-[80px] space-y-6 reveal reveal-up">
-              <RealtorCard realtor={seller} sellerRole={sellerRole} propertyTitle={property.title} />
+              <RealtorCard 
+                realtor={seller} 
+                sellerRole={sellerRole} 
+                propertyTitle={property.title} 
+                onTrackEvent={(eventType) => propertiesAPI.trackEvent(id, eventType).catch(() => {})}
+              />
 
               {seller && (
                 <ReviewSection 

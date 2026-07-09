@@ -4,7 +4,7 @@ import { Phone, MessageCircle, MessageSquare, BadgeCheck, User, Loader2 } from '
 import { useAuth } from '../../hooks/useAuth'
 import { chatAPI } from '../../api/client'
 
-export default function RealtorCard({ realtor, sellerRole = 'realtor', propertyTitle = '' }) {
+export default function RealtorCard({ realtor, sellerRole = 'realtor', propertyTitle = '', onTrackEvent }) {
   const { isAuthenticated, user } = useAuth()
   const navigate = useNavigate()
   const [loadingChat, setLoadingChat] = useState(false)
@@ -112,6 +112,7 @@ export default function RealtorCard({ realtor, sellerRole = 'realtor', propertyT
           href={whatsappUrl}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() => onTrackEvent && onTrackEvent('whatsapp_click')}
           className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-[#25D366] text-white font-semibold text-sm hover:bg-[#20bd5a] transition-all duration-200 hover:shadow-lg hover:shadow-[#25D366]/25 active:scale-[0.98]"
           id="realtor-whatsapp-btn"
         >
@@ -120,6 +121,7 @@ export default function RealtorCard({ realtor, sellerRole = 'realtor', propertyT
         </a>
         <a
           href={`tel:${realtor?.phone_number}`}
+          onClick={() => onTrackEvent && onTrackEvent('phone_click')}
           className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border-2 border-primary text-primary font-semibold text-sm hover:bg-primary hover:text-white transition-all duration-200 active:scale-[0.98]"
           id="realtor-call-btn"
         >

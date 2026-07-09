@@ -84,7 +84,8 @@ export default function KYCPage() {
         await refreshUser()
       }
     } catch (err) {
-      const msg = err.response?.data?.error
+      const msg = err.response?.data?.message
+        || err.response?.data?.error
         || err.response?.data?.id_number?.[0]
         || 'Verification failed. Please check your details and try again.'
       setResult({ status: 'failed', message: msg })

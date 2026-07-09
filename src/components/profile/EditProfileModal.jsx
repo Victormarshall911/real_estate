@@ -2,6 +2,7 @@ import { useState, useRef } from 'react'
 import { X, User, Camera, Loader2, CheckCircle2, AlertCircle, MapPin, Calendar, Mail } from 'lucide-react'
 import { authAPI } from '../../api/client'
 import { useAuth } from '../../hooks/useAuth'
+import { getMediaUrl } from '../../utils/media'
 
 export default function EditProfileModal({ onClose }) {
   const { user, refreshUser } = useAuth()
@@ -106,7 +107,7 @@ export default function EditProfileModal({ onClose }) {
                 {photoPreview && !imgError ? (
                   <img 
                     key={photoPreview}
-                    src={photoPreview.startsWith('/') ? `https://real-estate-api-orbx.onrender.com${photoPreview}` : photoPreview} 
+                    src={getMediaUrl(photoPreview)} 
                     alt="Profile Preview" 
                     className="w-full h-full object-cover"
                     onError={() => setImgError(true)}

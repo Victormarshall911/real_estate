@@ -5,6 +5,7 @@ import { useAuth } from '../../hooks/useAuth'
 import LoginModal from '../auth/LoginModal'
 import RegisterModal from '../auth/RegisterModal'
 import EditProfileModal from '../profile/EditProfileModal'
+import { getMediaUrl } from '../../utils/media'
 
 export default function Navbar() {
   const { user, isAuthenticated, isRealtor, logout } = useAuth()
@@ -67,6 +68,16 @@ export default function Navbar() {
                 id="nav-browse"
               >
                 Browse Land
+              </Link>
+              <Link
+                to="/mortgage-calculator"
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
+                  location.pathname === '/mortgage-calculator'
+                    ? 'text-primary bg-primary/5'
+                    : 'text-text-secondary hover:text-text-primary hover:bg-surface-muted'
+                }`}
+              >
+                Financing Calculator
               </Link>
               <Link
                 to="/agents"
@@ -148,7 +159,7 @@ export default function Navbar() {
                       {user?.profile_photo ? (
                         <img 
                           key={user.profile_photo}
-                          src={user.profile_photo.startsWith('/') ? `https://real-estate-api-orbx.onrender.com${user.profile_photo}` : user.profile_photo} 
+                          src={getMediaUrl(user.profile_photo)} 
                           alt={user.first_name || 'User'} 
                           className="w-full h-full object-cover"
                           onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling && (e.target.nextSibling.style.display = 'flex'); }}
@@ -243,6 +254,12 @@ export default function Navbar() {
                 className="px-4 py-3 rounded-lg text-sm font-medium text-text-secondary hover:bg-surface-muted transition-colors"
               >
                 Browse Land
+              </Link>
+              <Link
+                to="/mortgage-calculator"
+                className="px-4 py-3 rounded-lg text-sm font-medium text-text-secondary hover:bg-surface-muted transition-colors"
+              >
+                Financing Calculator
               </Link>
               <Link
                 to="/agents"

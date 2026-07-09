@@ -1,15 +1,22 @@
 import { useState, useEffect } from 'react'
+import { Bell } from 'lucide-react'
 import HeroSearch from '../components/search/HeroSearch'
 import PropertyGrid from '../components/property/PropertyGrid'
 import FeaturedCarousel from '../components/property/FeaturedCarousel'
+import SaveSearchModal from '../components/property/SaveSearchModal'
 import { useProperties } from '../hooks/useProperties'
+import { useAuth } from '../hooks/useAuth'
 import { propertiesAPI } from '../api/client'
+import LoginModal from '../components/auth/LoginModal'
 
 export default function PropertiesPage() {
-  const { properties: regularProperties, loading: regularLoading, updateFilters } = useProperties()
+  const { properties: regularProperties, loading: regularLoading, updateFilters, filters } = useProperties()
+  const { isAuthenticated } = useAuth()
   const [upcomingProperties, setUpcomingProperties] = useState([])
   const [upcomingLoading, setUpcomingLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('regular') // 'regular' or 'upcoming'
+  const [showSaveSearchModal, setShowSaveSearchModal] = useState(false)
+  const [showLoginModal, setShowLoginModal] = useState(false)
 
   useEffect(() => {
     async function fetchUpcoming() {
@@ -49,32 +56,60 @@ export default function PropertiesPage() {
             </p>
           </div>
           
-          {/* Tabs */}
-          <div className="flex items-center p-1 bg-surface-dim rounded-xl border border-border-light">
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Save Search Alert Button */}
             <button
-              onClick={() => setActiveTab('regular')}
-              className={`px-6 py-2.5 rounded-lg text-sm font-semibold transition-all ${
-                activeTab === 'regular' 
-                  ? 'bg-white text-primary shadow-sm' 
-                  : 'text-text-secondary hover:text-text-primary'
-              }`}
+              onClick={() => isAuthenticated ? setShowSaveSearchModal(true) : setShowLoginModal(true)}
+              className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-primary/10 hover:bg-primary/15 text-primary border border-primary/20 transition-all font-bold text-sm shadow-sm hover:shadow"
+              title="Save current search filter and receive instant notification alerts when matching properties are listed"
             >
-              Available Plots
+              <Bell className="w-4 h-4 text-gold animate-pulse" />
+              <span>Save Search & Alert</span>
             </button>
-            <button
-              onClick={() => setActiveTab('upcoming')}
-              className={`px-6 py-2.5 rounded-lg text-sm font-semibold transition-all ${
-                activeTab === 'upcoming' 
-                  ? 'bg-white text-gold shadow-sm' 
-                  : 'text-text-secondary hover:text-text-primary'
-              }`}
-            >
-              Upcoming Estates
-            </button>
+
+            {/* Tabs */}
+            <div className="flex items-center p-1 bg-surface-dim rounded-xl border border-border-light">
+              <button
+                onClick={() => setActiveTab('regular')}
+                className={`px-6 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+                  activeTab === 'regular' 
+                    ? 'bg-white text-primary shadow-sm' 
+                    : 'text-text-secondary hover:text-text-primary'
+                }`}
+              >
+                Available Plots
+              </button>
+              <button
+                onClick={() => setActiveTab('upcoming')}
+                className={`px-6 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+                  activeTab === 'upcoming' 
+                    ? 'bg-white text-gold shadow-sm' 
+                    : 'text-text-secondary hover:text-text-primary'
+                }`}
+              >
+                Upcoming Estates
+              </button>
+            </div>
           </div>
         </div>
 
         <PropertyGrid properties={properties} loading={loading} />
+
+        {showSaveSearchModal && (
+          <SaveSearchModal
+            onClose={() => setShowSaveSearchModal(false)}
+            filters={filters || {}}
+          />
+        )}
+        {showLoginModal && (
+          <LoginModal
+            onClose={() => setShowLoginModal(false)}
+            onSuccess={() => {
+              setShowLoginModal(false)
+              setShowSaveSearchModal(true)
+            }}
+          />
+        )}
       </section>
 
       {/* Value Propositions */}

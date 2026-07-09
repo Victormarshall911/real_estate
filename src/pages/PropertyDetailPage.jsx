@@ -5,9 +5,10 @@ import ImageGallery from '../components/property/ImageGallery'
 import RealtorCard from '../components/realtor/RealtorCard'
 import ReviewSection from '../components/shared/ReviewSection'
 import ProposeBuyModal from '../components/escrow/ProposeBuyModal'
+import MortgageCalculatorModal from '../components/property/MortgageCalculatorModal'
 import { useAuth } from '../hooks/useAuth'
 import useScrollReveal from '../hooks/useScrollReveal'
-import { ArrowLeft, MapPin, Maximize2, Eye, Calendar, BadgeCheck, Share2, ShieldCheck, FileText, Clock } from 'lucide-react'
+import { ArrowLeft, MapPin, Maximize2, Eye, Calendar, BadgeCheck, Share2, ShieldCheck, FileText, Clock, Calculator } from 'lucide-react'
 
 function formatPrice(price) {
   return `₦${parseFloat(price).toLocaleString()}`
@@ -66,6 +67,7 @@ export default function PropertyDetailPage() {
   const [property, setProperty] = useState(null)
   const [loading, setLoading] = useState(true)
   const [showEscrowModal, setShowEscrowModal] = useState(false)
+  const [showMortgageModal, setShowMortgageModal] = useState(false)
   const leftRef = useScrollReveal()
   const rightRef = useScrollReveal()
 
@@ -239,6 +241,14 @@ export default function PropertyDetailPage() {
                 </p>
               </div>
               <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => setShowMortgageModal(true)}
+                  className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-white border border-primary/30 text-primary font-bold text-xs uppercase tracking-wider hover:bg-primary hover:text-white transition-all shadow-sm"
+                  title="Estimate monthly mortgage installments & salary requirements"
+                >
+                  <Calculator className="w-4 h-4 text-gold" />
+                  <span>Mortgage Calculator</span>
+                </button>
                 <button className="p-3 rounded-xl bg-white border border-border hover:bg-surface-muted transition-colors" title="Share">
                   <Share2 className="w-5 h-5 text-text-secondary" />
                 </button>
@@ -545,6 +555,13 @@ export default function PropertyDetailPage() {
               setShowEscrowModal(false)
               alert('Purchase proposal submitted successfully! You can track this deal in your Dashboard under Escrow Deals.')
             }}
+          />
+        )}
+        {showMortgageModal && (
+          <MortgageCalculatorModal
+            onClose={() => setShowMortgageModal(false)}
+            propertyPrice={property.price}
+            propertyTitle={property.title}
           />
         )}
       </div>

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { MapPin, Maximize2, Eye, BadgeCheck, ImageIcon } from 'lucide-react'
+import { getMediaUrl } from '../../utils/media'
 
 function formatPrice(price) {
   const num = parseFloat(price)
@@ -45,7 +46,7 @@ export default function PropertyCard({ property }) {
       <div className="relative aspect-[4/3] overflow-hidden bg-surface-muted">
         {primary_image_url ? (
           <img
-            src={primary_image_url}
+            src={getMediaUrl(primary_image_url)}
             alt={title}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             loading="lazy"

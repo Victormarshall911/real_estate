@@ -27,6 +27,7 @@ export default function Footer() {
             <h4 className="font-semibold text-sm uppercase tracking-wider text-slate-300 mb-4">Quick Links</h4>
             <ul className="space-y-3">
               <li><Link to="/" className="text-sm text-slate-400 hover:text-primary-light transition-colors">Browse Properties</Link></li>
+              <li><Link to="/mortgage-calculator" className="text-sm text-slate-400 hover:text-primary-light transition-colors">Financing Calculator</Link></li>
               <li><Link to="/dashboard" className="text-sm text-slate-400 hover:text-primary-light transition-colors">Realtor Dashboard</Link></li>
             </ul>
           </div>

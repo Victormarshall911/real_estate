@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { ChevronLeft, ChevronRight, ImageIcon, PlayCircle } from 'lucide-react'
+import { getMediaUrl } from '../../utils/media'
 
 export default function ImageGallery({ images = [], video = null }) {
   const [current, setCurrent] = useState(0)
@@ -7,10 +8,10 @@ export default function ImageGallery({ images = [], video = null }) {
   // Construct media array with video at the front if it exists
   const media = []
   if (video) {
-    media.push({ type: 'video', url: video })
+    media.push({ type: 'video', url: getMediaUrl(video) })
   }
   images.forEach(img => {
-    media.push({ type: 'image', url: img?.image_url || img?.image || img, caption: img?.caption })
+    media.push({ type: 'image', url: getMediaUrl(img?.image_url || img?.image || img), caption: img?.caption })
   })
 
   if (media.length === 0) {

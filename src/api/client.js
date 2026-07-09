@@ -146,6 +146,9 @@ export const propertiesAPI = {
   myVerifications: () => client.get('/properties/my-verifications/'),
   trackEvent: (id, eventType) => client.post(`/properties/${id}/track-event/`, { event_type: eventType }),
   myAnalytics: () => client.get('/properties/my-analytics/'),
+  savedSearchesList: () => client.get('/properties/saved-searches/'),
+  savedSearchesCreate: (data) => client.post('/properties/saved-searches/', data),
+  savedSearchesDelete: (id) => client.delete(`/properties/saved-searches/${id}/`),
 }
 
 export const realtorsAPI = {

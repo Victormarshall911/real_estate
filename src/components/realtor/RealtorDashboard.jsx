@@ -501,14 +501,16 @@ function CreateListingModal({ onClose, onCreated }) {
 
   useEffect(() => {
     propertiesAPI.states().then(res => {
-      setStates(res.data)
+      const list = Array.isArray(res.data) ? res.data : (res.data?.results || [])
+      setStates(list)
     }).catch(err => console.error("Error loading states:", err))
   }, [])
 
   useEffect(() => {
     if (form.state_ref) {
       propertiesAPI.lgas({ state: form.state_ref }).then(res => {
-        setLgas(res.data)
+        const list = Array.isArray(res.data) ? res.data : (res.data?.results || [])
+        setLgas(list)
       }).catch(err => console.error("Error loading LGAs:", err))
     } else {
       setLgas([])
@@ -518,7 +520,7 @@ function CreateListingModal({ onClose, onCreated }) {
   const update = (key, val) => setForm((p) => ({ ...p, [key]: val }))
 
   const handleStateChange = (stateId) => {
-    const selectedState = states.find(s => s.id === parseInt(stateId))
+    const selectedState = states.find(s => String(s.id) === String(stateId))
     setForm(p => ({
       ...p,
       state_ref: stateId,
@@ -529,7 +531,7 @@ function CreateListingModal({ onClose, onCreated }) {
   }
 
   const handleLgaChange = (lgaId) => {
-    const selectedLga = lgas.find(l => l.id === parseInt(lgaId))
+    const selectedLga = lgas.find(l => String(l.id) === String(lgaId))
     setForm(p => ({
       ...p,
       lga_ref: lgaId,
@@ -773,7 +775,7 @@ function CreateListingModal({ onClose, onCreated }) {
               <label className="block text-sm font-medium text-text-secondary mb-1.5">Street Address / Local Area</label>
               <input type="text" placeholder="e.g. Plot 15, Admiralty Way" value={form.location.split(',')[0]} onChange={(e) => {
                 const street = e.target.value
-                const selectedLga = lgas.find(l => l.id === parseInt(form.lga_ref))
+                const selectedLga = lgas.find(l => String(l.id) === String(form.lga_ref))
                 setForm(p => ({
                   ...p,
                   location: selectedLga ? `${street}, ${selectedLga.name}, ${p.state}` : `${street}, ${p.state}`

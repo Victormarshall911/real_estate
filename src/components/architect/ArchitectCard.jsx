@@ -110,7 +110,6 @@ export default function ArchitectCard({ architect, onRate }) {
             size="sm"
           />
         </div>
-        </div>
         {onRate && (
           <button
             onClick={() => onRate(architect)}

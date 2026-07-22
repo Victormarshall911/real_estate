@@ -348,5 +348,31 @@ export const escrowsAPI = {
   dispute: (id, reason) => client.post(`/escrows/${id}/dispute/`, { reason }),
 }
 
+export const blogAPI = {
+  list: (params) => client.get('/blog/posts/', { params }),
+  detail: (slug) => client.get(`/blog/posts/${slug}/`),
+  create: (data) => {
+    const formData = new FormData()
+    Object.entries(data).forEach(([key, value]) => {
+      if (value !== null && value !== undefined) formData.append(key, value)
+    })
+    return client.post('/blog/posts/', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+  },
+  update: (slug, data) => {
+    const formData = new FormData()
+    Object.entries(data).forEach(([key, value]) => {
+      if (value !== null && value !== undefined) formData.append(key, value)
+    })
+    return client.patch(`/blog/posts/${slug}/`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+  },
+  delete: (slug) => client.delete(`/blog/posts/${slug}/`),
+  myPosts: () => client.get('/blog/posts/my_posts/'),
+  categories: () => client.get('/blog/categories/'),
+}
+
 export default client
 

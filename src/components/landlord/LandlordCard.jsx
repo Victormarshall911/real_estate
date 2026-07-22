@@ -2,12 +2,19 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Star, MessageCircle, MessageSquare, Phone, ShieldCheck, Loader2 } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
-import { chatAPI } from '../../api/client'
+import { chatAPI, landlordsAPI } from '../../api/client'
+import StarRating from '../shared/StarRating'
 
 export default function LandlordCard({ landlord, onRate }) {
   const { isAuthenticated, user } = useAuth()
   const navigate = useNavigate()
   const [loadingChat, setLoadingChat] = useState(false)
+  const canRate = isAuthenticated && user?.id !== landlord?.user?.id
+
+  const handleRate = async (n) => {
+    await landlordsAPI.rate(landlord.id, { rating: n })
+    if (onRate) onRate(landlord.id, n)
+  }
 
   const name = landlord?.user
     ? `${landlord.user.first_name} ${landlord.user.last_name}`
@@ -87,10 +94,14 @@ export default function LandlordCard({ landlord, onRate }) {
 
       {/* Ratings Section */}
       <div className="flex items-center justify-between py-3 border-t border-b border-border mb-4 bg-surface-muted/30 px-3 rounded-xl">
-        <div className="flex items-center space-x-1">
-          <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
-          <span className="font-bold text-sm text-text-primary">{landlord?.average_rating || 'New'}</span>
-          <span className="text-xs text-text-muted">({landlord?.total_reviews || 0} reviews)</span>
+        <div className="flex flex-col gap-1">
+          <StarRating
+            currentRating={landlord?.average_rating || 0}
+            ratingCount={landlord?.total_reviews || 0}
+            onRate={handleRate}
+            canRate={canRate}
+            size="sm"
+          />
         </div>
         {onRate && (
           <button

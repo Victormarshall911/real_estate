@@ -3,7 +3,7 @@ import { X, Mail, Lock, Eye, EyeOff, User, Building, Briefcase, Ruler, Home, Ham
 import { useAuth } from '../../hooks/useAuth'
 import { useNavigate } from 'react-router-dom'
 
-export default function RegisterModal({ onClose, onSwitchToLogin }) {
+export default function RegisterModal({ onClose, onSwitchToLogin, defaultRole = 'buyer' }) {
   const { register, loading } = useAuth()
   const navigate = useNavigate()
   const [form, setForm] = useState({
@@ -12,7 +12,7 @@ export default function RegisterModal({ onClose, onSwitchToLogin }) {
     email: '',
     password: '',
     password_confirm: '',
-    role: 'buyer',
+    role: defaultRole,
   })
   const [showPass, setShowPass] = useState(false)
   const [error, setError] = useState('')

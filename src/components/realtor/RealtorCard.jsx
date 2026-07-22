@@ -2,12 +2,18 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Phone, MessageCircle, MessageSquare, BadgeCheck, User, Loader2 } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
-import { chatAPI } from '../../api/client'
+import { chatAPI, realtorsAPI } from '../../api/client'
+import StarRating from '../shared/StarRating'
 
 export default function RealtorCard({ realtor, sellerRole = 'realtor', propertyTitle = '', onTrackEvent }) {
   const { isAuthenticated, user } = useAuth()
   const navigate = useNavigate()
   const [loadingChat, setLoadingChat] = useState(false)
+  const canRate = isAuthenticated && user?.id !== realtor?.user?.id
+
+  const handleRate = async (n) => {
+    await realtorsAPI.rate(realtor.id, { rating: n })
+  }
 
   const whatsappMessage = propertyTitle
     ? `Hi, I'm interested in your property listing: "${propertyTitle}" on LandMarket. Is it still available?`
@@ -84,6 +90,15 @@ export default function RealtorCard({ realtor, sellerRole = 'realtor', propertyT
             {realtor?.is_verified && <BadgeCheck className="w-4 h-4 text-primary flex-shrink-0" />}
           </div>
           <p className="text-xs text-text-muted capitalize font-semibold tracking-wider text-primary/80 mt-0.5">{roleLabel}</p>
+          <div className="mt-1">
+            <StarRating
+              currentRating={realtor?.average_rating || 0}
+              ratingCount={realtor?.total_reviews || realtor?.rating_count || 0}
+              onRate={handleRate}
+              canRate={canRate}
+              size="sm"
+            />
+          </div>
           {sellerRole === 'developer' && realtor?.company_name && realtor?.user && (
             <p className="text-[10px] text-text-muted truncate">Contact: {realtor.user.first_name}</p>
           )}

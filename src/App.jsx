@@ -14,6 +14,9 @@ import SubscriptionPage from './pages/SubscriptionPage'
 import MortgageCalculatorPage from './pages/MortgageCalculatorPage'
 import ChatPage from './pages/ChatPage'
 import NotFoundPage from './pages/NotFoundPage'
+import RegisterPage from './pages/RegisterPage'
+import BlogPage from './pages/BlogPage'
+import BlogDetailPage from './pages/BlogDetailPage'
 import NetworkStatus from './components/shared/NetworkStatus'
 
 export default function App() {
@@ -29,6 +32,9 @@ export default function App() {
           <Route path="/mortgage-calculator" element={<MortgageCalculatorPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/verify-identity" element={<KYCPage />} />
+          <Route path="/register/:role?" element={<RegisterPage />} />
+          <Route path="/blog" element={<BlogPage />} />
+          <Route path="/blog/:slug" element={<BlogDetailPage />} />
           <Route path="/agents" element={<AgentsPage />} />
           <Route path="/architects" element={<ArchitectsPage />} />
           <Route path="/landlords" element={<LandlordsPage />} />

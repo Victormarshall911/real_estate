@@ -70,6 +70,16 @@ export default function Navbar() {
                 Browse Land
               </Link>
               <Link
+                to="/blog"
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
+                  location.pathname === '/blog'
+                    ? 'text-primary bg-primary/5'
+                    : 'text-text-secondary hover:text-text-primary hover:bg-surface-muted'
+                }`}
+              >
+                Blog
+              </Link>
+              <Link
                 to="/mortgage-calculator"
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
                   location.pathname === '/mortgage-calculator'
@@ -180,6 +190,11 @@ export default function Navbar() {
                       <div className="px-4 py-2.5 border-b border-border-light mb-1">
                         <p className="text-sm font-semibold text-text-primary truncate">{user?.first_name} {user?.last_name}</p>
                         <p className="text-xs text-text-muted truncate mt-0.5">{user?.email}</p>
+                        <div className="mt-1.5">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">
+                            Role: {user?.role}
+                          </span>
+                        </div>
                       </div>
                       <button
                         onClick={() => { setProfileOpen(false); setShowEditProfile(true) }}
@@ -254,6 +269,12 @@ export default function Navbar() {
                 className="px-4 py-3 rounded-lg text-sm font-medium text-text-secondary hover:bg-surface-muted transition-colors"
               >
                 Browse Land
+              </Link>
+              <Link
+                to="/blog"
+                className="px-4 py-3 rounded-lg text-sm font-medium text-text-secondary hover:bg-surface-muted transition-colors"
+              >
+                Blog
               </Link>
               <Link
                 to="/mortgage-calculator"
@@ -364,6 +385,7 @@ export default function Navbar() {
       )}
       {showRegister && (
         <RegisterModal
+          defaultRole="realtor"
           onClose={() => setShowRegister(false)}
           onSwitchToLogin={() => { setShowRegister(false); setShowLogin(true) }}
         />

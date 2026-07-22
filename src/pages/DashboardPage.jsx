@@ -13,6 +13,8 @@ import { authAPI } from '../api/client'
 import { Loader2, MessageSquare, MapPin, CheckCircle2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import TransactionList from '../components/escrow/TransactionList'
+import AgentDashboard from '../components/agent/AgentDashboard'
+import ArchitectDashboard from '../components/architect/ArchitectDashboard'
 
 export default function DashboardPage() {
   const { user, isAuthenticated, isRealtor, isAgent, isArchitect, isLandlord, isDeveloper, isKycVerified, refreshUser } = useAuth()
@@ -22,8 +24,9 @@ export default function DashboardPage() {
     return <Navigate to="/" replace />
   }
 
-  // 1. Enforce KYC Verification — only for realtors, landlords, developers, and buyers
-  if (!isKycVerified && !isAgent && !isArchitect) {
+  // 1. Enforce KYC Verification — only for sellers (realtors, landlords, developers)
+  const needsKyc = isRealtor || isLandlord || isDeveloper
+  if (needsKyc && !isKycVerified) {
     return <Navigate to="/verify-identity" replace />
   }
 
@@ -74,55 +77,12 @@ export default function DashboardPage() {
 
   // 4. Agent dashboard
   if (isAgent) {
-    return (
-      <div className="min-h-screen py-12 bg-surface-dim">
-        <div className="max-w-3xl mx-auto px-4">
-          <h1 className="text-2xl font-bold text-text-primary mb-2">Agent Dashboard</h1>
-          <p className="text-text-muted mb-8">Manage your connections and chat with clients.</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <Link to="/messages" className="bg-surface border border-border rounded-2xl p-6 hover:shadow-card-hover transition-all group">
-              <MessageSquare className="w-8 h-8 text-primary mb-3 group-hover:scale-110 transition-transform" />
-              <h3 className="font-bold text-text-primary mb-1">Messages</h3>
-              <p className="text-sm text-text-muted">Chat with clients who have connected with you.</p>
-            </Link>
-            <Link to="/agents" className="bg-surface border border-border rounded-2xl p-6 hover:shadow-card-hover transition-all group">
-              <MapPin className="w-8 h-8 text-primary mb-3 group-hover:scale-110 transition-transform" />
-              <h3 className="font-bold text-text-primary mb-1">My Public Profile</h3>
-              <p className="text-sm text-text-muted">See how you appear to buyers searching for agents.</p>
-            </Link>
-          </div>
-          
-          <ManageAgentLocations />
-
-          <div className="mt-8">
-            <WalletManager />
-          </div>
-        </div>
-      </div>
-    )
+    return <AgentDashboard />
   }
 
   // 5. Architect dashboard
   if (isArchitect) {
-    return (
-      <div className="min-h-screen py-12 bg-surface-dim">
-        <div className="max-w-3xl mx-auto px-4">
-          <h1 className="text-2xl font-bold text-text-primary mb-2">Architect Dashboard</h1>
-          <p className="text-text-muted mb-8">Manage your profile and showcase your design portfolio to buyers.</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <Link to="/architects" className="bg-surface border border-border rounded-2xl p-6 hover:shadow-card-hover transition-all group">
-              <MapPin className="w-8 h-8 text-primary mb-3 group-hover:scale-110 transition-transform" />
-              <h3 className="font-bold text-text-primary mb-1">My Public Profile</h3>
-              <p className="text-sm text-text-muted">See how you appear in the public Architects directory.</p>
-            </Link>
-          </div>
-          
-          <div className="mt-8">
-            <WalletManager />
-          </div>
-        </div>
-      </div>
-    )
+    return <ArchitectDashboard />
   }
 
   const handleUpgrade = async () => {
@@ -147,16 +107,23 @@ export default function DashboardPage() {
     <div className="min-h-screen py-16 flex flex-col items-center justify-center bg-surface-dim">
       <div className="text-center max-w-md mx-auto px-4 bg-surface p-8 rounded-2xl shadow-card border border-border">
         <div className="text-5xl mb-4">👋</div>
-        <h2 className="text-2xl font-bold text-text-primary mb-2">Welcome to your Dashboard</h2>
+        <div className="flex items-center justify-center gap-2 mb-2">
+          <h2 className="text-2xl font-bold text-text-primary">Welcome to your Dashboard</h2>
+        </div>
+        <div className="mb-4">
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">
+            Role: Buyer
+          </span>
+        </div>
         <p className="text-sm text-text-muted mb-6">
           You are currently registered as a property buyer. Looking for expert help to find the perfect land?
         </p>
-        <a
-          href="/agents"
+        <Link
+          to="/agents"
           className="inline-flex items-center justify-center w-full py-3 rounded-xl bg-primary text-white font-bold text-sm hover:bg-primary-dark transition-all shadow-lg shadow-primary/20"
         >
           Hire a Verified Agent
-        </a>
+        </Link>
         <div className="mt-6 pt-6 border-t border-border-light">
           <p className="text-xs text-text-muted mb-3">Want to list your own properties?</p>
           <button

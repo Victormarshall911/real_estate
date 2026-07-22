@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom'
 import WalletManager from '../wallet/WalletManager'
 import TransactionList from '../escrow/TransactionList'
 import AnalyticsSection from './AnalyticsSection'
+import BlogManagement from '../blog/BlogManagement'
 
 function StatCard({ icon: Icon, label, value, color }) {
   return (
@@ -168,6 +169,16 @@ export default function RealtorDashboard() {
           >
             Analytics & Leads
           </button>
+          <button 
+            onClick={() => setActiveTab('blog')}
+            className={`pb-3 text-sm font-bold border-b-2 transition-all ${
+              activeTab === 'blog' 
+                ? 'border-primary text-primary' 
+                : 'border-transparent text-text-secondary hover:text-text-primary'
+            }`}
+          >
+            Articles / Blog
+          </button>
         </div>
 
         {activeTab === 'listings' ? (
@@ -253,8 +264,10 @@ export default function RealtorDashboard() {
           <div className="bg-surface rounded-2xl border border-border-light shadow-card p-6">
             <TransactionList />
           </div>
-        ) : (
+        ) : activeTab === 'analytics' ? (
           <AnalyticsSection />
+        ) : (
+          <BlogManagement />
         )}
 
         {/* Create Form Modal */}
@@ -464,7 +477,7 @@ function ManageDocumentsModal({ property, onClose }) {
   )
 }
 
-function CreateListingModal({ onClose, onCreated }) {
+export function CreateListingModal({ onClose, onCreated }) {
   const fileRef = useRef(null)
   const videoRef = useRef(null)
   const [form, setForm] = useState({
@@ -599,6 +612,11 @@ function CreateListingModal({ onClose, onCreated }) {
       cleanedPayload.has_survey_plan = form.has_survey_plan
 
       cleanedPayload.uploaded_images = images
+      if (images.length === 0) {
+        setError('At least one property image is required.')
+        setSubmitting(false)
+        return
+      }
       if (video) cleanedPayload.video = video
       
       await propertiesAPI.create(cleanedPayload)

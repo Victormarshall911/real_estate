@@ -1,8 +1,17 @@
 import { MapPin, CheckCircle2, User, Star } from 'lucide-react'
+import StarRating from '../shared/StarRating'
+import { agentsAPI } from '../../api/client'
+import { useAuth } from '../../hooks/useAuth'
 
 export default function AgentCard({ agent, onConnect }) {
+  const { user, isAuthenticated } = useAuth()
   const name = agent?.user?.full_name || 'Agent'
   const profilePic = agent?.profile_picture_url
+  const canRate = isAuthenticated && user?.id !== agent?.user?.id
+
+  const handleRate = async (n) => {
+    await agentsAPI.rate(agent.id, { rating: n })
+  }
 
   return (
     <div className="bg-surface rounded-2xl border border-border overflow-hidden shadow-card hover:shadow-card-hover transition-all flex flex-col h-full group">
@@ -33,12 +42,6 @@ export default function AgentCard({ agent, onConnect }) {
               {name}
             </h3>
             {agent.is_verified && <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />}
-            {agent.average_rating > 0 && (
-              <div className="flex items-center gap-1 ml-2 bg-gold/10 px-1.5 py-0.5 rounded text-xs font-bold text-gold">
-                <Star className="w-3 h-3 fill-gold" />
-                {agent.average_rating}
-              </div>
-            )}
           </div>
           {agent.company_name && (
             <p className="text-sm font-medium text-text-secondary truncate" title={agent.company_name}>
@@ -49,6 +52,15 @@ export default function AgentCard({ agent, onConnect }) {
             <MapPin className="w-3.5 h-3.5" />
             {agent.company_location || 'Remote'}
           </p>
+          <div className="mt-2">
+            <StarRating
+              currentRating={agent.average_rating || 0}
+              ratingCount={agent.rating_count || 0}
+              onRate={handleRate}
+              canRate={canRate}
+              size="sm"
+            />
+          </div>
         </div>
       </div>
 

@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
-import { ShieldCheck, CreditCard, Fingerprint, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react'
+import { ShieldCheck, CreditCard, Fingerprint, CheckCircle2, AlertCircle, Loader2, LayoutDashboard } from 'lucide-react'
 import { kycAPI } from '../api/client'
 import { useAuth } from '../hooks/useAuth'
-import { Navigate } from 'react-router-dom'
+import { Navigate, Link } from 'react-router-dom'
 
 const VERIFICATION_TYPES = [
   {
@@ -61,9 +61,15 @@ export default function KYCPage() {
             <ShieldCheck className="w-10 h-10 text-primary" />
           </div>
           <h2 className="text-2xl font-bold text-text-primary mb-2">Identity Verified</h2>
-          <p className="text-sm text-text-muted">
+          <p className="text-sm text-text-muted mb-6">
             Your identity has already been verified. You're all set!
           </p>
+          <Link
+            to="/dashboard"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-white font-semibold text-sm hover:bg-primary-dark transition-all shadow-lg shadow-primary/20"
+          >
+            <LayoutDashboard className="w-4 h-4" /> Go to Dashboard
+          </Link>
         </div>
       </div>
     )
@@ -204,12 +210,12 @@ export default function KYCPage() {
                   </div>
                   <h3 className="text-xl font-bold text-text-primary mb-2">Verification Successful!</h3>
                   <p className="text-sm text-text-muted mb-6">{result.message}</p>
-                  <a
-                    href="/dashboard"
+                  <Link
+                    to="/dashboard"
                     className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-white font-semibold text-sm hover:bg-primary-dark transition-all"
                   >
-                    Go to Dashboard
-                  </a>
+                    <LayoutDashboard className="w-4 h-4" /> Go to Dashboard
+                  </Link>
                 </>
               ) : (
                 <>

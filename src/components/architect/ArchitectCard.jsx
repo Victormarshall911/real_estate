@@ -2,12 +2,19 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Star, MessageCircle, MessageSquare, Phone, Globe, ShieldCheck, Award, Loader2 } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
-import { chatAPI } from '../../api/client'
+import { chatAPI, architectsAPI } from '../../api/client'
+import StarRating from '../shared/StarRating'
 
 export default function ArchitectCard({ architect, onRate }) {
   const { isAuthenticated, user } = useAuth()
   const navigate = useNavigate()
   const [loadingChat, setLoadingChat] = useState(false)
+  const canRate = isAuthenticated && user?.id !== architect?.user?.id
+
+  const handleRate = async (n) => {
+    await architectsAPI.rate(architect.id, { rating: n })
+    if (onRate) onRate(architect.id, n)
+  }
 
   const whatsappUrl = architect?.formatted_whatsapp_url
     ? `${architect.formatted_whatsapp_url}?text=${encodeURIComponent('Hello! I saw your profile on LandMarket and I would like to inquire about architectural design services.')}`
@@ -94,10 +101,15 @@ export default function ArchitectCard({ architect, onRate }) {
 
       {/* Ratings Section */}
       <div className="flex items-center justify-between py-3 border-t border-b border-border mb-4 bg-surface-muted/30 px-3 rounded-xl">
-        <div className="flex items-center space-x-1">
-          <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
-          <span className="font-bold text-sm text-text-primary">{architect?.average_rating || 'New'}</span>
-          <span className="text-xs text-text-muted">({architect?.total_reviews || 0} reviews)</span>
+        <div className="flex flex-col gap-1">
+          <StarRating
+            currentRating={architect?.average_rating || 0}
+            ratingCount={architect?.total_reviews || 0}
+            onRate={handleRate}
+            canRate={canRate}
+            size="sm"
+          />
+        </div>
         </div>
         {onRate && (
           <button

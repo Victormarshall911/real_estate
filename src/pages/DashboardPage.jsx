@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Navigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import RealtorDashboard from '../components/realtor/RealtorDashboard'
 import CompleteProfileModal from '../components/realtor/CompleteProfileModal'
@@ -10,15 +10,21 @@ import CompleteDeveloperProfileModal from '../components/developer/CompleteDevel
 import ManageAgentLocations from '../components/agent/ManageAgentLocations'
 import WalletManager from '../components/wallet/WalletManager'
 import { authAPI } from '../api/client'
-import { Loader2, MessageSquare, MapPin, CheckCircle2 } from 'lucide-react'
+import { Loader2, LogOut } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import TransactionList from '../components/escrow/TransactionList'
 import AgentDashboard from '../components/agent/AgentDashboard'
 import ArchitectDashboard from '../components/architect/ArchitectDashboard'
 
 export default function DashboardPage() {
-  const { user, isAuthenticated, isRealtor, isAgent, isArchitect, isLandlord, isDeveloper, isKycVerified, refreshUser } = useAuth()
+  const { user, isAuthenticated, isRealtor, isAgent, isArchitect, isLandlord, isDeveloper, isKycVerified, refreshUser, logout } = useAuth()
   const [upgrading, setUpgrading] = useState(false)
+  const navigate = useNavigate()
+
+  const handleLogout = () => {
+    logout()
+    navigate('/')
+  }
 
   if (!isAuthenticated) {
     return <Navigate to="/" replace />
@@ -135,8 +141,20 @@ export default function DashboardPage() {
             {upgrading ? 'Upgrading...' : 'Upgrade to Realtor Account — Free'}
           </button>
         </div>
+
+        {/* Logout button */}
+        <div className="mt-4">
+          <button
+            onClick={handleLogout}
+            className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-border text-danger text-sm font-semibold hover:bg-red-50 transition-all"
+            id="dashboard-logout-btn"
+          >
+            <LogOut className="w-4 h-4" />
+            Sign Out
+          </button>
+        </div>
       </div>
-      
+
       <div className="w-full max-w-2xl mx-auto px-4 mt-8 space-y-8">
         <WalletManager />
         <div className="border-t border-border/60 pt-6">

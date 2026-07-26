@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { chatAPI, agentsAPI } from '../api/client'
-import { Search, Loader2, ArrowLeft, Send, CheckCheck, Check, MessageSquare, ShieldCheck } from 'lucide-react'
+import { Search, Loader2, ArrowLeft, Send, CheckCheck, Check, MessageSquare, ShieldCheck, WifiOff, Wifi } from 'lucide-react'
 import ReviewSection from '../components/shared/ReviewSection'
 import { Link } from 'react-router-dom'
 import { formatDistanceToNow } from 'date-fns'
@@ -14,12 +14,27 @@ export default function ChatPage() {
   const [inputText, setInputText] = useState('')
   const [loading, setLoading] = useState(true)
   const [loadingMessages, setLoadingMessages] = useState(false)
-  const [ws, setWs] = useState(null)
-  
+  const [wsStatus, setWsStatus] = useState('disconnected') // 'connecting' | 'connected' | 'disconnected' | 'error'
+
+  // Use a ref for the WebSocket so closures always get the latest instance
+  const wsRef = useRef(null)
   const messagesEndRef = useRef(null)
+  const activeSessionRef = useRef(null)
+
+  // Keep activeSessionRef in sync so WebSocket handlers can read current session
+  useEffect(() => {
+    activeSessionRef.current = activeSession
+  }, [activeSession])
 
   useEffect(() => {
     fetchSessions()
+    // Clean up WebSocket on unmount
+    return () => {
+      if (wsRef.current) {
+        wsRef.current.close()
+        wsRef.current = null
+      }
+    }
   }, [])
 
   useEffect(() => {
@@ -27,10 +42,8 @@ export default function ChatPage() {
       fetchMessages(activeSession.id)
       connectWebSocket(activeSession.id)
     }
-    return () => {
-      if (ws) ws.close()
-    }
-  }, [activeSession])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeSession?.id])
 
   useEffect(() => {
     scrollToBottom()
@@ -60,7 +73,7 @@ export default function ChatPage() {
       const { data } = await chatAPI.messages(sessionId)
       setMessages(data)
       // Update unread count in session list
-      setSessions(prev => prev.map(s => 
+      setSessions(prev => prev.map(s =>
         s.id === sessionId ? { ...s, unread_count: 0 } : s
       ))
     } catch (err) {
@@ -70,41 +83,89 @@ export default function ChatPage() {
     }
   }
 
-  const connectWebSocket = (sessionId) => {
-    if (ws) ws.close()
-    
+  const connectWebSocket = useCallback((sessionId) => {
+    // Close any existing WebSocket connection
+    if (wsRef.current) {
+      wsRef.current.close()
+      wsRef.current = null
+    }
+
+    setWsStatus('connecting')
+
+    // Build WebSocket URL from the API base URL
     let wsBaseUrl = import.meta.env.VITE_WS_URL
     if (!wsBaseUrl) {
       const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:8001/api/v1'
       wsBaseUrl = apiBase.replace(/^http/, 'ws').replace(/\/api\/v1\/?$/, '')
     }
-    const wsUrl = `${wsBaseUrl}/ws/chat/${sessionId}/?token=${token}`
-    const socket = new WebSocket(wsUrl)
-    
-    socket.onmessage = (e) => {
-      const data = JSON.parse(e.data)
-      const newMessage = {
-        id: data.id,
-        text: data.message,
-        sender: data.sender_id,
-        sender_name: data.sender_name,
-        created_at: data.created_at,
-        is_mine: data.sender_id === user.id,
-        is_read: false
-      }
-      setMessages(prev => [...prev, newMessage])
-      
-      // Update session last_message
-      setSessions(prev => prev.map(s => {
-        if (s.id === sessionId) {
-          return { ...s, last_message: newMessage }
-        }
-        return s
-      }))
+
+    const currentToken = localStorage.getItem('access_token')
+    const wsUrl = `${wsBaseUrl}/ws/chat/${sessionId}/?token=${currentToken}`
+
+    let socket
+    try {
+      socket = new WebSocket(wsUrl)
+    } catch (err) {
+      console.error('Failed to create WebSocket:', err)
+      setWsStatus('error')
+      return
     }
-    
-    setWs(socket)
-  }
+
+    socket.onopen = () => {
+      console.log('WebSocket connected to session', sessionId)
+      setWsStatus('connected')
+    }
+
+    socket.onmessage = (e) => {
+      try {
+        const data = JSON.parse(e.data)
+        const newMessage = {
+          id: data.id,
+          text: data.message,
+          sender: data.sender_id,
+          sender_name: data.sender_name,
+          created_at: data.created_at,
+          is_mine: String(data.sender_id) === String(user?.id),
+          is_read: false,
+        }
+        setMessages(prev => {
+          // Deduplicate: don't add if we already have a message with same id
+          if (prev.some(m => m.id === newMessage.id)) return prev
+          return [...prev, newMessage]
+        })
+
+        // Update session last_message
+        setSessions(prev => prev.map(s => {
+          if (s.id === sessionId) {
+            return { ...s, last_message: newMessage }
+          }
+          return s
+        }))
+      } catch (parseErr) {
+        console.error('Failed to parse WebSocket message:', parseErr)
+      }
+    }
+
+    socket.onerror = (err) => {
+      console.error('WebSocket error:', err)
+      setWsStatus('error')
+    }
+
+    socket.onclose = (event) => {
+      console.log('WebSocket closed, code:', event.code)
+      if (event.code === 4001) {
+        console.error('WebSocket auth failed — invalid token')
+        setWsStatus('error')
+      } else if (event.code === 4003) {
+        console.error('WebSocket access denied — no permission to this session')
+        setWsStatus('error')
+      } else {
+        setWsStatus('disconnected')
+      }
+    }
+
+    wsRef.current = socket
+  }, [user?.id])
 
   const sendMessage = async (e) => {
     e.preventDefault()
@@ -113,41 +174,37 @@ export default function ChatPage() {
     const text = inputText.trim()
     setInputText('')
 
-    if (ws && ws.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify({ message: text }))
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify({ message: text }))
     } else {
-      // Fallback to REST
+      // Fallback to REST API when WebSocket is not available
       try {
         const { data } = await chatAPI.sendMessage(activeSession.id, { text })
-        setMessages(prev => [...prev, data])
+        setMessages(prev => [...prev, { ...data, is_mine: true }])
       } catch (err) {
         console.error('Failed to send message', err)
+        // Re-put the text back so the user can retry
+        setInputText(text)
       }
     }
   }
 
   const getOtherUser = (session) => {
     if (!session) return { first_name: '', last_name: '' }
-    // Direct chat sessions: agent field may be a profile object with nested .user
-    // or a plain user-like object without .user
     const client = session.client || {}
     const agent = session.agent || {}
-    
-    // If the current user is the "client" (buyer), the other party is "agent"
+
     if (client.id === user?.id) {
-      // agent could be a profile with .user, or a fallback dict with .user inside
       return agent.user || agent
     }
-    // Otherwise we are the "agent" side, other party is the client
     return client
   }
 
   const handleCompleteDeal = async () => {
     if (!window.confirm("Are you sure you want to mark this deal as completed? Funds will be released if both parties accept.")) return
-    
+
     try {
       const { data } = await agentsAPI.completeDeal(activeSession.connection)
-      // Refresh session
       const updatedSessions = await chatAPI.sessions()
       setSessions(updatedSessions.data)
       const current = updatedSessions.data.find(s => s.id === activeSession.id)
@@ -160,7 +217,6 @@ export default function ChatPage() {
 
   const handleReviewSubmit = async (targetId, reviewData) => {
     await agentsAPI.rate(targetId, reviewData)
-    // Refresh to get updated ratings
     const updatedSessions = await chatAPI.sessions()
     setSessions(updatedSessions.data)
     const current = updatedSessions.data.find(s => s.id === activeSession.id)
@@ -206,7 +262,7 @@ export default function ChatPage() {
               {sessions.map(session => {
                 const otherUser = getOtherUser(session)
                 const isActive = activeSession?.id === session.id
-                
+
                 return (
                   <button
                     key={session.id}
@@ -250,13 +306,13 @@ export default function ChatPage() {
           <>
             {/* Chat Header */}
             <div className="h-16 bg-surface border-b border-border-light flex items-center px-4 gap-4 sticky top-0 z-10 shadow-sm">
-              <button 
+              <button
                 onClick={() => setActiveSession(null)}
                 className="md:hidden p-2 rounded-lg hover:bg-surface-muted transition-colors text-text-secondary"
               >
                 <ArrowLeft className="w-5 h-5" />
               </button>
-              
+
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
                 {getOtherUser(activeSession).first_name?.[0]}{getOtherUser(activeSession).last_name?.[0]}
               </div>
@@ -269,19 +325,37 @@ export default function ChatPage() {
                     </span>
                   )}
                 </h3>
+                {/* WebSocket connection status indicator */}
+                <div className="flex items-center gap-1 mt-0.5">
+                  {wsStatus === 'connected' && (
+                    <span className="flex items-center gap-1 text-[10px] text-success">
+                      <Wifi className="w-3 h-3" /> Live
+                    </span>
+                  )}
+                  {wsStatus === 'connecting' && (
+                    <span className="flex items-center gap-1 text-[10px] text-text-muted">
+                      <Loader2 className="w-3 h-3 animate-spin" /> Connecting…
+                    </span>
+                  )}
+                  {(wsStatus === 'disconnected' || wsStatus === 'error') && (
+                    <span className="flex items-center gap-1 text-[10px] text-warning">
+                      <WifiOff className="w-3 h-3" /> {wsStatus === 'error' ? 'Connection failed — using fallback' : 'Offline'}
+                    </span>
+                  )}
+                </div>
               </div>
 
               {/* Escrow Actions */}
               {activeSession.connection_status !== 'closed' && (
                 <button
                   onClick={handleCompleteDeal}
-                  disabled={(user.id === activeSession.client.id && activeSession.connection_buyer_completed) || 
-                            (user.id !== activeSession.client.id && activeSession.connection_agent_completed)}
+                  disabled={(user.id === activeSession.client?.id && activeSession.connection_buyer_completed) ||
+                            (user.id !== activeSession.client?.id && activeSession.connection_agent_completed)}
                   className="px-4 py-2 rounded-xl bg-primary text-white text-xs font-bold flex items-center gap-1.5 hover:bg-primary-dark transition-colors disabled:bg-success disabled:text-white"
                 >
                   <ShieldCheck className="w-4 h-4" />
-                  {(user.id === activeSession.client.id && activeSession.connection_buyer_completed) || 
-                   (user.id !== activeSession.client.id && activeSession.connection_agent_completed)
+                  {(user.id === activeSession.client?.id && activeSession.connection_buyer_completed) ||
+                   (user.id !== activeSession.client?.id && activeSession.connection_agent_completed)
                     ? 'Waiting for other party...'
                     : 'Complete Deal'}
                 </button>
@@ -289,14 +363,14 @@ export default function ChatPage() {
             </div>
 
             {/* If Deal is closed, show Review Section for Buyer */}
-            {activeSession.connection_status === 'closed' && user.id === activeSession.client.id && (
+            {activeSession.connection_status === 'closed' && user.id === activeSession.client?.id && (
               <div className="px-4 pt-4">
                 <ReviewSection
-                  targetId={activeSession.agent.id}
+                  targetId={activeSession.agent?.id}
                   targetType="agent"
                   onSubmit={handleReviewSubmit}
-                  averageRating={activeSession.agent.average_rating}
-                  totalReviews={activeSession.agent.total_reviews}
+                  averageRating={activeSession.agent?.average_rating}
+                  totalReviews={activeSession.agent?.total_reviews}
                 />
               </div>
             )}
@@ -316,16 +390,16 @@ export default function ChatPage() {
                 messages.map((msg, idx) => {
                   const showTime = idx === 0 || new Date(msg.created_at) - new Date(messages[idx-1].created_at) > 5 * 60000;
                   return (
-                    <div key={msg.id} className={`flex flex-col ${msg.is_mine ? 'items-end' : 'items-start'}`}>
+                    <div key={msg.id || idx} className={`flex flex-col ${msg.is_mine ? 'items-end' : 'items-start'}`}>
                       {showTime && (
                         <div className="text-[11px] text-text-muted my-2 px-2 py-1 bg-black/5 rounded-full self-center">
                           {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </div>
                       )}
-                      <div 
+                      <div
                         className={`max-w-[75%] px-4 py-2.5 rounded-2xl ${
-                          msg.is_mine 
-                            ? 'bg-primary text-white rounded-tr-sm' 
+                          msg.is_mine
+                            ? 'bg-primary text-white rounded-tr-sm'
                             : 'bg-white border border-border-light text-text-primary rounded-tl-sm shadow-sm'
                         }`}
                       >
@@ -351,7 +425,7 @@ export default function ChatPage() {
                   type="text"
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value)}
-                  placeholder="Type a message..."
+                  placeholder="Type a message…"
                   className="flex-1 px-4 py-3 rounded-xl border border-border bg-surface-dim text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                 />
                 <button

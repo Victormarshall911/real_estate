@@ -5,7 +5,7 @@ import { useAuth } from '../hooks/useAuth'
 
 const ROLES = [
   { value: 'buyer', label: 'Buy Land', icon: User, desc: 'Browse & invest' },
-  { value: 'realtor', label: 'Realtor', icon: Building, desc: 'List properties' },
+  { value: 'realtor', label: 'Seller', icon: Building, desc: 'List properties' },
   { value: 'agent', label: 'Agent', icon: Briefcase, desc: 'Earn commission' },
   { value: 'architect', label: 'Architect', icon: Ruler, desc: 'Design & plan' },
   { value: 'landlord', label: 'Landlord', icon: Home, desc: 'Own & lease/sell' },

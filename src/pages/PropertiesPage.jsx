@@ -127,8 +127,8 @@ export default function PropertiesPage() {
             {[
               {
                 emoji: '🔒',
-                title: 'Verified Realtors',
-                desc: 'Every realtor goes through our verification process. Look for the verified badge on listings you can trust.',
+                title: 'Verified Sellers',
+                desc: 'Every seller goes through our verification process. Look for the verified badge on listings you can trust.',
               },
               {
                 emoji: '📍',

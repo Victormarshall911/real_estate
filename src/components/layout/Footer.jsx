@@ -28,7 +28,7 @@ export default function Footer() {
             <ul className="space-y-3">
               <li><Link to="/" className="text-sm text-slate-400 hover:text-primary-light transition-colors">Browse Properties</Link></li>
               <li><Link to="/mortgage-calculator" className="text-sm text-slate-400 hover:text-primary-light transition-colors">Financing Calculator</Link></li>
-              <li><Link to="/dashboard" className="text-sm text-slate-400 hover:text-primary-light transition-colors">Realtor Dashboard</Link></li>
+              <li><Link to="/dashboard" className="text-sm text-slate-400 hover:text-primary-light transition-colors">Seller Dashboard</Link></li>
             </ul>
           </div>
 

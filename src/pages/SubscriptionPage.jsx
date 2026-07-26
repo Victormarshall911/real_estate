@@ -44,7 +44,7 @@ export default function SubscriptionPage() {
       return
     }
     if (!isRealtor) {
-      alert('You need a Realtor account to subscribe to these plans.')
+      alert('You need a Seller account to subscribe to these plans.')
       return
     }
 

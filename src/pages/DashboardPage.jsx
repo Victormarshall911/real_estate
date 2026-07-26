@@ -138,7 +138,7 @@ export default function DashboardPage() {
             className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border-2 border-primary text-primary font-bold text-sm hover:bg-primary hover:text-white transition-all disabled:opacity-60"
           >
             {upgrading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-            {upgrading ? 'Upgrading...' : 'Upgrade to Realtor Account — Free'}
+            {upgrading ? 'Upgrading...' : 'Upgrade to Seller Account — Free'}
           </button>
         </div>
 

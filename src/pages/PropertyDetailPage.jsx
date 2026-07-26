@@ -186,7 +186,7 @@ export default function PropertyDetailPage() {
               <div className="flex flex-wrap items-center gap-2 mb-3">
                 {seller?.is_verified && (
                   <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium flex-shrink-0">
-                    <BadgeCheck className="w-3.5 h-3.5" /> Verified Realtor
+                    <BadgeCheck className="w-3.5 h-3.5" /> Verified Seller
                   </span>
                 )}
                 {property.is_title_verified && (

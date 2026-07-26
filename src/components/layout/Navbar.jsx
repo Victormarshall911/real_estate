@@ -192,7 +192,7 @@ export default function Navbar() {
                         <p className="text-xs text-text-muted truncate mt-0.5">{user?.email}</p>
                         <div className="mt-1.5">
                           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">
-                            Role: {user?.role}
+                            Role: {user?.role === 'realtor' ? 'Seller' : user?.role}
                           </span>
                         </div>
                       </div>

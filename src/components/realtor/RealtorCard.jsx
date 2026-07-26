@@ -31,7 +31,7 @@ export default function RealtorCard({ realtor, sellerRole = 'realtor', propertyT
 
   const roleLabel = sellerRole === 'developer' 
     ? 'Developer' 
-    : (sellerRole === 'landlord' ? 'Landlord' : 'Realtor')
+    : (sellerRole === 'landlord' ? 'Landlord' : 'Seller')
 
   const handleStartChat = async () => {
     if (!isAuthenticated) {

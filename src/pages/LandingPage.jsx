@@ -17,7 +17,7 @@ const HOW_IT_WORKS = [
   {
     step: '01',
     title: 'Create Your Free Account',
-    desc: 'Sign up in under 2 minutes. Choose your role — buyer, realtor, landlord, developer, agent, or architect — and verify your identity via KYC.',
+    desc: 'Sign up in under 2 minutes. Choose your role — buyer, seller, landlord, developer, agent, or architect — and verify your identity via KYC.',,
     icon: Users,
   },
   {
@@ -29,7 +29,7 @@ const HOW_IT_WORKS = [
   {
     step: '03',
     title: 'Connect & Negotiate',
-    desc: 'Found the perfect plot? Connect directly with verified sellers (realtors, landlords, developers) or agents on WhatsApp — zero middlemen.',
+    desc: 'Found the perfect plot? Connect directly with verified sellers (landlords, developers) or agents on WhatsApp — zero middlemen.',,
     icon: Phone,
   },
   {
@@ -62,7 +62,7 @@ const FEATURES = [
   {
     image: '/feature-experts.png',
     title: 'Hire Verified Experts & Sellers',
-    desc: 'Connect with verified realtors, private landlords, estate developers, agents who know the terrain, or certified architects. All professionals are rated and reviewed by real clients.',
+    desc: 'Connect with verified sellers, private landlords, estate developers, agents who know the terrain, or certified architects. All professionals are rated and reviewed by real clients.',,
     badge: 'Top-Rated Pros',
     badgeColor: 'bg-amber-500',
     link: '/agents',
@@ -135,7 +135,7 @@ export default function LandingPage() {
 
             <p className="text-lg sm:text-xl text-white max-w-2xl leading-relaxed mb-10">
               Browse thousands of verified listings across Lagos, Abuja, and all 36 states.
-              Connect with trusted realtors, hire certified architects, and close deals through
+              Connect with trusted sellers, hire certified architects, and close deals through
               our secure escrow wallet — no fraud, no middlemen, no regrets.
             </p>
 

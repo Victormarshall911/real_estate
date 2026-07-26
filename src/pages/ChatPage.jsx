@@ -338,7 +338,7 @@ export default function ChatPage() {
                     </span>
                   )}
                   {(wsStatus === 'disconnected' || wsStatus === 'error') && (
-                    <span className="flex items-center gap-1 text-[10px] text-warning">
+                    <span className="flex items-center gap-1 text-[10px] text-amber-500">
                       <WifiOff className="w-3 h-3" /> {wsStatus === 'error' ? 'Connection failed — using fallback' : 'Offline'}
                     </span>
                   )}

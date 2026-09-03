@@ -57,11 +57,11 @@ export default function PropertyPassport({ property, onOpenSafetyChecklist }) {
                 PROPERTY PASSPORT
               </h3>
               <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-mono font-bold uppercase">
-                #NG-{(property.id || '000000').slice(0, 8)}
+                #NG-{String(property.id || '000000').slice(0, 8)}
               </span>
             </div>
             <p className="text-xs text-text-muted mt-0.5">
-              Digital Trust, Identity & Title Verification Record
+              Automated Trust & Title Integrity Certificate &bull; Issued for Nigerian Market
             </p>
           </div>
         </div>

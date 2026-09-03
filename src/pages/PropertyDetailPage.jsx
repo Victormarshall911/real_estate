@@ -45,6 +45,12 @@ const MOCK_DETAIL = {
   latitude: '6.4590',
   longitude: '3.4240',
   status: 'available',
+  property_category: 'land',
+  property_type: 'plot',
+  has_c_of_o: true,
+  has_survey_plan: true,
+  is_verified: true,
+  is_title_verified: true,
   view_count: 342,
   created_at: '2026-05-15T10:00:00Z',
   updated_at: '2026-05-28T14:30:00Z',
@@ -63,6 +69,166 @@ const MOCK_DETAIL = {
     is_verified: true,
     bio: 'Premium real estate consultant with 12 years of experience in Lagos property market. Specializing in Ikoyi, VI, and Lekki corridor.',
     listing_count: 8,
+  },
+}
+
+const DEMO_PROPERTIES = {
+  '1': MOCK_DETAIL,
+  'asaba-1': {
+    id: 'asaba-1',
+    title: 'Commercial & Residential Estate Plot in Asaba GRA',
+    description: `## Property Overview\n\nThis prime dry plot is situated in **Asaba GRA Phase 2, Delta State**, within a rapidly developing luxury corridor. Ideal for residential duplexes or commercial development.\n\n### Key Highlights\n\n- **Registered Survey Plan** with beacon coordinates verified\n- 100% dry land — ready for immediate foundation casting\n- Direct access from paved dual-carriage expressway\n- Fast-appreciating capital growth estimated at 18% p.a.\n\n### Neighbourhood\n\n- 8 mins to Asaba International Airport\n- 5 mins to Delta State Government Secretariat\n- 12 mins to Onitsha Head Bridge`,
+    price: '15000000.00',
+    land_size: '600.00',
+    land_size_plots: 1.0,
+    location: 'Asaba GRA Phase 2, Asaba, Delta State',
+    state: 'Delta',
+    latitude: '6.2059',
+    longitude: '6.6959',
+    status: 'available',
+    property_category: 'land',
+    property_type: 'plot',
+    has_c_of_o: false,
+    has_survey_plan: true,
+    is_verified: true,
+    is_title_verified: false,
+    has_electricity: true,
+    has_water: true,
+    has_drainage: true,
+    has_security: true,
+    view_count: 184,
+    created_at: '2026-06-01T10:00:00Z',
+    images: [
+      { id: '1', image_url: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1200&h=800&fit=crop', caption: 'Aerial Plot View', is_primary: true },
+      { id: '2', image_url: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=1200&h=800&fit=crop', caption: 'Access Road', is_primary: false },
+    ],
+    realtor: {
+      id: 'r2',
+      company_name: 'Delta Prime Realty & Partners',
+      user: { id: 'u2', first_name: 'Chukwuma', last_name: 'Nnamdi', email: 'chukwuma@deltaprime.ng' },
+      phone_number: '+2348031234567',
+      formatted_whatsapp_url: 'https://wa.me/2348031234567',
+      is_verified: true,
+      bio: 'Trusted Delta State real estate consultant with over 8 years in commercial and residential acreage.',
+      listing_count: 5,
+    },
+  },
+  'lekki-1': {
+    id: 'lekki-1',
+    title: 'Luxury 4-Bedroom Semi-Detached Duplex in Lekki Phase 1',
+    description: `## Property Overview\n\nContemporary 4-Bedroom Semi-Detached Duplex located in a secure gated estate in **Lekki Phase 1, Lagos**.\n\n### Features\n\n- **Governor\'s Consent & C of O**\n- All bedrooms ensuite with fitted wardrobes\n- Modern Italian fitted kitchen with heat extractor\n- 24/7 power & private security post`,
+    price: '110000000.00',
+    land_size: '450.00',
+    land_size_plots: 0.75,
+    bedrooms: 4,
+    bathrooms: 4,
+    location: 'Lekki Phase 1, Lagos',
+    state: 'Lagos',
+    latitude: '6.4474',
+    longitude: '3.4723',
+    status: 'available',
+    property_category: 'building',
+    property_type: 'duplex',
+    has_c_of_o: true,
+    has_survey_plan: true,
+    is_verified: true,
+    is_title_verified: true,
+    has_electricity: true,
+    has_water: true,
+    has_drainage: true,
+    has_security: true,
+    view_count: 412,
+    created_at: '2026-05-20T10:00:00Z',
+    images: [
+      { id: '1', image_url: 'https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=1200&h=800&fit=crop', caption: 'Exterior Front', is_primary: true },
+      { id: '2', image_url: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&h=800&fit=crop', caption: 'Living Room', is_primary: false },
+    ],
+    realtor: {
+      id: 'r1',
+      company_name: 'Adebayo Properties Ltd',
+      user: { id: 'u1', first_name: 'Adebayo', last_name: 'Ogunlesi', email: 'adebayo@landmarket.ng' },
+      phone_number: '+2348012345678',
+      formatted_whatsapp_url: 'https://wa.me/2348012345678',
+      is_verified: true,
+      bio: 'Premium real estate consultant in Lagos.',
+      listing_count: 8,
+    },
+  },
+  'abuja-1': {
+    id: 'abuja-1',
+    title: 'Serviced Residential Estate Plot in Maitama Extension',
+    description: `## Property Overview\n\nExclusive 900sqm residential plot in **Maitama Extension, Abuja FCT** with complete infrastructure.\n\n### Features\n\n- FCDA Certificate of Occupancy (C of O)\n- Paved access roads, electricity, and water connection\n- High-security diplomatic perimeter`,
+    price: '85000000.00',
+    land_size: '900.00',
+    land_size_plots: 1.5,
+    location: 'Maitama Extension, Abuja, FCT',
+    state: 'Abuja',
+    latitude: '9.0882',
+    longitude: '7.4933',
+    status: 'available',
+    property_category: 'land',
+    property_type: 'plot',
+    has_c_of_o: true,
+    has_survey_plan: true,
+    is_verified: true,
+    is_title_verified: true,
+    has_electricity: true,
+    has_water: true,
+    has_drainage: true,
+    has_security: true,
+    view_count: 279,
+    created_at: '2026-05-18T10:00:00Z',
+    images: [
+      { id: '1', image_url: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=1200&h=800&fit=crop', caption: 'Plot View', is_primary: true },
+    ],
+    realtor: {
+      id: 'r3',
+      company_name: 'Capital City Heights Real Estate',
+      user: { id: 'u3', first_name: 'Fatima', last_name: 'Bello', email: 'fatima@capitalheights.ng' },
+      phone_number: '+2348029876543',
+      formatted_whatsapp_url: 'https://wa.me/2348029876543',
+      is_verified: true,
+      bio: 'Abuja luxury residential & commercial land specialist.',
+      listing_count: 6,
+    },
+  },
+  'epe-1': {
+    id: 'epe-1',
+    title: 'Prime Dry Land Plot in Epe Express Corridor',
+    description: `## Property Overview\n\nHigh-yield 100% dry land plot strategically located on the **Epe Expressway, Lagos**.\n\n### Highlights\n\n- Registered Survey & Freehold Gazette\n- Rapid capital appreciation along the proposed International Airport belt\n- Zero omo-onile interference`,
+    price: '7500000.00',
+    land_size: '648.00',
+    land_size_plots: 1.0,
+    location: 'Epe Expressway, Lagos',
+    state: 'Lagos',
+    latitude: '6.5841',
+    longitude: '3.9833',
+    status: 'available',
+    property_category: 'land',
+    property_type: 'plot',
+    has_c_of_o: false,
+    has_survey_plan: true,
+    is_verified: true,
+    is_title_verified: false,
+    has_electricity: true,
+    has_water: false,
+    has_drainage: true,
+    has_security: true,
+    view_count: 310,
+    created_at: '2026-05-22T10:00:00Z',
+    images: [
+      { id: '1', image_url: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1200&h=800&fit=crop', caption: 'Acreage View', is_primary: true },
+    ],
+    realtor: {
+      id: 'r1',
+      company_name: 'Adebayo Properties Ltd',
+      user: { id: 'u1', first_name: 'Adebayo', last_name: 'Ogunlesi', email: 'adebayo@landmarket.ng' },
+      phone_number: '+2348012345678',
+      formatted_whatsapp_url: 'https://wa.me/2348012345678',
+      is_verified: true,
+      bio: 'Premium real estate consultant in Lagos.',
+      listing_count: 8,
+    },
   },
 }
 
@@ -85,7 +251,8 @@ export default function PropertyDetailPage() {
       setProperty(data)
       propertiesAPI.trackEvent(id, 'view').catch(() => {})
     } catch {
-      setProperty(MOCK_DETAIL)
+      const fallback = DEMO_PROPERTIES[id] || MOCK_DETAIL
+      setProperty(fallback)
     } finally {
       setLoading(false)
     }
@@ -224,7 +391,7 @@ export default function PropertyDetailPage() {
                 </span>
                 <span className="flex items-center gap-1.5">
                   <Maximize2 className="w-4 h-4 text-primary/70" />
-                  {parseFloat(property.land_size).toLocaleString()} sqm ({property.land_size_plots} plots)
+                  {parseFloat(property.land_size || 0).toLocaleString()} sqm ({property.land_size_plots || 1} plots)
                 </span>
                 <span className="flex items-center gap-1.5">
                   <Eye className="w-4 h-4" /> {property.view_count} views
@@ -334,7 +501,7 @@ export default function PropertyDetailPage() {
                   <>
                     <div className="p-3 rounded-xl bg-surface-dim border border-border-light text-center">
                       <p className="text-[10px] text-text-muted uppercase font-semibold">Size</p>
-                      <p className="text-sm font-bold text-text-primary mt-1">{parseFloat(property.land_size).toLocaleString()} sqm</p>
+                      <p className="text-sm font-bold text-text-primary mt-1">{parseFloat(property.land_size || 0).toLocaleString()} sqm</p>
                     </div>
                     <div className="p-3 rounded-xl bg-surface-dim border border-border-light text-center">
                       <p className="text-[10px] text-text-muted uppercase font-semibold">Plots</p>

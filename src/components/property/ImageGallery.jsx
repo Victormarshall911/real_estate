@@ -25,16 +25,25 @@ export default function ImageGallery({ images = [], video = null, propertyTitle 
   const [isDragging, setIsDragging] = useState(false)
   const startXRef = useRef(0)
 
-  // Normalize image objects
-  const photoList = images.map((img, idx) => ({
+  // Normalize image objects safely
+  const safeImages = Array.isArray(images) ? images : (images ? [images] : [])
+  const photoList = safeImages.map((img, idx) => ({
     id: img?.id || idx,
-    url: getMediaUrl(img?.image_url || img?.image || img),
+    url: getMediaUrl(img?.image_url || img?.image || img?.primary_image_url || img),
     caption: img?.caption || `${propertyTitle} - View ${idx + 1}`,
   }))
 
+  if (photoList.length === 0) {
+    photoList.push({
+      id: 'default-1',
+      url: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1200&h=800&fit=crop',
+      caption: propertyTitle,
+    })
+  }
+
   const hasPhotos = photoList.length > 0
   const hasVideo = Boolean(video)
-  const mainImage = photoList[currentPhoto] || { url: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1200&h=800&fit=crop' }
+  const mainImage = photoList[currentPhoto] || photoList[0] || { url: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1200&h=800&fit=crop' }
 
   // 360 drag handlers
   const handleMouseDown = (e) => {

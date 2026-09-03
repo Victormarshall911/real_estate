@@ -218,17 +218,33 @@ export default function PropertyPassport({ property, onOpenSafetyChecklist }) {
       </div>
 
       {/* Safety Guarantee Footer */}
-      <div className="pt-4 border-t border-border-light flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-text-muted relative z-10">
+      <div className="pt-5 border-t border-border-light flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-text-muted relative z-10">
         <div className="flex items-center gap-2 text-text-secondary">
           <Lock className="w-4 h-4 text-primary shrink-0" />
           <span>
-            Protected by <strong>LandMarket Buyer Safety Guidelines</strong> &bull; Escrow Eligible
+            Protected by <strong>LandMarket Buyer Safety</strong> &bull; Escrow Eligible
           </span>
         </div>
-        <div className="flex items-center gap-3">
-          <span className="inline-flex items-center gap-1 text-[11px] text-emerald-600 font-semibold bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-            <CheckCircle2 className="w-3 h-3" /> Safe to Inspect
-          </span>
+        <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
+          {onOpenSafetyChecklist && (
+            <button
+              onClick={onOpenSafetyChecklist}
+              className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-800 font-bold text-xs border border-amber-300 transition-all shadow-sm"
+              title="View Know Before You Pay Safety Checklist"
+            >
+              <span>Know Before You Pay 🔍</span>
+            </button>
+          )}
+          {onOpenReportModal && (
+            <button
+              onClick={onOpenReportModal}
+              className="inline-flex items-center justify-center gap-1 px-3 py-2 rounded-xl text-text-muted hover:text-danger hover:bg-danger/10 text-xs font-semibold transition-colors"
+              title="Report suspicious property or fake agent"
+            >
+              <AlertTriangle className="w-3.5 h-3.5" />
+              <span>Report</span>
+            </button>
+          )}
         </div>
       </div>
     </div>

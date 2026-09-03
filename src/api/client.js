@@ -214,6 +214,7 @@ export const propertiesAPI = {
   savedSearchesList: () => client.get('/properties/saved-searches/'),
   savedSearchesCreate: (data) => client.post('/properties/saved-searches/', data),
   savedSearchesDelete: (id) => client.delete(`/properties/saved-searches/${id}/`),
+  reportListing: (id, data) => client.post(`/properties/${id}/report/`, data),
 }
 
 export const realtorsAPI = {

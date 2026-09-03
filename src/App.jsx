@@ -21,6 +21,7 @@ import NetworkStatus from './components/shared/NetworkStatus'
 import { CompareProvider } from './context/CompareContext'
 import PropertyCompareTray from './components/property/PropertyCompareTray'
 import PropertyCompareModal from './components/property/PropertyCompareModal'
+import AIAssistantWidget from './components/ai/AIAssistantWidget'
 
 export default function App() {
   return (
@@ -52,6 +53,7 @@ export default function App() {
         <Footer />
         <PropertyCompareTray />
         <PropertyCompareModal />
+        <AIAssistantWidget />
       </div>
     </CompareProvider>
   )

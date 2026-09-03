@@ -7,6 +7,7 @@ import WalletManager from '../wallet/WalletManager'
 import TransactionList from '../escrow/TransactionList'
 import AnalyticsSection from './AnalyticsSection'
 import BlogManagement from '../blog/BlogManagement'
+import VerifiedBadge from '../shared/VerifiedBadge'
 
 function StatCard({ icon: Icon, label, value, color }) {
   return (
@@ -225,7 +226,14 @@ export default function RealtorDashboard() {
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-medium text-sm text-text-primary truncate">{listing.title}</h4>
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <h4 className="font-medium text-sm text-text-primary truncate">{listing.title}</h4>
+                      {listing.is_title_verified ? (
+                        <VerifiedBadge tier="title_verified" size="sm" />
+                      ) : (listing.has_c_of_o || listing.has_survey_plan) ? (
+                        <VerifiedBadge tier="documents_submitted" size="sm" />
+                      ) : null}
+                    </div>
                     <p className="text-xs text-text-muted">{listing.location}</p>
                   </div>
                   <div className="hidden sm:block text-right">

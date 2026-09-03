@@ -6,9 +6,11 @@ import RealtorCard from '../components/realtor/RealtorCard'
 import ReviewSection from '../components/shared/ReviewSection'
 import ProposeBuyModal from '../components/escrow/ProposeBuyModal'
 import MortgageCalculatorModal from '../components/property/MortgageCalculatorModal'
+import PropertyPassport from '../components/property/PropertyPassport'
+import VerifiedBadge from '../components/shared/VerifiedBadge'
 import { useAuth } from '../hooks/useAuth'
 import useScrollReveal from '../hooks/useScrollReveal'
-import { ArrowLeft, MapPin, Maximize2, Eye, Calendar, BadgeCheck, Share2, ShieldCheck, FileText, Clock, Calculator } from 'lucide-react'
+import { ArrowLeft, MapPin, Maximize2, Eye, Calendar, Share2, ShieldCheck, FileText, Clock, Calculator } from 'lucide-react'
 
 function formatPrice(price) {
   return `₦${parseFloat(price).toLocaleString()}`
@@ -185,15 +187,16 @@ export default function PropertyDetailPage() {
             <div>
               <div className="flex flex-wrap items-center gap-2 mb-3">
                 {seller?.is_verified && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium flex-shrink-0">
-                    <BadgeCheck className="w-3.5 h-3.5" /> Verified Seller
-                  </span>
+                  <VerifiedBadge 
+                    tier={sellerRole === 'Developer' ? 'cac_verified' : 'id_verified'} 
+                    size="sm" 
+                  />
                 )}
-                {property.is_title_verified && (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-100 text-green-700 text-xs font-semibold flex-shrink-0 border border-green-200">
-                    <ShieldCheck className="w-3.5 h-3.5 text-green-600 fill-green-100" /> Title Verified
-                  </span>
-                )}
+                {property.is_title_verified ? (
+                  <VerifiedBadge tier="title_verified" size="sm" />
+                ) : (property.has_c_of_o || property.has_survey_plan) ? (
+                  <VerifiedBadge tier="documents_submitted" size="sm" />
+                ) : null}
                 <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium flex-shrink-0 ${
                   property.status === 'available' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
                 }`}>
@@ -254,6 +257,9 @@ export default function PropertyDetailPage() {
                 </button>
               </div>
             </div>
+
+            {/* Flagship Property Passport Component */}
+            <PropertyPassport property={property} />
 
             {/* Tenancy Fee Breakdown */}
             {property.listing_type !== 'sale' && (property.caution_fee || property.agency_fee || property.legal_fee) && (

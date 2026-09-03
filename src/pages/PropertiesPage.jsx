@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Bell } from 'lucide-react'
+import { Bell, ShieldCheck } from 'lucide-react'
 import HeroSearch from '../components/search/HeroSearch'
 import PropertyGrid from '../components/property/PropertyGrid'
 import FeaturedCarousel from '../components/property/FeaturedCarousel'
@@ -17,6 +17,11 @@ export default function PropertiesPage() {
   const [activeTab, setActiveTab] = useState('regular') // 'regular' or 'upcoming'
   const [showSaveSearchModal, setShowSaveSearchModal] = useState(false)
   const [showLoginModal, setShowLoginModal] = useState(false)
+  const isVerifiedOnly = Boolean(filters?.verified_only === 'true' || filters?.verified_only === true)
+
+  const handleToggleVerifiedOnly = () => {
+    updateFilters({ verified_only: isVerifiedOnly ? '' : 'true' })
+  }
 
   useEffect(() => {
     async function fetchUpcoming() {
@@ -57,6 +62,20 @@ export default function PropertiesPage() {
           </div>
           
           <div className="flex flex-wrap items-center gap-3">
+            {/* Verified Only Toggle Button */}
+            <button
+              onClick={handleToggleVerifiedOnly}
+              className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl border transition-all font-bold text-sm shadow-sm ${
+                isVerifiedOnly
+                  ? 'bg-emerald-600 text-white border-emerald-700 shadow-emerald-600/20'
+                  : 'bg-surface-dim hover:bg-surface-muted text-text-secondary border-border-light hover:text-text-primary'
+              }`}
+              title="Filter listings to only show properties with verified documents or verified sellers"
+            >
+              <ShieldCheck className={`w-4 h-4 ${isVerifiedOnly ? 'text-white' : 'text-emerald-600'}`} />
+              <span>Verified Only</span>
+            </button>
+
             {/* Save Search Alert Button */}
             <button
               onClick={() => isAuthenticated ? setShowSaveSearchModal(true) : setShowLoginModal(true)}

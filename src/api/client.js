@@ -241,7 +241,17 @@ export const realtorsAPI = {
 }
 
 export const kycAPI = {
-  initiate: (data) => client.post('/kyc/initiate/', data),
+  initiate: (data) => {
+    if (data instanceof FormData) {
+      return client.post('/kyc/initiate/', data, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+    }
+    return client.post('/kyc/initiate/', data)
+  },
+  uploadDocument: (formData) => client.post('/kyc/initiate/', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }),
   getStatus: () => client.get('/kyc/status/'),
 }
 

@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Phone, MessageCircle, MessageSquare, BadgeCheck, User, Loader2 } from 'lucide-react'
+import { Phone, MessageCircle, MessageSquare, User, Loader2 } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { chatAPI, realtorsAPI } from '../../api/client'
 import StarRating from '../shared/StarRating'
+import VerifiedBadge from '../shared/VerifiedBadge'
 
 export default function RealtorCard({ realtor, sellerRole = 'realtor', propertyTitle = '', onTrackEvent }) {
   const { isAuthenticated, user } = useAuth()
@@ -85,9 +86,14 @@ export default function RealtorCard({ realtor, sellerRole = 'realtor', propertyT
           </span>
         </div>
         <div className="min-w-0">
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 flex-wrap">
             <h4 className="font-semibold text-text-primary text-sm truncate">{name}</h4>
-            {realtor?.is_verified && <BadgeCheck className="w-4 h-4 text-primary flex-shrink-0" />}
+            {realtor?.is_verified && (
+              <VerifiedBadge 
+                tier={sellerRole === 'developer' ? 'cac_verified' : 'id_verified'} 
+                size="sm" 
+              />
+            )}
           </div>
           <p className="text-xs text-text-muted capitalize font-semibold tracking-wider text-primary/80 mt-0.5">{roleLabel}</p>
           <div className="mt-1">

@@ -156,6 +156,9 @@ export function useProperties(initialFilters = {}) {
         const loc = f.location.toLowerCase()
         filtered = filtered.filter((p) => p.location.toLowerCase().includes(loc) || p.state.toLowerCase().includes(loc))
       }
+      if (f.verified_only === 'true' || f.verified_only === true) {
+        filtered = filtered.filter((p) => p.is_verified || p.is_title_verified)
+      }
 
       setProperties(filtered)
       setPagination({ count: filtered.length, totalPages: 1, currentPage: 1 })

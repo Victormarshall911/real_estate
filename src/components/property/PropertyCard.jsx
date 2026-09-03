@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
-import { MapPin, Maximize2, Eye, BadgeCheck, ImageIcon } from 'lucide-react'
+import { MapPin, Maximize2, Eye, ImageIcon, FileCheck2 } from 'lucide-react'
 import { getMediaUrl } from '../../utils/media'
+import VerifiedBadge from '../shared/VerifiedBadge'
 
 function formatPrice(price) {
   const num = parseFloat(price)
@@ -32,8 +33,9 @@ function getPriceSuffix(listingType, freq) {
 export default function PropertyCard({ property }) {
   const {
     id, title, price, land_size, land_size_plots, location,
-    primary_image_url, is_verified, image_count, view_count, created_at,
-    property_category, property_type, bedrooms, bathrooms, rent_frequency, listing_type
+    primary_image_url, is_verified, is_title_verified, seller_role, image_count, view_count, created_at,
+    property_category, property_type, bedrooms, bathrooms, rent_frequency, listing_type,
+    has_c_of_o, has_survey_plan
   } = property
 
   return (
@@ -61,17 +63,19 @@ export default function PropertyCard({ property }) {
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
 
         {/* Badges */}
-        <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
+        <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 z-10">
           {property_type && (
             <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-sm text-white text-[10px] uppercase font-bold tracking-wider">
               {property_type.replace('_', ' ')}
             </div>
           )}
-          {is_verified && (
-            <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/95 backdrop-blur-sm text-white text-xs font-semibold">
-              <BadgeCheck className="w-3.5 h-3.5" /> Verified
-            </div>
-          )}
+          {is_title_verified ? (
+            <VerifiedBadge tier="title_verified" size="sm" />
+          ) : is_verified ? (
+            <VerifiedBadge tier={seller_role === 'developer' ? 'cac_verified' : 'id_verified'} size="sm" />
+          ) : (has_c_of_o || has_survey_plan) ? (
+            <VerifiedBadge tier="documents_submitted" size="sm" />
+          ) : null}
         </div>
 
         {/* Image Count */}

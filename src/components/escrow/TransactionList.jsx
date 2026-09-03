@@ -5,6 +5,7 @@ import {
 } from 'lucide-react'
 import { escrowsAPI } from '../../api/client'
 import { useAuth } from '../../hooks/useAuth'
+import EscrowMilestoneTracker from './EscrowMilestoneTracker'
 
 export default function TransactionList() {
   const { user } = useAuth()
@@ -276,59 +277,15 @@ export default function TransactionList() {
                     </div>
                   )}
 
-                  {/* Milestones (Only relevant when funds are escrowed/disputed/completed) */}
-                  {['escrowed', 'disputed', 'completed'].includes(deal.status) && (
-                    <div className="space-y-3">
-                      <h5 className="text-xs uppercase font-bold text-text-secondary tracking-wider">
-                        Milestone Progress Checks
-                      </h5>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {/* Physical Inspection Milestone */}
-                        <div 
-                          onClick={() => deal.status === 'escrowed' && handleToggleMilestone(deal.id, 'inspection', deal.is_inspected)}
-                          className={`p-4 rounded-xl border flex items-center justify-between shadow-sm transition-all select-none ${
-                            deal.is_inspected 
-                              ? 'bg-emerald-50/40 border-emerald-200 text-emerald-900' 
-                              : 'bg-surface border-border text-text-primary'
-                          } ${deal.status === 'escrowed' ? 'cursor-pointer hover:border-primary/60' : 'opacity-85'}`}
-                        >
-                          <div>
-                            <p className="font-semibold text-sm">Physical Property Inspection</p>
-                            <p className="text-xs text-text-secondary mt-0.5">
-                              {deal.is_inspected ? 'Marked as Completed' : 'Pending verification'}
-                            </p>
-                          </div>
-                          <span className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${
-                            deal.is_inspected ? 'bg-emerald-500 border-transparent text-white' : 'border-border'
-                          }`}>
-                            {deal.is_inspected && <CheckCircle2 className="w-4.5 h-4.5" />}
-                          </span>
-                        </div>
-
-                        {/* Title Docs Verification Milestone */}
-                        <div 
-                          onClick={() => deal.status === 'escrowed' && handleToggleMilestone(deal.id, 'documents', deal.is_documents_verified)}
-                          className={`p-4 rounded-xl border flex items-center justify-between shadow-sm transition-all select-none ${
-                            deal.is_documents_verified 
-                              ? 'bg-emerald-50/40 border-emerald-200 text-emerald-900' 
-                              : 'bg-surface border-border text-text-primary'
-                          } ${deal.status === 'escrowed' ? 'cursor-pointer hover:border-primary/60' : 'opacity-85'}`}
-                        >
-                          <div>
-                            <p className="font-semibold text-sm">Land / Property Documents Verified</p>
-                            <p className="text-xs text-text-secondary mt-0.5">
-                              {deal.is_documents_verified ? 'Deeds & C of O Checked' : 'Pending validation'}
-                            </p>
-                          </div>
-                          <span className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${
-                            deal.is_documents_verified ? 'bg-emerald-500 border-transparent text-white' : 'border-border'
-                          }`}>
-                            {deal.is_documents_verified && <CheckCircle2 className="w-4.5 h-4.5" />}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                  {/* Milestones Escrow Tracker Component */}
+                  <EscrowMilestoneTracker 
+                    deal={deal}
+                    isBuyer={isBuyer}
+                    isSeller={isSeller}
+                    onToggleMilestone={handleToggleMilestone}
+                    onRelease={handleRelease}
+                    onRaiseDispute={(d) => setDisputeModalDeal(d)}
+                  />
 
                   {/* Actions Bar */}
                   <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-border/40">

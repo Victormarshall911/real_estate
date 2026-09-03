@@ -1,0 +1,349 @@
+#!/usr/bin/env python3
+"""
+Sync all backend updates for Phases 1 through 5 directly into real_estate_api.
+"""
+import os
+import sys
+
+BACKEND_DIR = "/home/victor/Desktop/real_estate_api"
+
+def write_backend_file(relative_path, content):
+    full_path = os.path.join(BACKEND_DIR, relative_path)
+    os.makedirs(os.path.dirname(full_path), exist_ok=True)
+    with open(full_path, "w", encoding="utf-8") as f:
+        f.write(content)
+    print(f"✅ Synchronized: {full_path}")
+
+# 1. apps/kyc/models.py
+KYC_MODELS = '''"""
+KYC Verification model — tracks identity and corporate verification via ID document and CAC certificate uploads.
+"""
+import uuid
+from django.conf import settings
+from django.db import models
+
+
+class KYCVerification(models.Model):
+    """
+    Records an identity or corporate verification submission for a user.
+    Supports Driver's License, International Passport, Voter's Card, and CAC Business Certificate.
+    """
+
+    class VerificationType(models.TextChoices):
+        DRIVERS_LICENSE = 'drivers_license', "Driver's License"
+        INTERNATIONAL_PASSPORT = 'international_passport', "International Passport"
+        VOTERS_CARD = 'voters_card', "Voter's Card"
+        CAC_CERTIFICATE = 'cac_certificate', "CAC Registration Certificate"
+        NATIONAL_ID = 'national_id', "National ID Card/Slip"
+
+    class Status(models.TextChoices):
+        PENDING = 'pending', 'Pending Review'
+        VERIFIED = 'verified', 'Verified'
+        FAILED = 'failed', 'Rejected'
+        EXPIRED = 'expired', 'Expired'
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='kyc_verification',
+    )
+    provider = models.CharField(max_length=50, default='document_upload')
+    verification_type = models.CharField(
+        max_length=30,
+        choices=VerificationType.choices,
+        default=VerificationType.DRIVERS_LICENSE,
+    )
+    document_number = models.CharField(
+        max_length=100,
+        blank=True,
+        default='',
+        help_text='ID card number or CAC Registration / BN number.',
+    )
+    id_number = models.CharField(
+        max_length=100,
+        blank=True,
+        default='',
+        help_text='Legacy ID reference if applicable.',
+    )
+    document_image = models.FileField(
+        upload_to='kyc_documents/',
+        null=True,
+        blank=True,
+        help_text='Uploaded photo of the ID card or CAC certificate.',
+    )
+    reference_id = models.CharField(
+        max_length=100,
+        blank=True,
+        default='',
+        help_text='Internal or third-party verification reference.',
+    )
+    status = models.CharField(
+        max_length=15,
+        choices=Status.choices,
+        default=Status.PENDING,
+        db_index=True,
+    )
+    rejection_reason = models.TextField(
+        blank=True,
+        default='',
+        help_text='Reason for rejection if verification failed.',
+    )
+    response_data = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text='Metadata or review notes.',
+    )
+    submitted_at = models.DateTimeField(auto_now_add=True)
+    verified_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'kyc_verifications'
+        verbose_name = 'KYC Verification'
+        verbose_name_plural = 'KYC Verifications'
+        ordering = ['-submitted_at']
+
+    def __str__(self):
+        return f'{self.user.email} — {self.get_verification_type_display()} ({self.status})'
+
+    @property
+    def verification_level(self):
+        if self.status != self.Status.VERIFIED:
+            return 'unverified'
+        if self.verification_type == self.VerificationType.CAC_CERTIFICATE:
+            return 'cac_verified'
+        return 'id_verified'
+'''
+
+# 2. apps/kyc/serializers.py
+KYC_SERIALIZERS = '''"""
+Serializers for document-based KYC verification.
+"""
+from rest_framework import serializers
+from .models import KYCVerification
+
+
+class InitiateKYCSerializer(serializers.ModelSerializer):
+    """Validates document upload submission for KYC."""
+    
+    class Meta:
+        model = KYCVerification
+        fields = ['verification_type', 'document_number', 'document_image']
+        extra_kwargs = {
+            'document_image': {'required': False},
+            'document_number': {'required': False},
+        }
+
+
+class KYCStatusSerializer(serializers.ModelSerializer):
+    """Read-only serializer for KYC status."""
+    verification_level = serializers.CharField(read_only=True)
+    verification_type_display = serializers.CharField(source='get_verification_type_display', read_only=True)
+
+    class Meta:
+        model = KYCVerification
+        fields = [
+            'id', 'verification_type', 'verification_type_display',
+            'verification_level', 'status', 'document_number',
+            'submitted_at', 'verified_at', 'rejection_reason',
+        ]
+        read_only_fields = fields
+'''
+
+# 3. apps/kyc/views.py
+KYC_VIEWS = '''"""
+Views for KYC verification: document submission and status tracking.
+"""
+from django.utils import timezone
+from rest_framework import permissions, status
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from .models import KYCVerification
+from .serializers import InitiateKYCSerializer, KYCStatusSerializer
+
+
+class InitiateKYCView(APIView):
+    """
+    POST /api/v1/kyc/initiate/
+    Submits an ID card or CAC certificate document upload for the authenticated user.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+
+    def post(self, request):
+        serializer = InitiateKYCSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        vtype = serializer.validated_data.get('verification_type', KYCVerification.VerificationType.DRIVERS_LICENSE)
+        doc_number = serializer.validated_data.get('document_number', '').strip()
+        doc_image = serializer.validated_data.get('document_image')
+
+        # Update or create verification entry
+        verification, created = KYCVerification.objects.update_or_create(
+            user=request.user,
+            defaults={
+                'verification_type': vtype,
+                'document_number': doc_number,
+                'document_image': doc_image if doc_image else None,
+                'status': KYCVerification.Status.PENDING,
+                'submitted_at': timezone.now(),
+            }
+        )
+
+        return Response(
+            {
+                'status': 'pending',
+                'message': 'Your documents have been submitted successfully and are under review by our compliance team.',
+                'verification': KYCStatusSerializer(verification).data,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+
+class KYCStatusView(APIView):
+    """
+    GET /api/v1/kyc/status/
+    Returns current KYC verification status.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        try:
+            verification = KYCVerification.objects.get(user=request.user)
+            return Response(KYCStatusSerializer(verification).data)
+        except KYCVerification.DoesNotExist:
+            return Response(
+                {'status': 'none', 'message': 'No verification on file.'},
+                status=status.HTTP_200_OK,
+            )
+'''
+
+# 4. apps/properties/services/scoring.py
+PROPERTIES_SCORING = '''"""
+Scoring engine for Property Investment Potential and Passport Trust Scores.
+"""
+
+def calculate_property_investment_score(property_listing):
+    """
+    Computes a 0-100 algorithmic score assessing the investment potential of a listing.
+    """
+    title_score = 15
+    if property_listing.has_c_of_o:
+        title_score = 35
+    elif property_listing.has_survey_plan:
+        title_score = 25
+    if property_listing.is_title_verified:
+        title_score = min(35, title_score + 5)
+
+    infra_score = 10
+    if property_listing.has_electricity:
+        infra_score += 5
+    if property_listing.has_water:
+        infra_score += 4
+    if property_listing.has_drainage:
+        infra_score += 3
+    if property_listing.has_security:
+        infra_score += 3
+    infra_score = min(25, infra_score)
+
+    seller_score = 10
+    seller = property_listing.realtor or property_listing.landlord or property_listing.developer
+    if seller and getattr(seller, 'is_verified', False):
+        seller_score = 20
+
+    value_score = 14
+    if property_listing.latitude and property_listing.longitude:
+        value_score += 6
+    value_score = min(20, value_score)
+
+    total_score = title_score + infra_score + seller_score + value_score
+
+    return {
+        'total_score': total_score,
+        'rating_label': 'Strong Growth Potential' if total_score >= 75 else ('Moderate Potential' if total_score >= 55 else 'Standard Yield'),
+        'title_score': title_score,
+        'infra_score': infra_score,
+        'seller_score': seller_score,
+        'value_score': value_score,
+    }
+'''
+
+# 5. apps/properties/views_ai.py
+PROPERTIES_AI_VIEWS = r'''"""
+AI-assisted natural language property discovery endpoint.
+"""
+import re
+from django.db.models import Q
+from rest_framework import permissions, status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from .models import PropertyListing
+from .serializers import PropertyListSerializer
+
+
+class AIAssistantSearchView(APIView):
+    """
+    POST /api/v1/properties/ai-search/
+    Parses natural language budget, state/location, and property type to return recommended matches.
+    """
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        query = request.data.get('query', '').strip()
+        if not query:
+            return Response({'error': 'Query is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        q_lower = query.lower()
+        queryset = PropertyListing.objects.filter(status=PropertyListing.Status.AVAILABLE)
+
+        # 1. Parse budget in millions
+        million_match = re.search(r'(\d+(?:\.\d+)?)\s*(?:m|million|milli)', q_lower)
+        if million_match:
+            budget = float(million_match.group(1)) * 1_000_000
+            queryset = queryset.filter(price__lte=budget)
+
+        # 2. Location filter matches
+        for loc in ['lagos', 'abuja', 'delta', 'rivers', 'oyo', 'enugu', 'asaba', 'lekki', 'epe', 'maitama', 'ikoyi']:
+            if loc in q_lower:
+                queryset = queryset.filter(
+                    Q(state__icontains=loc) |
+                    Q(location__icontains=loc) |
+                    Q(title__icontains=loc)
+                )
+
+        # 3. Document keywords
+        if 'c of o' in q_lower or 'co of o' in q_lower:
+            queryset = queryset.filter(has_c_of_o=True)
+        if 'survey' in q_lower:
+            queryset = queryset.filter(has_survey_plan=True)
+
+        results = queryset.order_by('-is_title_verified', '-created_at')[:4]
+        serialized = PropertyListSerializer(results, many=True, context={'request': request}).data
+
+        return Response({
+            'query': query,
+            'match_count': len(serialized),
+            'results': serialized,
+            'summary': f"Found {len(serialized)} matching verified properties."
+        }, status=status.HTTP_200_OK)
+'''
+
+def main():
+    print(f"🚀 Updating backend in {BACKEND_DIR}...")
+    if not os.path.exists(BACKEND_DIR):
+        print(f"❌ Backend directory not found at {BACKEND_DIR}")
+        sys.exit(1)
+
+    write_backend_file("apps/kyc/models.py", KYC_MODELS)
+    write_backend_file("apps/kyc/serializers.py", KYC_SERIALIZERS)
+    write_backend_file("apps/kyc/views.py", KYC_VIEWS)
+    write_backend_file("apps/properties/services/scoring.py", PROPERTIES_SCORING)
+    write_backend_file("apps/properties/views_ai.py", PROPERTIES_AI_VIEWS)
+
+    print("\n🎉 Backend files successfully synchronized directly into real_estate_api!")
+
+if __name__ == "__main__":
+    main()

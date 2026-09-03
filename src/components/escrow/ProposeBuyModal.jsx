@@ -135,10 +135,47 @@ export default function ProposeBuyModal({ property, onClose, onSuccess }) {
             )}
           </div>
 
+          {/* Payment Structure Selector */}
+          <div className="space-y-2">
+            <label className="text-xs font-bold uppercase tracking-wider text-text-secondary">
+              Payment Structure
+            </label>
+            <div className="grid grid-cols-2 gap-2.5">
+              <button
+                type="button"
+                onClick={() => setAmount(property.price || '')}
+                className={`p-3 rounded-xl border text-left transition-all text-xs font-bold ${
+                  amount === String(property.price)
+                    ? 'border-primary bg-primary/10 text-primary ring-2 ring-primary/20'
+                    : 'border-border bg-surface-dim hover:bg-surface-muted text-text-secondary'
+                }`}
+              >
+                <div className="font-extrabold text-sm text-text-primary">100% Full Escrow</div>
+                <div className="text-[10px] text-text-muted mt-0.5">Total purchase price held in safe custody</div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const deposit = Math.round(parseFloat(property.price || 0) * 0.10)
+                  setAmount(deposit.toString())
+                }}
+                className={`p-3 rounded-xl border text-left transition-all text-xs font-bold ${
+                  amount === String(Math.round(parseFloat(property.price || 0) * 0.10))
+                    ? 'border-primary bg-primary/10 text-primary ring-2 ring-primary/20'
+                    : 'border-border bg-surface-dim hover:bg-surface-muted text-text-secondary'
+                }`}
+              >
+                <div className="font-extrabold text-sm text-text-primary">10% Earnest Deposit</div>
+                <div className="text-[10px] text-text-muted mt-0.5">Locks property 14 days for title search</div>
+              </button>
+            </div>
+          </div>
+
           {/* Offer Input */}
           <div className="space-y-1.5">
             <label className="text-sm font-semibold text-text-primary">
-              Proposed Price (₦)
+              Escrow Deposit Amount (₦)
             </label>
             <input 
               type="number"

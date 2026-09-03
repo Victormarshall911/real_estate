@@ -18,7 +18,7 @@ import VerifiedBadge from '../shared/VerifiedBadge'
  * PropertyPassport Component
  * Standardized digital trust & safety passport for Nigerian property listings.
  */
-export default function PropertyPassport({ property, onOpenSafetyChecklist }) {
+export default function PropertyPassport({ property, onOpenSafetyChecklist, onOpenReportModal }) {
   if (!property) return null
 
   const seller = property.realtor || property.landlord || property.developer || property.architect

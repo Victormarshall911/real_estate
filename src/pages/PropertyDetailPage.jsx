@@ -10,6 +10,7 @@ import PropertyPassport from '../components/property/PropertyPassport'
 import VerifiedBadge from '../components/shared/VerifiedBadge'
 import KnowBeforeYouPayModal from '../components/property/KnowBeforeYouPayModal'
 import ReportListingModal from '../components/property/ReportListingModal'
+import InvestmentScoreCard from '../components/property/InvestmentScoreCard'
 import { useAuth } from '../hooks/useAuth'
 import useScrollReveal from '../hooks/useScrollReveal'
 import { ArrowLeft, MapPin, Maximize2, Eye, Calendar, Share2, ShieldCheck, FileText, Clock, Calculator, Flag, ShieldAlert } from 'lucide-react'
@@ -275,6 +276,9 @@ export default function PropertyDetailPage() {
               onOpenSafetyChecklist={() => setShowSafetyModal(true)}
               onOpenReportModal={() => setShowReportModal(true)}
             />
+
+            {/* Property Investment Score Card */}
+            <InvestmentScoreCard property={property} />
 
             {/* Tenancy Fee Breakdown */}
             {property.listing_type !== 'sale' && (property.caution_fee || property.agency_fee || property.legal_fee) && (

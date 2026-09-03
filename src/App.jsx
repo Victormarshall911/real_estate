@@ -18,34 +18,42 @@ import RegisterPage from './pages/RegisterPage'
 import BlogPage from './pages/BlogPage'
 import BlogDetailPage from './pages/BlogDetailPage'
 import NetworkStatus from './components/shared/NetworkStatus'
+import { CompareProvider } from './context/CompareContext'
+import PropertyCompareTray from './components/property/PropertyCompareTray'
+import PropertyCompareModal from './components/property/PropertyCompareModal'
 
 export default function App() {
   return (
-    <div className="flex flex-col min-h-screen">
-      <NetworkStatus />
-      <Navbar />
-      <div className="flex-1">
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/properties" element={<PropertiesPage />} />
-          <Route path="/properties/:id" element={<PropertyDetailPage />} />
-          <Route path="/mortgage-calculator" element={<MortgageCalculatorPage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/verify-identity" element={<KYCPage />} />
-          <Route path="/register/:role?" element={<RegisterPage />} />
-          <Route path="/blog" element={<BlogPage />} />
-          <Route path="/blog/:slug" element={<BlogDetailPage />} />
-          <Route path="/agents" element={<AgentsPage />} />
-          <Route path="/architects" element={<ArchitectsPage />} />
-          <Route path="/landlords" element={<LandlordsPage />} />
-          <Route path="/developers" element={<DevelopersPage />} />
-          <Route path="/pricing" element={<SubscriptionPage />} />
-          <Route path="/messages" element={<ChatPage />} />
-          <Route path="/chat" element={<ChatPage />} />
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
+    <CompareProvider>
+      <div className="flex flex-col min-h-screen">
+        <NetworkStatus />
+        <Navbar />
+        <div className="flex-1">
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/properties" element={<PropertiesPage />} />
+            <Route path="/properties/:id" element={<PropertyDetailPage />} />
+            <Route path="/mortgage-calculator" element={<MortgageCalculatorPage />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/verify-identity" element={<KYCPage />} />
+            <Route path="/register/:role?" element={<RegisterPage />} />
+            <Route path="/blog" element={<BlogPage />} />
+            <Route path="/blog/:slug" element={<BlogDetailPage />} />
+            <Route path="/agents" element={<AgentsPage />} />
+            <Route path="/architects" element={<ArchitectsPage />} />
+            <Route path="/landlords" element={<LandlordsPage />} />
+            <Route path="/developers" element={<DevelopersPage />} />
+            <Route path="/pricing" element={<SubscriptionPage />} />
+            <Route path="/messages" element={<ChatPage />} />
+            <Route path="/chat" element={<ChatPage />} />
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+        </div>
+        <Footer />
+        <PropertyCompareTray />
+        <PropertyCompareModal />
       </div>
-      <Footer />
-    </div>
+    </CompareProvider>
   )
 }
+

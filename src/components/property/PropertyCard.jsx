@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom'
-import { MapPin, Maximize2, Eye, ImageIcon, FileCheck2 } from 'lucide-react'
+import { MapPin, Maximize2, Eye, ImageIcon, FileCheck2, Scale } from 'lucide-react'
 import { getMediaUrl } from '../../utils/media'
 import VerifiedBadge from '../shared/VerifiedBadge'
+import { useCompare } from '../../context/CompareContext'
 
 function formatPrice(price) {
   const num = parseFloat(price)
@@ -37,6 +38,15 @@ export default function PropertyCard({ property }) {
     property_category, property_type, bedrooms, bathrooms, rent_frequency, listing_type,
     has_c_of_o, has_survey_plan
   } = property
+
+  const { toggleCompare, isInCompare } = useCompare()
+  const isCompared = isInCompare(id)
+
+  const handleCompareClick = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    toggleCompare(property)
+  }
 
   return (
     <Link
@@ -78,12 +88,27 @@ export default function PropertyCard({ property }) {
           ) : null}
         </div>
 
-        {/* Image Count */}
-        {image_count > 1 && (
-          <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 rounded-lg bg-black/50 backdrop-blur-sm text-white text-xs">
-            <ImageIcon className="w-3 h-3" /> {image_count}
-          </div>
-        )}
+        {/* Top Right Actions (Compare + Image Count) */}
+        <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10">
+          <button
+            onClick={handleCompareClick}
+            className={`px-2 py-1 rounded-lg backdrop-blur-sm transition-all text-xs flex items-center gap-1 font-bold ${
+              isCompared
+                ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30'
+                : 'bg-black/50 text-white hover:bg-black/75'
+            }`}
+            title={isCompared ? 'Remove from compare' : 'Add to compare'}
+          >
+            <Scale className="w-3.5 h-3.5" />
+            <span className="text-[10px]">{isCompared ? 'Compared' : 'Compare'}</span>
+          </button>
+
+          {image_count > 1 && (
+            <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-black/50 backdrop-blur-sm text-white text-xs">
+              <ImageIcon className="w-3 h-3" /> {image_count}
+            </div>
+          )}
+        </div>
 
         {/* Price */}
         <div className="absolute bottom-3 left-3">

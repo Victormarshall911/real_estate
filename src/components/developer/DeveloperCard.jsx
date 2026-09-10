@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Star, MessageCircle, MessageSquare, Phone, Globe, ShieldCheck, Loader2 } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { chatAPI } from '../../api/client'
+import VerifiedBadge from '../shared/VerifiedBadge'
 
 export default function DeveloperCard({ developer, onRate }) {
   const { isAuthenticated, user } = useAuth()
@@ -80,8 +81,14 @@ export default function DeveloperCard({ developer, onRate }) {
             {company}
           </h3>
           <p className="text-sm font-medium text-text-secondary truncate">{name}</p>
+          <div className="mt-1">
+            <VerifiedBadge
+              tier={developer?.user?.verification_level || (developer?.is_verified ? 'cac_verified' : 'contact_verified')}
+              size="sm"
+            />
+          </div>
           {developer?.company_location && (
-            <p className="text-xs text-text-muted truncate mt-0.5">{developer.company_location}</p>
+            <p className="text-xs text-text-muted truncate mt-1">{developer.company_location}</p>
           )}
         </div>
       </div>

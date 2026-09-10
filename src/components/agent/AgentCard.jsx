@@ -2,6 +2,7 @@ import { MapPin, CheckCircle2, User, Star } from 'lucide-react'
 import StarRating from '../shared/StarRating'
 import { agentsAPI } from '../../api/client'
 import { useAuth } from '../../hooks/useAuth'
+import VerifiedBadge from '../shared/VerifiedBadge'
 
 export default function AgentCard({ agent, onConnect }) {
   const { user, isAuthenticated } = useAuth()
@@ -37,11 +38,16 @@ export default function AgentCard({ agent, onConnect }) {
           </span>
         </div>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5 mb-1">
+          <div className="flex items-center gap-1.5 mb-1 flex-wrap">
             <h3 className="font-bold text-text-primary text-lg truncate" title={name}>
               {name}
             </h3>
-            {agent.is_verified && <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />}
+            {agent.is_verified && (
+              <VerifiedBadge
+                tier={agent.user?.verification_level || (agent.company_name ? 'cac_verified' : 'id_verified')}
+                size="sm"
+              />
+            )}
           </div>
           {agent.company_name && (
             <p className="text-sm font-medium text-text-secondary truncate" title={agent.company_name}>

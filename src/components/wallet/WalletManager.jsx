@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Wallet, ArrowDownToLine, ArrowUpRight, History, Loader2 } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { Wallet, ArrowDownToLine, ArrowUpRight, History, Loader2, Lock, Building2, ChevronRight } from 'lucide-react'
 import { walletsAPI } from '../../api/client'
 import { formatDistanceToNow } from 'date-fns'
 
@@ -38,7 +39,7 @@ export default function WalletManager() {
       await walletsAPI.deposit({
         amount: depositAmount,
         reference: `dep-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-        description: 'Wallet top-up (Mock)'
+        description: 'Wallet top-up'
       })
       setDepositAmount('')
       await fetchWallet()
@@ -59,6 +60,8 @@ export default function WalletManager() {
 
   if (!wallet) return null
 
+  const lockedEscrow = Number(wallet.locked_in_escrow || 0)
+
   return (
     <div className="bg-surface rounded-2xl shadow-elevated border border-border overflow-hidden">
       {/* Header / Balance */}
@@ -69,11 +72,33 @@ export default function WalletManager() {
             <h2 className="text-lg font-semibold flex items-center gap-2">
               <Wallet className="w-5 h-5 text-gold" /> My Wallet
             </h2>
+            <Link
+              to="/wallet"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold text-white backdrop-blur-sm transition-colors"
+            >
+              <span>Full Wallet & Payouts</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </Link>
           </div>
-          <p className="text-sm text-blue-200 mb-1">Available Balance</p>
-          <h3 className="text-4xl font-extrabold tracking-tight">
-            ₦{Number(wallet.balance).toLocaleString()}
-          </h3>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <p className="text-xs text-blue-200 uppercase tracking-wider font-semibold mb-1">Available Balance</p>
+              <h3 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+                ₦{Number(wallet.balance).toLocaleString()}
+              </h3>
+            </div>
+            {lockedEscrow > 0 && (
+              <div className="sm:border-l sm:border-white/10 sm:pl-4">
+                <p className="text-xs text-amber-300 uppercase tracking-wider font-semibold mb-1 flex items-center gap-1">
+                  <Lock className="w-3.5 h-3.5" /> In Escrow Hold
+                </p>
+                <h3 className="text-2xl font-bold tracking-tight text-amber-200">
+                  ₦{lockedEscrow.toLocaleString()}
+                </h3>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -85,10 +110,15 @@ export default function WalletManager() {
         )}
 
         {/* Deposit Form */}
-        <form onSubmit={handleDeposit} className="mb-8 p-5 bg-surface-dim rounded-2xl border border-border-light">
-          <h4 className="font-semibold text-text-primary mb-3 text-sm flex items-center gap-2">
-            <ArrowDownToLine className="w-4 h-4 text-primary" /> Quick Deposit
-          </h4>
+        <form onSubmit={handleDeposit} className="mb-6 p-5 bg-surface-dim rounded-2xl border border-border-light">
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="font-semibold text-text-primary text-sm flex items-center gap-2">
+              <ArrowDownToLine className="w-4 h-4 text-primary" /> Quick Deposit
+            </h4>
+            <Link to="/wallet" className="text-xs font-medium text-primary hover:underline flex items-center gap-1">
+              Bank transfer / NUBAN <ArrowUpRight className="w-3 h-3" />
+            </Link>
+          </div>
           <div className="flex gap-3">
             <div className="relative flex-1">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted font-medium">₦</span>

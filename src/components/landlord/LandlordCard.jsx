@@ -4,6 +4,7 @@ import { Star, MessageCircle, MessageSquare, Phone, ShieldCheck, Loader2 } from 
 import { useAuth } from '../../hooks/useAuth'
 import { chatAPI, landlordsAPI } from '../../api/client'
 import StarRating from '../shared/StarRating'
+import VerifiedBadge from '../shared/VerifiedBadge'
 
 export default function LandlordCard({ landlord, onRate }) {
   const { isAuthenticated, user } = useAuth()
@@ -84,7 +85,12 @@ export default function LandlordCard({ landlord, onRate }) {
           <h3 className="font-bold text-text-primary text-lg truncate group-hover:text-primary transition-colors">
             {name}
           </h3>
-          <p className="text-xs font-semibold text-text-muted uppercase tracking-wider">Verified Landlord</p>
+          <div className="mt-1">
+            <VerifiedBadge
+              tier={landlord?.user?.verification_level || (landlord?.is_verified ? 'id_verified' : 'contact_verified')}
+              size="sm"
+            />
+          </div>
         </div>
       </div>
 

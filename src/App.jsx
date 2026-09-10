@@ -5,6 +5,7 @@ import LandingPage from './pages/LandingPage'
 import PropertiesPage from './pages/PropertiesPage'
 import PropertyDetailPage from './pages/PropertyDetailPage'
 import DashboardPage from './pages/DashboardPage'
+import WalletPage from './pages/WalletPage'
 import KYCPage from './pages/KYCPage'
 import AgentsPage from './pages/AgentsPage'
 import ArchitectsPage from './pages/ArchitectsPage'
@@ -36,6 +37,7 @@ export default function App() {
             <Route path="/properties/:id" element={<PropertyDetailPage />} />
             <Route path="/mortgage-calculator" element={<MortgageCalculatorPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/wallet" element={<WalletPage />} />
             <Route path="/verify-identity" element={<KYCPage />} />
             <Route path="/register/:role?" element={<RegisterPage />} />
             <Route path="/blog" element={<BlogPage />} />

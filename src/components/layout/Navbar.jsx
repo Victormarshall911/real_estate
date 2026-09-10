@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { Menu, X, MapPin, User, LogOut, LayoutDashboard, ChevronDown, MessageSquare } from 'lucide-react'
+import { Menu, X, MapPin, User, LogOut, LayoutDashboard, ChevronDown, MessageSquare, Wallet } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import LoginModal from '../auth/LoginModal'
 import RegisterModal from '../auth/RegisterModal'
@@ -203,13 +203,23 @@ export default function Navbar() {
                         <User className="w-4 h-4" /> Edit Profile
                       </button>
                       {isAuthenticated && (
-                        <Link
-                          to="/dashboard"
-                          onClick={() => setProfileOpen(false)}
-                          className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-text-secondary hover:bg-surface-muted transition-colors"
-                        >
-                          <LayoutDashboard className="w-4 h-4" /> Dashboard
-                        </Link>
+                        <>
+                          <Link
+                            to="/dashboard"
+                            onClick={() => setProfileOpen(false)}
+                            className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-text-secondary hover:bg-surface-muted transition-colors"
+                          >
+                            <LayoutDashboard className="w-4 h-4" /> Dashboard
+                          </Link>
+                          <Link
+                            to="/wallet"
+                            onClick={() => setProfileOpen(false)}
+                            className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-text-secondary hover:bg-surface-muted transition-colors"
+                            id="nav-wallet-link"
+                          >
+                            <Wallet className="w-4 h-4 text-primary" /> My Virtual Wallet
+                          </Link>
+                        </>
                       )}
                       <Link
                         to="/messages"
@@ -315,12 +325,21 @@ export default function Navbar() {
                 </Link>
               )}
               {isAuthenticated && (
-                <Link
-                  to="/dashboard"
-                  className="px-4 py-3 rounded-lg text-sm font-medium text-text-secondary hover:bg-surface-muted transition-colors"
-                >
-                  Dashboard
-                </Link>
+                <>
+                  <Link
+                    to="/dashboard"
+                    className="px-4 py-3 rounded-lg text-sm font-medium text-text-secondary hover:bg-surface-muted transition-colors"
+                  >
+                    Dashboard
+                  </Link>
+                  <Link
+                    to="/wallet"
+                    onClick={() => setMobileOpen(false)}
+                    className="px-4 py-3 rounded-lg text-sm font-medium text-text-secondary hover:bg-surface-muted transition-colors flex items-center gap-2.5"
+                  >
+                    <Wallet className="w-4 h-4 text-primary" /> My Virtual Wallet
+                  </Link>
+                </>
               )}
 
               <div className="border-t border-border-light my-1.5" />

@@ -265,9 +265,9 @@ class PropertyTrustAndSafetyTests(APITestCase):
 
     def test_report_listing_creates_property_report(self):
         self.client.force_authenticate(user=self.reporter)
-        url = reverse('propertylisting-report', kwargs={'pk': self.property.id})
+        url = reverse('properties:property-report', kwargs={'pk': self.property.id})
         payload = {
-            'reason': 'fake_documents',
+            'reason': 'fake_agent',
             'description': 'Survey plan number does not exist in state surveyor general records.',
             'contact_email': 'reporter@example.com'
         }
@@ -276,7 +276,7 @@ class PropertyTrustAndSafetyTests(APITestCase):
 
         report = PropertyReport.objects.filter(property_listing=self.property).first()
         self.assertIsNotNone(report)
-        self.assertEqual(report.reason, 'fake_documents')
+        self.assertEqual(report.reason, 'fake_agent')
 
     def test_auto_moderation_threshold_flags_property_review(self):
         # Create 3 reports to test the threshold
@@ -286,8 +286,8 @@ class PropertyTrustAndSafetyTests(APITestCase):
                 password='testpassword123'
             )
             self.client.force_authenticate(user=u)
-            url = reverse('propertylisting-report', kwargs={'pk': self.property.id})
-            self.client.post(url, {'reason': 'fraud_scam', 'description': 'Scam listing'})
+            url = reverse('properties:property-report', kwargs={'pk': self.property.id})
+            self.client.post(url, {'reason': 'suspicious_payment', 'description': 'Demanded cash payment outside escrow'})
 
         self.property.refresh_from_db()
         self.assertTrue(self.property.is_under_review)

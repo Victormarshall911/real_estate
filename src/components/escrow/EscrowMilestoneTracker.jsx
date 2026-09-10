@@ -10,7 +10,11 @@ import {
   ArrowRight,
   DollarSign,
   Building2,
-  HelpCircle
+  HelpCircle,
+  Scale,
+  UserCheck,
+  PhoneCall,
+  ShieldAlert
 } from 'lucide-react'
 
 const MILESTONES = [
@@ -22,7 +26,7 @@ const MILESTONES = [
   },
   {
     key: 'accepted',
-    title: '2. Seller Confirmed',
+    title: '2. Seller Accepted',
     description: 'Seller agreed to purchase terms & scheduled physical site inspection.',
     icon: Building2,
   },
@@ -40,8 +44,8 @@ const MILESTONES = [
   },
   {
     key: 'disbursement',
-    title: '5. Release & Payout',
-    description: 'Buyer authorizes fund release; payout disbursed to seller.',
+    title: '5. Dual Confirmation & Payout',
+    description: 'Both buyer AND seller must confirm transaction to release funds.',
     icon: ShieldCheck,
   },
 ]
@@ -51,18 +55,23 @@ export default function EscrowMilestoneTracker({
   isBuyer, 
   isSeller, 
   onToggleMilestone, 
-  onRelease, 
+  onConfirmDeal,
+  onRejectDeal,
   onRaiseDispute 
 }) {
   if (!deal) return null
 
   // Determine active milestone state
   const isFunded = deal.status !== 'pending' && deal.status !== 'cancelled'
-  const isAccepted = deal.status === 'escrowed' || deal.status === 'completed'
+  const isAccepted = deal.status === 'escrowed' || deal.status === 'completed' || deal.status === 'in_mediation'
   const isInspected = Boolean(deal.is_inspected)
   const isDocsVerified = Boolean(deal.is_documents_verified)
   const isCompleted = deal.status === 'completed'
-  const isDisputed = deal.status === 'disputed'
+  const isInMediation = deal.status === 'in_mediation' || Boolean(deal.in_mediation)
+  const isDisputed = deal.status === 'disputed' || isInMediation
+
+  const buyerConfirmed = Boolean(deal.buyer_confirmed || deal.buyer_approved)
+  const sellerConfirmed = Boolean(deal.seller_confirmed)
 
   const milestoneStatus = {
     deposit: isFunded,
@@ -71,6 +80,9 @@ export default function EscrowMilestoneTracker({
     documents: isDocsVerified,
     disbursement: isCompleted,
   }
+
+  // Pre-conditions for final release
+  const canConfirmMilestone = isInspected && isDocsVerified
 
   return (
     <div className="rounded-2xl bg-surface border border-border-light p-5 sm:p-6 space-y-6">
@@ -82,32 +94,37 @@ export default function EscrowMilestoneTracker({
           </div>
           <div>
             <h4 className="font-bold text-sm text-text-primary">
-              Milestone Escrow Lifecycle
+              Milestone Escrow Lifecycle & Dual Confirmation
             </h4>
             <p className="text-[11px] text-text-muted">
-              Funds remain protected until both parties validate title and physical boundaries.
+              Funds remain protected until both parties validate boundaries, documents, and dual-confirm delivery.
             </p>
           </div>
         </div>
 
-        {isDisputed ? (
+        {isInMediation ? (
+          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-red-100 text-danger text-xs font-bold border border-red-200 animate-pulse">
+            <Scale className="w-3.5 h-3.5" />
+            <span>Mediation Case Active</span>
+          </span>
+        ) : isDisputed ? (
           <span className="px-3 py-1 rounded-full bg-red-100 text-danger text-xs font-bold border border-red-200">
             ⚠️ Under Arbitration Dispute
           </span>
         ) : isCompleted ? (
           <span className="px-3 py-1 rounded-full bg-green-100 text-emerald-800 text-xs font-bold border border-green-200">
-            ✅ Transaction Completed
+            ✅ Transaction Completed & Funds Released
           </span>
         ) : (
           <span className="px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-bold border border-amber-200">
-            🔒 Funds Locked in Escrow
+            🔒 Funds Safely Locked in Escrow
           </span>
         )}
       </div>
 
       {/* 5-Step Timeline Grid */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-3 relative">
-        {MILESTONES.map((m, index) => {
+        {MILESTONES.map((m) => {
           const isDone = milestoneStatus[m.key]
           const isCurrent = !isDone && (
             (m.key === 'inspection' && isAccepted) ||
@@ -148,7 +165,7 @@ export default function EscrowMilestoneTracker({
 
               {/* Interactive Milestone Checkbox Toggles */}
               <div className="mt-3 pt-2 border-t border-border-light/60">
-                {m.key === 'inspection' && isAccepted && !isCompleted && onToggleMilestone && (
+                {m.key === 'inspection' && isAccepted && !isCompleted && !isInMediation && onToggleMilestone && (
                   <button
                     onClick={() => onToggleMilestone(deal.id, 'inspection', isInspected)}
                     className={`w-full py-1 rounded-lg text-[10px] font-bold transition-all ${
@@ -161,7 +178,7 @@ export default function EscrowMilestoneTracker({
                   </button>
                 )}
 
-                {m.key === 'documents' && isAccepted && !isCompleted && onToggleMilestone && (
+                {m.key === 'documents' && isAccepted && !isCompleted && !isInMediation && onToggleMilestone && (
                   <button
                     onClick={() => onToggleMilestone(deal.id, 'documents', isDocsVerified)}
                     className={`w-full py-1 rounded-lg text-[10px] font-bold transition-all ${
@@ -174,15 +191,21 @@ export default function EscrowMilestoneTracker({
                   </button>
                 )}
 
-                {m.key === 'disbursement' && isBuyer && !isCompleted && deal.status === 'escrowed' && onRelease && (
-                  <button
-                    onClick={() => onRelease(deal.id)}
-                    disabled={!isInspected || !isDocsVerified}
-                    className="w-full py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] transition-all disabled:opacity-40"
-                    title={!isInspected || !isDocsVerified ? 'Complete inspection and document milestones before release' : 'Authorize release'}
-                  >
-                    Authorize Release
-                  </button>
+                {m.key === 'disbursement' && (
+                  <div className="space-y-1 text-[10px]">
+                    <div className="flex items-center justify-between">
+                      <span className="text-text-muted">Buyer:</span>
+                      <span className={`font-bold ${buyerConfirmed ? 'text-emerald-700' : 'text-amber-700'}`}>
+                        {buyerConfirmed ? 'Confirmed ✓' : 'Pending'}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-text-muted">Seller:</span>
+                      <span className={`font-bold ${sellerConfirmed ? 'text-emerald-700' : 'text-amber-700'}`}>
+                        {sellerConfirmed ? 'Confirmed ✓' : 'Pending'}
+                      </span>
+                    </div>
+                  </div>
                 )}
               </div>
             </div>
@@ -190,8 +213,109 @@ export default function EscrowMilestoneTracker({
         })}
       </div>
 
+      {/* ⚖️ ACTIVE MEDIATION CASE BANNER */}
+      {isInMediation && (
+        <div className="p-4 sm:p-5 rounded-2xl bg-red-50/90 border-2 border-red-300 text-red-950 space-y-3 shadow-sm animate-in fade-in">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-xl bg-red-600 text-white flex items-center justify-center shrink-0 shadow">
+              <Scale className="w-5 h-5" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h4 className="font-extrabold text-sm text-red-900">
+                  ⚖️ Mediation Case Opened — Compliance Team Assigned
+                </h4>
+                <span className="px-2.5 py-0.5 rounded-full bg-red-200 text-red-800 text-[10px] font-mono font-bold">
+                  Status: {deal.mediation_status === 'resolved' ? 'Resolved' : 'Under Investigation'}
+                </span>
+              </div>
+              <p className="text-xs text-red-800 mt-1 leading-relaxed">
+                A confirmation discrepancy or issue was reported. The LandMarket Trust & Legal Compliance Team has intervened to arbitrate between the buyer and seller.
+              </p>
+              {deal.mediation_reason && (
+                <div className="mt-2.5 p-3 rounded-xl bg-white/80 border border-red-200 text-xs text-red-900">
+                  <span className="font-bold text-red-950 block mb-0.5">Discrepancy Note / Reason:</span>
+                  {deal.mediation_reason}
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="pt-2 border-t border-red-200/80 flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div className="flex items-center gap-1.5 text-[11px] text-red-800 font-medium">
+              <ShieldCheck className="w-4 h-4 text-emerald-600" />
+              <span>Funds are 100% frozen in escrow trust account. Neither party can lose money during mediation.</span>
+            </div>
+            <a
+              href="https://wa.me/2348000000000?text=Hello%20LandMarket%20Support,%20I%20need%20help%20with%20Mediation%20Case"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-700 hover:bg-red-800 text-white font-bold text-xs transition-colors shadow-sm"
+            >
+              <PhoneCall className="w-3.5 h-3.5" />
+              <span>Contact Compliance Desk</span>
+            </a>
+          </div>
+        </div>
+      )}
+
+      {/* Dual Confirmation Actions for Active Deal */}
+      {isAccepted && !isCompleted && !isInMediation && (
+        <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-50/70 to-indigo-50/70 border border-blue-200/80">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h5 className="font-bold text-xs sm:text-sm text-text-primary flex items-center gap-1.5">
+                <UserCheck className="w-4 h-4 text-primary" />
+                Dual Transaction Confirmation Required
+              </h5>
+              <p className="text-[11px] text-text-secondary mt-0.5">
+                {isBuyer && buyerConfirmed && !sellerConfirmed && (
+                  <span className="text-emerald-700 font-medium">
+                    ✓ You have confirmed delivery as Buyer. Waiting for seller to confirm to disburse funds.
+                  </span>
+                )}
+                {isSeller && sellerConfirmed && !buyerConfirmed && (
+                  <span className="text-emerald-700 font-medium">
+                    ✓ You have confirmed handover as Seller. Waiting for buyer to authorize release.
+                  </span>
+                )}
+                {((isBuyer && !buyerConfirmed) || (isSeller && !sellerConfirmed)) && (
+                  <span>
+                    Have you completed the inspection and agreed with all terms? Both parties must confirm before escrow release.
+                  </span>
+                )}
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              {/* Confirm Completion Button */}
+              {((isBuyer && !buyerConfirmed) || (isSeller && !sellerConfirmed)) && onConfirmDeal && (
+                <button
+                  onClick={() => onConfirmDeal(deal.id)}
+                  disabled={!canConfirmMilestone}
+                  className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-all shadow-sm disabled:opacity-40"
+                  title={!canConfirmMilestone ? 'Please verify inspection and documents first' : 'Confirm transaction completion'}
+                >
+                  Confirm Completion ✓
+                </button>
+              )}
+
+              {/* Not Confirmed / Report Issue Button (Triggers Mediation) */}
+              {onRejectDeal && (
+                <button
+                  onClick={() => onRejectDeal(deal)}
+                  className="px-3.5 py-2 rounded-xl border border-red-200 bg-white hover:bg-red-50 text-danger font-bold text-xs transition-colors"
+                  title="Report discrepancy or mismatch. This will open a mediation case and involve our team."
+                >
+                  Not Confirmed / Report Issue
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Safety Actions & Dispute Escalation */}
-      {!isCompleted && !isDisputed && (
+      {!isCompleted && !isDisputed && !isInMediation && (
         <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
           <p className="text-[11px] text-text-muted">
             Found discrepancies with title documents or physical beacons?
@@ -202,7 +326,7 @@ export default function EscrowMilestoneTracker({
               className="inline-flex items-center gap-1.5 text-danger hover:underline font-bold text-xs"
             >
               <AlertTriangle className="w-3.5 h-3.5" />
-              <span>Raise Arbitration Dispute</span>
+              <span>Raise Dispute / Request Team Mediation</span>
             </button>
           )}
         </div>

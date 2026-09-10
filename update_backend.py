@@ -1247,22 +1247,61 @@ class CompleteProfileSerializer(serializers.ModelSerializer):
 
 
 class RegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, validators=[validate_password])
-    password_confirm = serializers.CharField(write_only=True)
+    """Handles user registration with password validation."""
+    password = serializers.CharField(
+        write_only=True,
+        min_length=8,
+        validators=[validate_password],
+        style={'input_type': 'password'},
+    )
+    password_confirm = serializers.CharField(
+        write_only=True,
+        style={'input_type': 'password'},
+    )
+    tokens = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = User
-        fields = ['email', 'password', 'password_confirm', 'first_name', 'last_name', 'role']
+        fields = [
+            'id', 'email', 'first_name', 'last_name', 'role',
+            'password', 'password_confirm', 'tokens',
+        ]
+        extra_kwargs = {
+            'first_name': {'required': True},
+            'last_name': {'required': True},
+            'role': {'required': True},
+        }
+
+    def validate_email(self, value):
+        """Ensure email is unique (case-insensitive)."""
+        if User.objects.filter(email__iexact=value).exists():
+            raise serializers.ValidationError('A user with this email already exists.')
+        return value.lower()
 
     def validate(self, attrs):
-        if attrs['password'] != attrs['password_confirm']:
-            raise serializers.ValidationError({'password_confirm': 'Passwords do not match.'})
+        """Ensure passwords match."""
+        if attrs['password'] != attrs.pop('password_confirm'):
+            raise serializers.ValidationError(
+                {'password_confirm': 'Passwords do not match.'}
+            )
         return attrs
 
+    def get_tokens(self, user):
+        """Generate JWT token pair for newly registered user."""
+        refresh = RefreshToken.for_user(user)
+        return {
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+        }
+
     def create(self, validated_data):
-        validated_data.pop('password_confirm')
-        user = User.objects.create_user(**validated_data)
-        return user
+        """Create user and hash password."""
+        return User.objects.create_user(**validated_data)
+
+
+class EmailVerifySerializer(serializers.Serializer):
+    """Serializer for email verification token."""
+    token = serializers.UUIDField()
 
 
 class LoginSerializer(serializers.Serializer):
@@ -1812,6 +1851,7 @@ from .models import (
     PropertyImage,
     PropertyDocument,
     PropertyReport,
+    SavedSearch,
     State,
     LGA,
 )
@@ -2033,6 +2073,18 @@ class PropertyReportSerializer(serializers.ModelSerializer):
         model = PropertyReport
         fields = ['id', 'reason', 'description', 'contact_email', 'created_at']
         read_only_fields = ['id', 'created_at']
+
+
+class SavedSearchSerializer(serializers.ModelSerializer):
+    state_name = serializers.CharField(source='state.name', read_only=True)
+    lga_name = serializers.CharField(source='lga.name', read_only=True)
+
+    class Meta:
+        model = SavedSearch
+        fields = [
+            'id', 'title', 'state', 'state_name', 'lga', 'lga_name',
+            'property_type', 'max_price', 'min_bedrooms', 'email_alerts_enabled', 'created_at'
+        ]
 '''
 
 # =====================================================================
@@ -2117,6 +2169,7 @@ from rest_framework.decorators import action
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
 
+from accounts.permissions import IsOwnerOrReadOnly, CanListProperties
 from .filters import PropertyFilter
 from .models import (
     PropertyListing,
@@ -2129,7 +2182,6 @@ from .models import (
     State,
     LGA,
 )
-from .permissions import IsRealtorOrReadOnly, IsListingOwnerOrReadOnly
 from .serializers import (
     PropertyListSerializer,
     PropertyDetailSerializer,
@@ -2137,6 +2189,7 @@ from .serializers import (
     PropertyImageSerializer,
     PropertyDocumentSerializer,
     PropertyReportSerializer,
+    SavedSearchSerializer,
     StateSerializer,
     LGASerializer,
 )
@@ -2145,7 +2198,7 @@ logger = logging.getLogger(__name__)
 
 
 class PropertyViewSet(viewsets.ModelViewSet):
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsListingOwnerOrReadOnly]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, CanListProperties]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_class = PropertyFilter
     ordering_fields = ['price', 'land_size', 'created_at', 'view_count']
@@ -2353,6 +2406,7 @@ class LGAViewSet(viewsets.ReadOnlyModelViewSet):
 
 class SavedSearchViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
+    serializer_class = SavedSearchSerializer
     
     def get_queryset(self):
         return SavedSearch.objects.filter(user=self.request.user)

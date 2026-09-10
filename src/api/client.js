@@ -215,6 +215,7 @@ export const propertiesAPI = {
   savedSearchesCreate: (data) => client.post('/properties/saved-searches/', data),
   savedSearchesDelete: (id) => client.delete(`/properties/saved-searches/${id}/`),
   reportListing: (id, data) => client.post(`/properties/${id}/report/`, data),
+  aiSearch: (query) => client.post('/properties/ai-search/', { query }),
 }
 
 export const realtorsAPI = {
@@ -347,6 +348,10 @@ export const chatAPI = {
 export const walletsAPI = {
   me: () => client.get('/wallets/me/'),
   deposit: (data) => client.post('/wallets/deposit/', data),
+  withdraw: (data) => client.post('/wallets/withdraw/', data),
+  transactions: (params) => client.get('/wallets/transactions/', { params }),
+  virtualAccount: () => client.get('/wallets/virtual_account/'),
+  banks: () => client.get('/wallets/banks/'),
 }
 
 export const escrowsAPI = {
@@ -355,8 +360,11 @@ export const escrowsAPI = {
   accept: (id) => client.post(`/escrows/${id}/accept/`),
   cancel: (id) => client.post(`/escrows/${id}/cancel/`),
   verifyMilestone: (id, milestone, value) => client.post(`/escrows/${id}/verify_milestone/`, { milestone, value }),
-  release: (id) => client.post(`/escrows/${id}/release/`),
-  dispute: (id, reason) => client.post(`/escrows/${id}/dispute/`, { reason }),
+  confirm: (id) => client.post(`/escrows/${id}/confirm/`),
+  reject: (id, data) => client.post(`/escrows/${id}/reject_confirmation/`, data),
+  resolveMediation: (id, data) => client.post(`/escrows/${id}/resolve_mediation/`, data),
+  release: (id) => client.post(`/escrows/${id}/confirm/`),
+  dispute: (id, reason, evidenceNotes = '') => client.post(`/escrows/${id}/reject_confirmation/`, { reason, evidence_notes: evidenceNotes }),
 }
 
 export const blogAPI = {

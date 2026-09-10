@@ -136,7 +136,7 @@ export default function AIAssistantWidget() {
     }
   }
 
-  const handleSend = (textToSend = null) => {
+  const handleSend = async (textToSend = null) => {
     const query = (textToSend || inputQuery).trim()
     if (!query || loading) return
 
@@ -150,11 +150,30 @@ export default function AIAssistantWidget() {
     setInputQuery('')
     setLoading(true)
 
-    setTimeout(() => {
+    try {
+      if (propertiesAPI.aiSearch) {
+        const { data } = await propertiesAPI.aiSearch(query)
+        const recs = data?.results || data?.recommendations || []
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: (Date.now() + 1).toString(),
+            sender: 'bot',
+            text: data?.reply || `I searched our verified Nigerian property database for "${query}". Here are the matching listings:`,
+            recommendations: recs.length > 0 ? recs : parseAndRespond(query).recommendations,
+          }
+        ])
+      } else {
+        const botResponse = parseAndRespond(query)
+        setMessages((prev) => [...prev, botResponse])
+      }
+    } catch (err) {
+      console.warn('AI search API error, falling back to local matcher', err)
       const botResponse = parseAndRespond(query)
       setMessages((prev) => [...prev, botResponse])
+    } finally {
       setLoading(false)
-    }, 800)
+    }
   }
 
   return (
@@ -231,7 +250,7 @@ export default function AIAssistantWidget() {
                         >
                           <div className="flex gap-3">
                             <img
-                              src={getMediaUrl(prop.primary_image_url)}
+                              src={getMediaUrl(prop.primary_image_url || prop.images?.[0]?.image || prop.primary_image)}
                               alt={prop.title}
                               className="w-16 h-16 rounded-xl object-cover shrink-0 bg-surface-muted"
                             />
@@ -239,10 +258,10 @@ export default function AIAssistantWidget() {
                               <h4 className="font-bold text-xs text-text-primary truncate">{prop.title}</h4>
                               <p className="text-[10px] text-text-muted flex items-center gap-1 mt-0.5 truncate">
                                 <MapPin className="w-3 h-3 text-primary shrink-0" />
-                                {prop.location}
+                                {prop.location || `${prop.city ? prop.city + ', ' : ''}${prop.state || 'Nigeria'}`}
                               </p>
                               <p className="text-xs font-extrabold text-primary mt-1">
-                                ₦{parseFloat(prop.price).toLocaleString()}
+                                ₦{parseFloat(prop.price || 0).toLocaleString()}
                               </p>
                             </div>
                           </div>

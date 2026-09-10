@@ -877,7 +877,7 @@ class WalletSerializer(serializers.ModelSerializer):
         """Generates deterministic virtual account details for bank transfer deposits."""
         user = obj.user
         # Generate clean 10-digit account number from user uuid/email
-        raw_num = int(hashlib.md5(f"wm_{user.id}".encode('utf-8')).hexdestring()[:8], 16)
+        raw_num = int(hashlib.md5(f"wm_{user.id}".encode('utf-8')).hexdigest()[:8], 16)
         acct_num = f"9{str(raw_num).zfill(9)[:9]}"
         
         full_name = user.full_name or f"{user.first_name} {user.last_name}".strip() or user.email.split('@')[0]

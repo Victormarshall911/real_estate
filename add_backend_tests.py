@@ -17,6 +17,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 from escrows.models import EscrowTransaction, EscrowMediation
 from properties.models import PropertyListing
+from realtors.models import RealtorProfile
 from wallets.models import Wallet
 
 User = get_user_model()
@@ -46,14 +47,18 @@ class EscrowDualConfirmationTests(APITestCase):
         self.seller_wallet.balance = Decimal('0.00')
         self.seller_wallet.save()
 
-        self.property = PropertyListing.objects.create(
+        self.realtor_profile, _ = RealtorProfile.objects.get_or_create(
             user=self.seller,
+            defaults={'company_name': 'Premier Estates'}
+        )
+
+        self.property = PropertyListing.objects.create(
+            realtor=self.realtor_profile,
             title='Prime Waterfront Plot, Lekki Phase 1',
             description='Prime residential plot with C of O',
             price=Decimal('5000000.00'),
             state='Lagos',
-            city='Lekki',
-            address='Admiralty Way',
+            location='Lekki Phase 1',
             property_category='land',
             land_size=Decimal('600.00'),
             status='active'
@@ -69,7 +74,7 @@ class EscrowDualConfirmationTests(APITestCase):
 
     def test_seller_accepts_escrow_locks_funds(self):
         self.client.force_authenticate(user=self.seller)
-        url = reverse('escrowtransaction-accept', kwargs={'pk': self.escrow.id})
+        url = reverse('escrow-accept', kwargs={'pk': self.escrow.id})
         response = self.client.post(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -86,7 +91,7 @@ class EscrowDualConfirmationTests(APITestCase):
 
         # Buyer confirms
         self.client.force_authenticate(user=self.buyer)
-        confirm_url = reverse('escrowtransaction-confirm', kwargs={'pk': self.escrow.id})
+        confirm_url = reverse('escrow-confirm', kwargs={'pk': self.escrow.id})
         res1 = self.client.post(confirm_url)
         self.assertEqual(res1.status_code, status.HTTP_200_OK)
 
@@ -116,12 +121,12 @@ class EscrowDualConfirmationTests(APITestCase):
 
         # Buyer confirms
         self.client.force_authenticate(user=self.buyer)
-        confirm_url = reverse('escrowtransaction-confirm', kwargs={'pk': self.escrow.id})
+        confirm_url = reverse('escrow-confirm', kwargs={'pk': self.escrow.id})
         self.client.post(confirm_url)
 
         # Seller rejects / reports discrepancy
         self.client.force_authenticate(user=self.seller)
-        reject_url = reverse('escrowtransaction-reject-confirmation', kwargs={'pk': self.escrow.id})
+        reject_url = reverse('escrow-reject-confirmation', kwargs={'pk': self.escrow.id})
         res = self.client.post(reject_url, {
             'reason': 'Deed of Assignment signature discrepancy noted upon inspection.'
         })
@@ -221,6 +226,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from properties.models import PropertyListing, PropertyReport
+from realtors.models import RealtorProfile
 
 User = get_user_model()
 
@@ -241,14 +247,17 @@ class PropertyTrustAndSafetyTests(APITestCase):
             last_name='Doe',
             role='buyer'
         )
-        self.property = PropertyListing.objects.create(
+        self.realtor_profile, _ = RealtorProfile.objects.get_or_create(
             user=self.seller,
+            defaults={'company_name': 'Ade Properties'}
+        )
+        self.property = PropertyListing.objects.create(
+            realtor=self.realtor_profile,
             title='Suspicious Plot, Ibeju Lekki',
             description='Cheap land with unverified document claims',
             price=Decimal('1500000.00'),
             state='Lagos',
-            city='Ibeju Lekki',
-            address='KM 45 Lekki Expressway',
+            location='Ibeju Lekki',
             property_category='land',
             land_size=Decimal('500.00'),
             status='active'

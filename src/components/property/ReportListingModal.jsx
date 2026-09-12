@@ -113,6 +113,18 @@ export default function ReportListingModal({ property, onClose, onSuccess }) {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Escalation to formal crime report */}
+            <div className="p-3 rounded-xl bg-red-50/60 border border-red-200/70 text-xs text-red-950 flex items-center justify-between gap-2">
+              <span className="text-[11px] font-medium">Victim of extortion, forged deeds, or payment fraud?</span>
+              <Link
+                to="/report-crime"
+                onClick={onClose}
+                className="text-[11px] font-bold text-red-700 hover:text-red-900 underline shrink-0"
+              >
+                File Crime Report →
+              </Link>
+            </div>
+
             {/* Header */}
             <div className="flex items-center gap-3">
               <div className="w-11 h-11 rounded-2xl bg-red-50 border border-red-200 text-danger flex items-center justify-center shrink-0">

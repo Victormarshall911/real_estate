@@ -4,6 +4,7 @@ import { Star, MessageCircle, MessageSquare, Phone, Globe, ShieldCheck, Award, L
 import { useAuth } from '../../hooks/useAuth'
 import { chatAPI, architectsAPI } from '../../api/client'
 import StarRating from '../shared/StarRating'
+import VerifiedBadge from '../shared/VerifiedBadge'
 
 export default function ArchitectCard({ architect, onRate }) {
   const { isAuthenticated, user } = useAuth()
@@ -81,9 +82,17 @@ export default function ArchitectCard({ architect, onRate }) {
         </div>
 
         <div className="flex-1 min-w-0">
-          <h3 className="font-bold text-text-primary text-lg truncate group-hover:text-primary transition-colors">
-            {architect?.company_name || name}
-          </h3>
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <h3 className="font-bold text-text-primary text-lg truncate group-hover:text-primary transition-colors">
+              {architect?.company_name || name}
+            </h3>
+            {architect?.is_verified && (
+              <VerifiedBadge
+                tier={architect?.user?.verification_level || (architect?.company_name ? 'cac_verified' : 'id_verified')}
+                size="sm"
+              />
+            )}
+          </div>
           <p className="text-sm font-medium text-text-secondary truncate">{name}</p>
           <div className="flex items-center space-x-2 mt-1">
             <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-primary-50 text-primary border border-primary-100">

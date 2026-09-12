@@ -27,6 +27,8 @@ export default function Footer() {
             <h4 className="font-semibold text-sm uppercase tracking-wider text-slate-300 mb-4">Quick Links</h4>
             <ul className="space-y-3">
               <li><Link to="/" className="text-sm text-slate-400 hover:text-primary-light transition-colors">Browse Properties</Link></li>
+              <li><Link to="/wallet" className="text-sm text-slate-400 hover:text-primary-light transition-colors">Virtual Escrow Wallet</Link></li>
+              <li><Link to="/report-crime" className="text-sm text-red-400 hover:text-red-300 font-medium transition-colors flex items-center gap-1.5">🚨 Report Crime / Fraud</Link></li>
               <li><Link to="/mortgage-calculator" className="text-sm text-slate-400 hover:text-primary-light transition-colors">Financing Calculator</Link></li>
               <li><Link to="/dashboard" className="text-sm text-slate-400 hover:text-primary-light transition-colors">Seller Dashboard</Link></li>
             </ul>

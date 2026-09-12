@@ -23,6 +23,7 @@ import { CompareProvider } from './context/CompareContext'
 import PropertyCompareTray from './components/property/PropertyCompareTray'
 import PropertyCompareModal from './components/property/PropertyCompareModal'
 import AIAssistantWidget from './components/ai/AIAssistantWidget'
+import ReportCrimePage from './pages/ReportCrimePage'
 
 export default function App() {
   return (
@@ -49,6 +50,7 @@ export default function App() {
             <Route path="/pricing" element={<SubscriptionPage />} />
             <Route path="/messages" element={<ChatPage />} />
             <Route path="/chat" element={<ChatPage />} />
+            <Route path="/report-crime" element={<ReportCrimePage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </div>

@@ -393,5 +393,30 @@ export const blogAPI = {
   categories: () => client.get('/blog/categories/'),
 }
 
+export const reportsAPI = {
+  submitCrimeReport: (data) => {
+    let payload = data
+    let headers = {}
+    if (data instanceof FormData) {
+      payload = data
+      headers = { 'Content-Type': 'multipart/form-data' }
+    } else {
+      const formData = new FormData()
+      Object.entries(data).forEach(([key, value]) => {
+        if (value !== null && value !== undefined && value !== '') {
+          formData.append(key, value)
+        }
+      })
+      payload = formData
+      headers = { 'Content-Type': 'multipart/form-data' }
+    }
+    return client.post('/reports/crime/submit/', payload, { headers })
+  },
+  myReports: () => client.get('/reports/crime/my-reports/'),
+  reportDetail: (id) => client.get(`/reports/crime/${id}/`),
+  categories: () => client.get('/reports/crime/categories/'),
+}
+
 export default client
+
 

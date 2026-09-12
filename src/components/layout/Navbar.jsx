@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { Menu, X, MapPin, User, LogOut, LayoutDashboard, ChevronDown, MessageSquare, Wallet } from 'lucide-react'
+import { Menu, X, MapPin, User, LogOut, LayoutDashboard, ChevronDown, MessageSquare, Wallet, ShieldAlert } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import LoginModal from '../auth/LoginModal'
 import RegisterModal from '../auth/RegisterModal'
 import EditProfileModal from '../profile/EditProfileModal'
 import { getMediaUrl } from '../../utils/media'
+import { walletsAPI } from '../../api/client'
+import VerifiedBadge from '../shared/VerifiedBadge'
 
 export default function Navbar() {
   const { user, isAuthenticated, isRealtor, logout } = useAuth()
@@ -14,9 +16,25 @@ export default function Navbar() {
   const [showRegister, setShowRegister] = useState(false)
   const [showEditProfile, setShowEditProfile] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
+  const [walletBalance, setWalletBalance] = useState(null)
   const navigate = useNavigate()
   const location = useLocation()
   const profileRef = useRef(null)
+
+  // Fetch quick wallet balance for authenticated users
+  useEffect(() => {
+    if (isAuthenticated) {
+      walletsAPI.me()
+        .then(res => {
+          if (res?.data?.balance !== undefined) {
+            setWalletBalance(res.data.balance)
+          }
+        })
+        .catch(() => {})
+    } else {
+      setWalletBalance(null)
+    }
+  }, [isAuthenticated, location.pathname])
 
   // Close profile dropdown on outside click
   useEffect(() => {
@@ -158,6 +176,18 @@ export default function Navbar() {
 
             {/* Desktop Right Section */}
             <div className="hidden md:flex items-center gap-2.5">
+              {isAuthenticated && (
+                <Link
+                  to="/wallet"
+                  className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold transition-all border border-primary/20 hover:scale-[1.02]"
+                  title="Virtual Escrow Wallet"
+                  id="nav-quick-wallet-btn"
+                >
+                  <Wallet className="w-3.5 h-3.5 shrink-0" />
+                  <span>{walletBalance !== null ? `₦${Number(walletBalance).toLocaleString()}` : 'Wallet'}</span>
+                </Link>
+              )}
+
               {isAuthenticated ? (
                 <div className="relative" ref={profileRef}>
                   <button
@@ -182,23 +212,47 @@ export default function Navbar() {
                     <span className="text-sm font-medium text-text-primary max-w-[120px] truncate">
                       {user?.first_name}
                     </span>
+                    {(user?.is_kyc_verified || user?.is_fully_verified) && (
+                      <VerifiedBadge
+                        tier={user?.verification_level || 'id_verified'}
+                        size="sm"
+                        showTooltip={false}
+                      />
+                    )}
                     <ChevronDown className={`w-3.5 h-3.5 text-text-muted transition-transform duration-200 ${profileOpen ? 'rotate-180' : ''}`} />
                   </button>
 
                   {profileOpen && (
-                    <div className="absolute right-0 mt-2 w-56 bg-surface rounded-xl shadow-elevated border border-border py-1.5 animate-fade-in">
+                    <div className="absolute right-0 mt-2 w-64 bg-surface rounded-2xl shadow-elevated border border-border py-2 animate-fade-in z-50">
                       <div className="px-4 py-2.5 border-b border-border-light mb-1">
-                        <p className="text-sm font-semibold text-text-primary truncate">{user?.first_name} {user?.last_name}</p>
-                        <p className="text-xs text-text-muted truncate mt-0.5">{user?.email}</p>
-                        <div className="mt-1.5">
+                        <div className="flex items-center justify-between gap-2 mb-1">
+                          <p className="text-sm font-semibold text-text-primary truncate">{user?.first_name} {user?.last_name}</p>
+                          {(user?.is_kyc_verified || user?.is_fully_verified) && (
+                            <VerifiedBadge
+                              tier={user?.verification_level || 'id_verified'}
+                              size="sm"
+                            />
+                          )}
+                        </div>
+                        <p className="text-xs text-text-muted truncate">{user?.email}</p>
+                        <div className="mt-2 flex items-center justify-between gap-1 flex-wrap">
                           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">
                             Role: {user?.role === 'realtor' ? 'Seller' : user?.role}
                           </span>
+                          {!user?.is_kyc_verified && (
+                            <Link
+                              to="/verify-identity"
+                              onClick={() => setProfileOpen(false)}
+                              className="text-[10px] text-amber-600 font-bold hover:underline"
+                            >
+                              Verify ID (Get Badge) →
+                            </Link>
+                          )}
                         </div>
                       </div>
                       <button
                         onClick={() => { setProfileOpen(false); setShowEditProfile(true) }}
-                        className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-text-secondary hover:bg-surface-muted transition-colors text-left"
+                        className="flex items-center gap-2.5 w-full px-4 py-2 text-sm text-text-secondary hover:bg-surface-muted transition-colors text-left"
                       >
                         <User className="w-4 h-4" /> Edit Profile
                       </button>
@@ -207,30 +261,43 @@ export default function Navbar() {
                           <Link
                             to="/dashboard"
                             onClick={() => setProfileOpen(false)}
-                            className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-text-secondary hover:bg-surface-muted transition-colors"
+                            className="flex items-center gap-2.5 px-4 py-2 text-sm text-text-secondary hover:bg-surface-muted transition-colors"
                           >
                             <LayoutDashboard className="w-4 h-4" /> Dashboard
                           </Link>
                           <Link
                             to="/wallet"
                             onClick={() => setProfileOpen(false)}
-                            className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-text-secondary hover:bg-surface-muted transition-colors"
+                            className="flex items-center justify-between px-4 py-2 text-sm text-text-secondary hover:bg-surface-muted transition-colors"
                             id="nav-wallet-link"
                           >
-                            <Wallet className="w-4 h-4 text-primary" /> My Virtual Wallet
+                            <span className="flex items-center gap-2.5">
+                              <Wallet className="w-4 h-4 text-primary" /> My Virtual Wallet
+                            </span>
+                            {walletBalance !== null && (
+                              <span className="text-xs font-bold text-primary">₦{Number(walletBalance).toLocaleString()}</span>
+                            )}
                           </Link>
                         </>
                       )}
                       <Link
                         to="/messages"
                         onClick={() => setProfileOpen(false)}
-                        className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-text-secondary hover:bg-surface-muted transition-colors"
+                        className="flex items-center gap-2.5 px-4 py-2 text-sm text-text-secondary hover:bg-surface-muted transition-colors"
                       >
                         <MessageSquare className="w-4 h-4" /> Messages
                       </Link>
+                      <Link
+                        to="/report-crime"
+                        onClick={() => setProfileOpen(false)}
+                        className="flex items-center gap-2.5 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors font-medium"
+                      >
+                        <ShieldAlert className="w-4 h-4 text-red-500" /> Report Crime / Fraud
+                      </Link>
+                      <div className="border-t border-border-light my-1" />
                       <button
                         onClick={handleLogout}
-                        className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-danger hover:bg-red-50 transition-colors"
+                        className="flex items-center gap-2.5 w-full px-4 py-2 text-sm text-danger hover:bg-red-50 transition-colors"
                         id="nav-logout-btn"
                       >
                         <LogOut className="w-4 h-4" /> Sign Out
@@ -335,9 +402,21 @@ export default function Navbar() {
                   <Link
                     to="/wallet"
                     onClick={() => setMobileOpen(false)}
-                    className="px-4 py-3 rounded-lg text-sm font-medium text-text-secondary hover:bg-surface-muted transition-colors flex items-center gap-2.5"
+                    className="px-4 py-3 rounded-lg text-sm font-medium text-text-secondary hover:bg-surface-muted transition-colors flex items-center justify-between"
                   >
-                    <Wallet className="w-4 h-4 text-primary" /> My Virtual Wallet
+                    <span className="flex items-center gap-2.5">
+                      <Wallet className="w-4 h-4 text-primary" /> My Virtual Wallet
+                    </span>
+                    {walletBalance !== null && (
+                      <span className="text-xs font-bold text-primary">₦{Number(walletBalance).toLocaleString()}</span>
+                    )}
+                  </Link>
+                  <Link
+                    to="/report-crime"
+                    onClick={() => setMobileOpen(false)}
+                    className="px-4 py-3 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2.5"
+                  >
+                    <ShieldAlert className="w-4 h-4 text-red-500" /> Report Crime / Fraud
                   </Link>
                 </>
               )}
@@ -347,7 +426,16 @@ export default function Navbar() {
               {isAuthenticated ? (
                 <>
                   <div className="px-4 py-2">
-                    <p className="text-sm font-medium text-text-primary">{user?.first_name} {user?.last_name}</p>
+                    <div className="flex items-center gap-2 mb-1">
+                      <p className="text-sm font-medium text-text-primary">{user?.first_name} {user?.last_name}</p>
+                      {(user?.is_kyc_verified || user?.is_fully_verified) && (
+                        <VerifiedBadge
+                          tier={user?.verification_level || 'id_verified'}
+                          size="sm"
+                          showTooltip={false}
+                        />
+                      )}
+                    </div>
                     <p className="text-xs text-text-muted">{user?.email}</p>
                   </div>
                   <button
